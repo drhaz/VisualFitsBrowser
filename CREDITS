@@ -1,0 +1,9 @@
+For a complete list of included kibraries, please read the maven pom.xml file.
+
+Included libraries:
+- Parts of the jsky library
+  http://jsky.sourceforge.net/index.html
+  
+- JSamp library:
+  https://github.com/mbtaylor/jsamp
+
