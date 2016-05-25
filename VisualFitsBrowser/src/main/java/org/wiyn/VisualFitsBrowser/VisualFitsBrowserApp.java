@@ -125,7 +125,7 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 		theFileBrowserApp = this;
 
 		// Get a saved parameter instance for this application.
-		Preferences.initPreferences("ODIFileBrowserApp");
+		Preferences.initPreferences("VisualFitsBrowserApp");
 
 		/*
 		 * Build the GUI: Basic Layout: three vertical panels from left to right
