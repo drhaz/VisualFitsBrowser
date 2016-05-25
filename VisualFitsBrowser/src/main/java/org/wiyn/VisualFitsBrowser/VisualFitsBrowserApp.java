@@ -2,7 +2,6 @@ package org.wiyn.VisualFitsBrowser;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,20 +16,20 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.swing.Box;
-import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -42,19 +41,15 @@ import org.astrogrid.samp.Message;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
 import org.wiyn.guiUtils.GUIConsts;
-import org.wiyn.guiUtils.MultiFlickPanel;
 import org.wiyn.guiUtils.OSXAdapter;
 import org.wiyn.guiUtils.Preferences;
-import org.wiyn.guiUtils.VariableGridLayout;
 import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
-import org.wiyn.odi.VisualFitsBrowser.ImageActions.ODIImageInfoPanel;
-import org.wiyn.odi.VisualFitsBrowser.ImageActions.OTAInFocalPlaneSelector;
+import org.wiyn.odi.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.wiyn.odi.VisualFitsBrowser.util.Filelist2Latex;
 import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
-import org.wiyn.util.FitsComments.OTASelectionPanel;
 
 @SuppressWarnings("serial")
-public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener, OTAInFocalPlaneSelector {
+public class VisualFitsBrowserApp extends JFrame {
 
 	final static String VersionString = "Version 1";
 	final static String LOOKANDFEEL = "Ocean";
@@ -78,40 +73,9 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 	 * 
 	 */
 	private static FileBrowserPanel mBrowserPanel = null;
+	private static ImageToolBoxPanel mToolBoxPanel = null;
 
-	/**
-	 * Widget to select an OTA from the focal plane
-	 * 
-	 */
-	protected OTASelectionPanel theOTASelectPanel;
-
-	/** A Panel for Action items. */
-	JPanel ButtonPanel;
-
-	/*
-	 * Functional Panels come here
-	 */
-	MultiFlickPanel myMultiPanel = null;
-
-	ODIImageInfoPanel myImageInfoPanel = null;
-
-	String nowPlayingVideo = null;
-	/**
-	 * The currently selected ota: X coordinate
-	 * 
-	 */
-	public int otaX = 0;
-	/**
-	 * The currently selected ota: Y coordinate
-	 * 
-	 */
-	public int otaY = 0;
 	private boolean showUtilities;
-
-	// ID names for the functional panels
-	private static final String THUMBPANEL = "THUMBVIEW";
-	private static final String INFOPANEL = "INFOVIEW";
-	private static final String QAPANEL = "QUPANEL";
 
 	/**
 	 * A singleton file browser application
@@ -133,22 +97,15 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 		BorderLayout mBorderLayout = new BorderLayout();
 		this.setLayout(mBorderLayout);
 
-		setmBrowserPanel(new FileBrowserPanel(this));
-		this.add(getmBrowserPanel(), BorderLayout.WEST);
+		this.mToolBoxPanel = new ImageToolBoxPanel(null);
+		FileBrowserPanel fbp = new FileBrowserPanel(this.mToolBoxPanel);
 
-		/*
-		 * Put in the middle section for actionbuttons
-		 */
-		ButtonPanel = new JPanel();
-		fillButtonPanelForODI(ButtonPanel);
-		this.add(ButtonPanel);
+		this.setmBrowserPanel(fbp);
+		this.add(getmBrowserPanel(), BorderLayout.CENTER);
 
-		/*
-		 * Fill in most right panel: here are the results of actions displayed
-		 */
-		myMultiPanel = new MultiFlickPanel();
-		this.add(myMultiPanel, BorderLayout.EAST);
-		fillMultiPanelView();
+		this.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
+
+		this.add(mToolBoxPanel, BorderLayout.EAST);
 
 		/*
 		 * Define the MenuBar
@@ -179,12 +136,11 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		pack();
-
-		setVisible(true);
 
 		this.setShowUtiltiies(false);
 
+		pack();
+		setVisible(true);
 		/*
 		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
 		 */
@@ -204,197 +160,21 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 	}
 
 	/**
-	 * Create the Button Panel contenxt for ODI use
+	 * Enable or disable display of the toolbox section right of the list.
 	 * 
-	 * @param ButtonPanel
+	 * @param show
 	 */
-
-	private void fillButtonPanelForODI(JPanel ButtonPanel) {
-
-		{
-
-			// Generate Image Info Panel
-			JButton generateHeader = new JButton("Image Header");
-			generateHeader.addActionListener(new ActionListener() {
-
-				public void actionPerformed(ActionEvent arg0) {
-					Vector<ODIFitsFileEntry> fileList = getmBrowserPanel().getSelected();
-
-					myMultiPanel.setTopComponent(INFOPANEL);
-					myImageInfoPanel.setMode(ODIImageInfoPanel.MODE_FITSHEADER);
-					if (fileList != null && fileList.size() > 0) {
-
-						myImageInfoPanel.setImageList(fileList, -1, -1);
-					} else {
-						myLogger.warn("No file list or empty file list for image header display.");
-					}
-
-				}
-
-			});
-
-			// Generate Image Info Panel
-			JButton generateLogfile = new JButton("Acquisistion Log");
-			generateLogfile.addActionListener(new ActionListener() {
-
-				public void actionPerformed(ActionEvent arg0) {
-					Vector<ODIFitsFileEntry> fileList = getmBrowserPanel().getSelected();
-
-					myMultiPanel.setTopComponent(INFOPANEL);
-					myImageInfoPanel.setMode(ODIImageInfoPanel.MODE_LOGFILE);
-					if (fileList != null) {
-
-						myImageInfoPanel.setImageList(fileList, otaX, otaY);
-					}
-
-				}
-
-			});
-
-			GridLayout ButtonPanelLayout = new VariableGridLayout(12, 1);
-			ButtonPanelLayout.setColumns(1);
-			ButtonPanelLayout.setRows(19);
-			ButtonPanelLayout.setHgap(5);
-			ButtonPanelLayout.setVgap(5);
-
-			ButtonPanel.setLayout(ButtonPanelLayout);
-
-			ButtonPanel.setBackground(new java.awt.Color(196, 196, 217));
-			// First the ODI Label;
-			JLabel ODILabel = GUIConsts.getODIImageLabel();
-			ODILabel.setPreferredSize(new java.awt.Dimension(165, 225));
-			// ButtonPanel.add(ODILabel);
-
-			// Then the OTA Selection
-			theOTASelectPanel = new OTASelectionPanel(this, otaX, otaY);
-			ButtonPanel.add(theOTASelectPanel);
-			theOTASelectPanel.setBackground(new java.awt.Color(210, 198, 217));
-
-			JLabel ImageTitleLabel = new JLabel(" Images");
-			ImageTitleLabel.setFont(GUIConsts.InformationFont);
-			JLabel VideoTitleLabel = new JLabel(" Video");
-			VideoTitleLabel.setFont(GUIConsts.InformationFont);
-			JLabel AdvancedTitleLabel = new JLabel(" Advanced");
-			AdvancedTitleLabel.setFont(GUIConsts.InformationFont);
-			// Finally All the buttons.
-
-			ButtonPanel.add(ImageTitleLabel);
-
-			ButtonPanel.add(AdvancedTitleLabel);
-
-			ButtonPanel.add(generateHeader);
-			ButtonPanel.add(generateLogfile);
-
-			// ButtonPanel.add (Box.createVerticalGlue ());
-
-			ButtonPanel.setMaximumSize(ButtonPanel.getMinimumSize());
-		}
-	}
-
-	protected void QRStack(Vector<ODIFitsFileEntry> fileList) {
-
-		double track_ra = 0;
-		double track_dec = 0;
-		String xArgs = "";
-		SAMPUtilities.callQRStack(fileList, track_ra, track_dec, xArgs);
-
-	}
-
-	protected void QuickReduceToDS(String inName, final JButton callbackButton) {
-
-		final String outName = Preferences.thePreferences.getProperty("samp.iraf.outdir", "/ODIScratch/odiiraf") + "/"
-				+ inName.substring(inName.lastIndexOf("/")) + ".fits";
-
-		final String calDir = "-cals=" + Preferences.thePreferences.getProperty("filebrowser.quickreduce.caldir",
-				"/Volumes/ODIScratch/MasterCals");
-
-		final String execString = Preferences.thePreferences.getProperty("OTAFileBrowser.quickreduce.python",
-				"/Users/odiobserver/bin/podi/podi_collectcells.py") + " " + inName + " " + outName + " " + calDir;
-
-		new SwingWorker() {
-
-			@Override
-			protected Object doInBackground() throws Exception {
-
-				myLogger.info("Executing command: " + execString);
-
-				String oldLabel = null;
-				if (callbackButton != null) {
-					callbackButton.setEnabled(false);
-					oldLabel = callbackButton.getText();
-					callbackButton.setText("Busy...");
-				}
-
-				long start = System.currentTimeMillis();
-
-				try {
-					Runtime rt = Runtime.getRuntime();
-					Process pr = rt.exec(execString);
-
-					StreamGobbler errorGobbler = new StreamGobbler(pr.getErrorStream(), "stderr");
-					StreamGobbler outputGobbler = new StreamGobbler(pr.getInputStream(), "stdout");
-					errorGobbler.start();
-					outputGobbler.start();
-
-					String line = null;
-					BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-
-					while ((line = input.readLine()) != null) {
-						myLogger.debug(line);
-						if (line.contains("OTA") && line.contains("cell")) {
-							String lab = line.substring(line.indexOf("OTA"), line.indexOf("OTA") + 6);
-							myLogger.debug(lab);
-						}
-					}
-
-					int exitVal = pr.waitFor();
-					System.out.println("Exited with error code " + exitVal);
-				} catch (Exception e) {
-					myLogger.error("Error while executing python:", e);
-				}
-
-				long end = System.currentTimeMillis();
-
-				myLogger.info("python quick reduce took: " + ((end - start) / 1000) + " seconds");
-
-				SAMPUtilities.loadMosaicDS9(outName);
-
-				if (callbackButton != null) {
-					callbackButton.setText(oldLabel);
-					callbackButton.setEnabled(true);
-				}
-				return null;
-			}
-
-		}.execute();
-
-	}
-
-	protected void setVideoActionStatus(boolean enable) {
-		// videoToDS9Button.setEnabled(enable);
-		// replayVideoButton.setEnabled(enable);
-	}
-
-	private void fillMultiPanelView() {
-		{
-
-			myImageInfoPanel = new ODIImageInfoPanel();
-			myImageInfoPanel.setName(INFOPANEL);
-			myMultiPanel.addComponent(myImageInfoPanel);
-
-		}
-	}
 
 	private void setShowUtiltiies(boolean show) {
 
 		Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
 		this.showUtilities = show;
-		if (myMultiPanel != null) {
-			this.remove(myMultiPanel);
-			this.remove(ButtonPanel);
+		if (this.mToolBoxPanel != null) {
+			this.remove(mToolBoxPanel);
+
 			if (show) {
-				this.add(myMultiPanel, BorderLayout.EAST);
-				this.add(ButtonPanel, BorderLayout.CENTER);
+				this.add(mToolBoxPanel, BorderLayout.EAST);
+
 			}
 
 			this.invalidate();
@@ -412,6 +192,24 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		menu.getAccessibleContext().setAccessibleDescription("File Menu");
 		theMenu.add(menu);
+
+		{
+			menuItem = new JCheckBoxMenuItem("ToolBox");
+			menuItem.setSelected(
+					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+			menu.add(menuItem);
+			menuItem.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent evt) {
+					boolean show = ((JCheckBoxMenuItem) evt.getSource()).getState();
+					setShowUtiltiies(show);
+
+				}
+
+			});
+		}
+
+		menu.add(new JSeparator());
 
 		{
 			menuItem = new JMenuItem("Change Directory ...", KeyEvent.VK_L);
@@ -439,6 +237,8 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 				}
 			});
 		}
+
+		menu.add(new JSeparator());
 
 		{
 			menuItem = new JMenuItem("Exit", KeyEvent.VK_X);
@@ -556,23 +356,6 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		return theMenu;
 
-	}
-
-	public void pushFileSelection(Vector<ODIFitsFileEntry> fileList) {
-
-		if (fileList != null && fileList.size() == 1 && fileList.firstElement() != null) {
-			if (fileList.firstElement().hasVideo) {
-				this.setVideoActionStatus(true);
-			} else {
-				this.setVideoActionStatus(false);
-			}
-		}
-
-		if (this.myMultiPanel.getTopComponent().equals(INFOPANEL) && fileList != null && fileList.size() == 1
-				&& this.showUtilities) {
-			this.myImageInfoPanel.setImageList(fileList, -1, -1);
-			return;
-		}
 	}
 
 	public void onExit() {
@@ -695,12 +478,6 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 	static long IRAF_MSGID = 0;
 	static long IrafLastAttemt = 0;
 
-	public void setSelectedOTA(int x, int y) {
-		if (this.theOTASelectPanel != null)
-			this.theOTASelectPanel.setSelectedOTA(x, y);
-
-	}
-
 	public static FileBrowserPanel getmBrowserPanel() {
 		return mBrowserPanel;
 	}
@@ -741,7 +518,7 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 		try {
 			InputStream i = VisualFitsBrowserApp.class.getResourceAsStream("/resources/properties");
 			if (i == null) {
-				myLogger.warn ("Could not read version file.");
+				myLogger.warn("Could not read version file.");
 				return v;
 			}
 			java.util.Properties p = new Properties();
@@ -753,8 +530,4 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		return v;
 	}
-}
-
-interface OTAFileListListener {
-	public void pushFileSelection(Vector<ODIFitsFileEntry> fileList);
 }

@@ -59,7 +59,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 
 			File f = new File(imagelist.firstElement().getAbsolutePath());
 
-			if (f.exists() && f.isDirectory()) {
+			if (f.exists()) {
 
 				loadImageInfo(imagelist.firstElement(), otaX, otaY);
 				return 1;
@@ -86,13 +86,13 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 		clearImageInfo();
 		File f = new File(image.getAbsolutePath());
 
-		if (f.exists() && f.isDirectory() && myTextArea != null) {
+		if (f.exists() && myTextArea != null) {
 
 			this.FileNameLabel.setText(image.FName);
 
 			switch (ODIImageInfoPanel.mode) {
 			case MODE_FITSHEADER: {
-				Vector<String> fitsHeader = QuickHeaderInfo.getODIHeader(f, otaX, otaY);
+				Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
 				if (fitsHeader != null)
 					for (String card : fitsHeader) {
 						myTextArea.append(card + "\n");
@@ -106,10 +106,12 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 				break;
 			}
 			case MODE_LOGFILE: {
-
-				String logfile = QuickHeaderInfo.getLogfileContent(f);
-				myTextArea.append(logfile);
-				myTextArea.setCaretPosition(this.lastPanePosition);
+				myLogger.error("This not implemented for type of fits file");
+				/*
+				 * String logfile = QuickHeaderInfo.getLogfileContent(f);
+				 * myTextArea.append(logfile);
+				 * myTextArea.setCaretPosition(this.lastPanePosition);
+				 */
 			}
 
 			}

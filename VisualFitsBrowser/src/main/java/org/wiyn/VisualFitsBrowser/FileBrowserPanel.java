@@ -5,13 +5,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
@@ -47,9 +45,9 @@ import org.wiyn.guiUtils.TableCellRenderers.BooleanTableCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.NumberFormatterCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.mDateRenderer;
 import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
+import org.wiyn.odi.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.wiyn.odi.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.wiyn.odi.VisualFitsBrowser.util.DirectoryListener;
-import org.wiyn.odi.VisualFitsBrowser.util.Filelist2Latex;
 import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry.TRANSFERSTATUS;
 
@@ -240,19 +238,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 								} else {
 									SAMPUtilities.loadMosaicDS9(fname);
 								}
-							}
-						}
-						return;
-					}
-
-					if (e.getButton() == MouseEvent.BUTTON3) {
-
-						int row = (mTable.getSelectedRow());
-						if (row >= 0 && row < mTable.getRowCount()) {
-							ODIFitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
-							if (selectedFits != null) {
-								String fname = selectedFits.getAbsolutePath();
-								VisualFitsBrowserApp.theFileBrowserApp.QuickReduceToDS(fname, null);
 							}
 						}
 						return;
