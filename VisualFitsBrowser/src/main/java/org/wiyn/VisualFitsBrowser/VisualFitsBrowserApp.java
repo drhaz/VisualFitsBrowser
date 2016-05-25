@@ -121,7 +121,7 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 	private VisualFitsBrowserApp() {
 
-		super("ODI File Browser");
+		super("VisualFitsBrowser " + getVersion());
 		theFileBrowserApp = this;
 
 		// Get a saved parameter instance for this application.
@@ -739,7 +739,11 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		String v = "";
 		try {
-			InputStream i = VisualFitsBrowserApp.class.getResourceAsStream(".properties");
+			InputStream i = VisualFitsBrowserApp.class.getResourceAsStream("/resources/properties");
+			if (i == null) {
+				myLogger.warn ("Could not read version file.");
+				return v;
+			}
 			java.util.Properties p = new Properties();
 			p.load(i);
 			v = p.getProperty("version");
