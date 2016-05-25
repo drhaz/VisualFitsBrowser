@@ -1,4 +1,4 @@
-package org.wiyn.odi.ODIFitsReader;
+package org.wiyn.guiUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,8 +19,6 @@ import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
 import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
-import org.wiyn.guiUtils.Preferences;
-import org.wiyn.guiUtils.SoundSignal;
 
 /**
  * Tools to talks via SAMP

@@ -47,7 +47,7 @@ import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.guiUtils.OSXAdapter;
 import org.wiyn.guiUtils.Preferences;
-import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
+import org.wiyn.guiUtils.SAMPUtilities;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {

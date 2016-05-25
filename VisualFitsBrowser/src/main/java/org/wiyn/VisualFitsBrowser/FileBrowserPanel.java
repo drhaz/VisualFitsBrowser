@@ -45,11 +45,11 @@ import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry.TRANSFERSTATUS;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.guiUtils.Preferences;
+import org.wiyn.guiUtils.SAMPUtilities;
 import org.wiyn.guiUtils.ZebraJTable;
 import org.wiyn.guiUtils.TableCellRenderers.BooleanTableCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.NumberFormatterCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.mDateRenderer;
-import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
 
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
