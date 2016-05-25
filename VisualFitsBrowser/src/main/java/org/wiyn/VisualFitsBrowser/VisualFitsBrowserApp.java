@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -29,7 +31,6 @@ import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -57,6 +58,8 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
 			+ ".WindowLocation";
+	private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
+			+ ".ToolsBoxWindowLocation";
 	private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
 	private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
 
@@ -74,6 +77,7 @@ public class VisualFitsBrowserApp extends JFrame {
 	 */
 	private static FileBrowserPanel mBrowserPanel = null;
 	private static ImageToolBoxPanel mToolBoxPanel = null;
+	private JFrame ToolBoxFrame = null;
 
 	private boolean showUtilities;
 
@@ -102,10 +106,12 @@ public class VisualFitsBrowserApp extends JFrame {
 
 		this.setmBrowserPanel(fbp);
 		this.add(getmBrowserPanel(), BorderLayout.CENTER);
-
 		this.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
 
-		this.add(mToolBoxPanel, BorderLayout.EAST);
+		this.ToolBoxFrame = new JFrame("Fits ToolBox");
+
+		ToolBoxFrame.getContentPane().add(mToolBoxPanel);
+		ToolBoxFrame.pack();
 
 		/*
 		 * Define the MenuBar
@@ -128,6 +134,7 @@ public class VisualFitsBrowserApp extends JFrame {
 		 * Finally, restore window location and some look and feel fine-tuning
 		 */
 		Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
+		Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
 
 		getContentPane().setBackground(new java.awt.Color(198, 206, 217));
 		try {
@@ -137,10 +144,12 @@ public class VisualFitsBrowserApp extends JFrame {
 			e1.printStackTrace();
 		}
 
-		this.setShowUtiltiies(false);
-
 		pack();
 		setVisible(true);
+
+		this.setShowUtiltiies(
+				Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+
 		/*
 		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
 		 */
@@ -169,16 +178,9 @@ public class VisualFitsBrowserApp extends JFrame {
 
 		Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
 		this.showUtilities = show;
-		if (this.mToolBoxPanel != null) {
-			this.remove(mToolBoxPanel);
+		if (this.ToolBoxFrame != null) {
 
-			if (show) {
-				this.add(mToolBoxPanel, BorderLayout.EAST);
-
-			}
-
-			this.invalidate();
-			this.pack();
+			this.ToolBoxFrame.setVisible(show);
 		}
 
 	}
@@ -197,11 +199,12 @@ public class VisualFitsBrowserApp extends JFrame {
 			menuItem = new JCheckBoxMenuItem("ToolBox");
 			menuItem.setSelected(
 					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
-			menu.add(menuItem);
-			menuItem.addChangeListener(new ChangeListener() {
 
-				public void stateChanged(ChangeEvent evt) {
-					boolean show = ((JCheckBoxMenuItem) evt.getSource()).getState();
+			menu.add(menuItem);
+			menuItem.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent e) {
+					boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
 					setShowUtiltiies(show);
 
 				}
@@ -360,6 +363,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	public void onExit() {
 		Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
+		Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
 		Preferences.thePreferences.save();
 	}
 

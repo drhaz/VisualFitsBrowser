@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -135,14 +136,14 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		ButtonPanel.setLayout(ButtonPanelLayout);
 		ButtonPanel.setBackground(new java.awt.Color(196, 196, 217));
 
-		JLabel ImageTitleLabel = new JLabel(" Actions");
+		JLabel ImageTitleLabel = new JLabel("Actions:");
 		ImageTitleLabel.setFont(GUIConsts.InformationFont);
 
 		ButtonPanel.add(ImageTitleLabel);
 
 		ButtonPanel.add(generateHeader);
 
-		// ButtonPanel.add (Box.createVerticalGlue ());
+		ButtonPanel.add (Box.createVerticalGlue ());
 
 		ButtonPanel.setMaximumSize(ButtonPanel.getMinimumSize());
 
