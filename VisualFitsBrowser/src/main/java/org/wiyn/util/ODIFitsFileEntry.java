@@ -13,7 +13,7 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
-import org.wiyn.VisualFitsBrowser.FileBrowserApp;
+import org.wiyn.VisualFitsBrowser.VisualFitsBrowserApp;
 import org.wiyn.odi.ODIFitsReader.OBSTYPE;
 import org.wiyn.odi.ODIFitsReader.QuickHeaderInfo;
 import org.wiyn.util.FitsComments.FITSTextCommentImpl;
@@ -110,7 +110,7 @@ public class ODIFitsFileEntry {
 	public static FileFilter thefileFilter = theODIFileFilter;
 
 	static {
-		if (FileBrowserApp.noODI) {
+		if (VisualFitsBrowserApp.noODI) {
 			thefileFilter = theFITSFileFilter;
 			theCommentInterface = new FITSTextCommentImpl();
 		}
@@ -157,7 +157,7 @@ public class ODIFitsFileEntry {
 		String Filter = "n/a";
 		int ponTime = 0;
 
-		if (! (ArchiveMode || FileBrowserApp.noODI)) {
+		if (! (ArchiveMode || VisualFitsBrowserApp.noODI)) {
 			if (!f.exists() || !new File(f.getAbsoluteFile() + "/temp/.finished").exists()) {
 				myLogger.debug("rejecting pending file " + f.getAbsolutePath());
 				return null;

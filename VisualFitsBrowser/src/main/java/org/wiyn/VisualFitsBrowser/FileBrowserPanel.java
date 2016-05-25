@@ -201,7 +201,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.PONTIME_COL).setPreferredWidth(30);
 
-			if (FileBrowserApp.noODI) {
+			if (VisualFitsBrowserApp.noODI) {
 				this.hideColumn(mTable, FitsViewerTableModel.ARCHIVESTAT_COL);
 				this.hideColumn(mTable, FitsViewerTableModel.PONTIME_COL);
 
@@ -233,7 +233,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 							ODIFitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
-								if (!FileBrowserApp.noODI) {
+								if (!VisualFitsBrowserApp.noODI) {
 									// In ODI mode, we sent image to OTA
 									// Listener
 									SAMPUtilities.sendImageToListener(fname);
@@ -252,7 +252,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 							ODIFitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
-								FileBrowserApp.theFileBrowserApp.QuickReduceToDS(fname, null);
+								VisualFitsBrowserApp.theFileBrowserApp.QuickReduceToDS(fname, null);
 							}
 						}
 						return;

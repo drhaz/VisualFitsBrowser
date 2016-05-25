@@ -20,7 +20,6 @@ import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -31,8 +30,6 @@ import javax.swing.JProgressBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -55,17 +52,17 @@ import org.wiyn.odi.VisualFitsBrowser.util.Filelist2Latex;
 import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.util.FitsComments.OTASelectionPanel;
 
-
 @SuppressWarnings("serial")
-public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAInFocalPlaneSelector {
+public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener, OTAInFocalPlaneSelector {
 
 	final static String VersionString = "May 2015";
 	final static String LOOKANDFEEL = "Ocean";
-	private final static Logger myLogger = Logger.getLogger(FileBrowserApp.class);
+	private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
 
-	private final static String PROP_WINDOWLOCATION_ROOT = FileBrowserApp.class.getCanonicalName() + ".WindowLocation";
-	private final static String PROP_SHOWUTILITIES = FileBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
-	private final static String PROP_AUTODISPLAY = FileBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
+	private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
+			+ ".WindowLocation";
+	private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
+	private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
 
 	/**
 	 * Configuration Parameter: Omit all ODI-things from FileBrowser and
@@ -73,7 +70,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 	 * 
 	 */
 
-	static public boolean noODI = false;
+	static public boolean noODI = true;
 
 	/**
 	 * Class to Manage & Display image directory
@@ -102,11 +99,9 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 	 * Functional Panels come here
 	 */
 	MultiFlickPanel myMultiPanel = null;
-	
-	
-	
+
 	ODIImageInfoPanel myImageInfoPanel = null;
-	
+
 	String nowPlayingVideo = null;
 	/**
 	 * The currently selected ota: X coordinate
@@ -129,9 +124,9 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 	 * A singleton file browser application
 	 * 
 	 */
-	public static FileBrowserApp theFileBrowserApp = null;
+	public static VisualFitsBrowserApp theFileBrowserApp = null;
 
-	private FileBrowserApp() {
+	private VisualFitsBrowserApp() {
 
 		super("ODI File Browser");
 		theFileBrowserApp = this;
@@ -195,9 +190,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 		setVisible(true);
 
-		boolean show = Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false"));
-		show = show & !noODI;
-		this.setShowUtiltiies(show);
+		this.setShowUtiltiies(false);
 
 		/*
 		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
@@ -226,8 +219,6 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 	private void fillButtonPanelForODI(JPanel ButtonPanel) {
 
 		{
-
-			
 
 			// Generate Image Info Panel
 			JButton generateHeader = new JButton("Image Header");
@@ -267,21 +258,6 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 			});
 
-			
-		
-
-			
-
-			
-			
-
-			
-
-
-			
-			
-
-			
 			GridLayout ButtonPanelLayout = new VariableGridLayout(12, 1);
 			ButtonPanelLayout.setColumns(1);
 			ButtonPanelLayout.setRows(19);
@@ -311,15 +287,11 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 			ButtonPanel.add(ImageTitleLabel);
 
-			
-
-			
-
 			ButtonPanel.add(AdvancedTitleLabel);
-			
+
 			ButtonPanel.add(generateHeader);
 			ButtonPanel.add(generateLogfile);
-			
+
 			// ButtonPanel.add (Box.createVerticalGlue ());
 
 			ButtonPanel.setMaximumSize(ButtonPanel.getMinimumSize());
@@ -412,16 +384,10 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 	private void fillMultiPanelView() {
 		{
-			
+
 			myImageInfoPanel = new ODIImageInfoPanel();
 			myImageInfoPanel.setName(INFOPANEL);
 			myMultiPanel.addComponent(myImageInfoPanel);
-
-			
-
-			
-
-		
 
 		}
 	}
@@ -467,24 +433,6 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 			menu.add(menuItem);
 		}
 
-		if (!noODI) {
-			menuItem = new JCheckBoxMenuItem("Auto load new images to OTAListener");
-			getmBrowserPanel().autoLoadImageToListener = Boolean
-					.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
-			menuItem.setSelected(getmBrowserPanel().autoLoadImageToListener);
-			menu.add(menuItem);
-			menuItem.addChangeListener(new ChangeListener() {
-
-				
-				public void stateChanged(ChangeEvent evt) {
-					boolean show = ((JCheckBoxMenuItem) evt.getSource()).getState();
-					getmBrowserPanel().autoLoadImageToListener = show;
-					Preferences.thePreferences.setProperty(PROP_AUTODISPLAY, show + "");
-				}
-
-			});
-		}
-
 		{
 			menuItem = new JMenuItem("Reload Directory", KeyEvent.VK_R);
 			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
@@ -496,25 +444,6 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 					if (getmBrowserPanel() != null)
 						getmBrowserPanel().reload();
 				}
-			});
-		}
-
-		if (!noODI)
-
-		{
-			menuItem = new JCheckBoxMenuItem("Show Tools");
-			menuItem.setSelected(
-					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
-			menu.add(menuItem);
-			menuItem.addChangeListener(new ChangeListener() {
-
-				
-				public void stateChanged(ChangeEvent evt) {
-					boolean show = ((JCheckBoxMenuItem) evt.getSource()).getState();
-					setShowUtiltiies(show);
-
-				}
-
 			});
 		}
 
@@ -533,7 +462,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 		menu = new JMenu("LogSheets");
 		menu.getAccessibleContext().setAccessibleDescription("Logsheets Menu");
 
-		if (!noODI)
+		if (false)
 			theMenu.add(menu);
 
 		{
@@ -561,40 +490,22 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 			});
 		}
 
-		
-
 		JMenu debugMenu = GUIConsts.getDebugMenu();
-
-		
-
-		
-
-		if (!noODI)
-			debugMenu.add(ODIFitsFileEntry.getArchiveModemenuItem());
 
 		theMenu.add(debugMenu);
 
 		theMenu.add(Box.createHorizontalGlue());
 
-		final JLabel otaLabel = new JLabel("OTAListener  ");
-		if (!noODI)
-			theMenu.add(otaLabel);
-
-		final JLabel guiLabel = new JLabel("GUI  ");
-		if (!noODI)
-			theMenu.add(guiLabel);
-
 		final JLabel ds9Label = new JLabel("DS9  ");
 		theMenu.add(ds9Label);
-
-		final JLabel qrLabel = new JLabel("QR  ");
-		if (!noODI)
-			theMenu.add(qrLabel);
 
 		final JLabel fileWatch = new JLabel("Files watched: " + 0);
 		theMenu.add(fileWatch);
 
-		final JLabel memorylabel = new JLabel("  "); //"RAM: " + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB");
+		final JLabel memorylabel = new JLabel("  "); // "RAM: " +
+														// Runtime.getRuntime().totalMemory()
+														// / 1024 / 1024 + "
+														// MB");
 
 		theMenu.add(memorylabel);
 
@@ -615,30 +526,24 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 				while (true) {
 
 					// long Now = System.currentTimeMillis();
-//					final String t = "RAM: " // +  (rt.totalMemory() / 1024 / 1024)
-//							+ " MB  ";
-//					memorylabel.setText(t);
-//					memorylabel.repaint();
+					// final String t = "RAM: " // + (rt.totalMemory() / 1024 /
+					// 1024)
+					// + " MB ";
+					// memorylabel.setText(t);
+					// memorylabel.repaint();
 
-//					if (getmBrowserPanel() != null && getmBrowserPanel().myDirectoryListener != null) {
-//
-//						final String t2 = "Files watched: " + getmBrowserPanel().myDirectoryListener.getNFileWatched()
-//								+ "   ";
-//						fileWatch.setText(t2);
-//						fileWatch.repaint();
-//					}
+					// if (getmBrowserPanel() != null &&
+					// getmBrowserPanel().myDirectoryListener != null) {
+					//
+					// final String t2 = "Files watched: " +
+					// getmBrowserPanel().myDirectoryListener.getNFileWatched()
+					// + " ";
+					// fileWatch.setText(t2);
+					// fileWatch.repaint();
+					// }
 
 					boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
 					ds9Label.setEnabled(ds9Status);
-
-					boolean guiStatus = SAMPUtilities.isClientAvailable("ODIGUI");
-					guiLabel.setEnabled(guiStatus);
-
-					boolean ota = SAMPUtilities.isClientAvailable("ODI OTA Listener");
-					otaLabel.setEnabled(ota);
-
-					boolean qr = SAMPUtilities.isClientAvailable("QR_listener");
-					qrLabel.setEnabled(qr);
 
 					try {
 						Thread.sleep(5000);
@@ -650,10 +555,9 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 					if (getmBrowserPanel() != null && getmBrowserPanel().mRootDirectory != null
 							&& getmBrowserPanel().mRootDirectory.exists()) {
 
-						
-						 free = getmBrowserPanel().mRootDirectory.getFreeSpace();
-						
-						 total = getmBrowserPanel().mRootDirectory.getTotalSpace();
+						free = getmBrowserPanel().mRootDirectory.getFreeSpace();
+
+						total = getmBrowserPanel().mRootDirectory.getTotalSpace();
 						if (total != 0) {
 							int progress = (int) ((total - free) / total * 1000);
 							// System.out.println (progress+ " " + free + " / "
@@ -689,8 +593,6 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 				this.setVideoActionStatus(false);
 			}
 		}
-
-		
 
 		if (this.myMultiPanel.getTopComponent().equals(INFOPANEL) && fileList != null && fileList.size() == 1
 				&& this.showUtilities) {
@@ -761,7 +663,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 			CommandLine cmd = parser.parse(options, args);
 
 			if (cmd.hasOption("noodi")) {
-				FileBrowserApp.noODI = true;
+
 				ODIFitsFileEntry.ArchiveMode = true;
 			}
 
@@ -774,8 +676,8 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 	public static void main(String[] args) {
 
-		PropertyConfigurator
-				.configure(FileBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
+		PropertyConfigurator.configure(
+				VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
 
 		parseArgs(args);
 
@@ -786,7 +688,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 
 		System.out.println("Starting Directory Browser & Listener ...");
 		@SuppressWarnings("unused")
-		FileBrowserApp b = new FileBrowserApp();
+		VisualFitsBrowserApp b = new VisualFitsBrowserApp();
 
 		System.out.println("Registering functions with SAMP ...");
 		SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.iraf.imageLoadReply") {
@@ -828,7 +730,7 @@ public class FileBrowserApp extends JFrame implements OTAFileListListener, OTAIn
 	}
 
 	public static void setmBrowserPanel(FileBrowserPanel mBrowserPanel) {
-		FileBrowserApp.mBrowserPanel = mBrowserPanel;
+		VisualFitsBrowserApp.mBrowserPanel = mBrowserPanel;
 	}
 
 	class StreamGobbler extends Thread {
