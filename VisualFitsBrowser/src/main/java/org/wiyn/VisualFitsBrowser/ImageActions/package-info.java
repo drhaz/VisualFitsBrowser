@@ -5,4 +5,4 @@
  * @author harbeck
  *
  */
-package org.wiyn.odi.VisualFitsBrowser.ImageActions;
+package org.wiyn.VisualFitsBrowser.ImageActions;

@@ -1,4 +1,4 @@
-package org.wiyn.odi.VisualFitsBrowser.ImageActions;
+package org.wiyn.VisualFitsBrowser.ImageActions;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,9 +14,9 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.odi.ODIFitsReader.QuickHeaderInfo;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 /**
  * Display the FITS header of an image, or the acquisition log of an ODi image,

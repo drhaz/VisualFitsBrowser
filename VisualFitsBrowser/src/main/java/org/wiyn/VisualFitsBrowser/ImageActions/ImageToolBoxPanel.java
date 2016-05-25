@@ -1,4 +1,4 @@
-package org.wiyn.odi.VisualFitsBrowser.ImageActions;
+package org.wiyn.VisualFitsBrowser.ImageActions;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -14,10 +14,10 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 import org.wiyn.VisualFitsBrowser.FileBrowserPanel;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.guiUtils.MultiFlickPanel;
 import org.wiyn.guiUtils.VariableGridLayout;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 /**
  * 

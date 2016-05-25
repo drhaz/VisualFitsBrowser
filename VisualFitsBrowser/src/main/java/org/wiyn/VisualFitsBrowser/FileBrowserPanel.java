@@ -38,6 +38,11 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.log4j.Logger;
+import org.wiyn.VisualFitsBrowser.ImageActions.OTAFileListListener;
+import org.wiyn.VisualFitsBrowser.util.DirectoryChangeReceiver;
+import org.wiyn.VisualFitsBrowser.util.DirectoryListener;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry.TRANSFERSTATUS;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.guiUtils.Preferences;
 import org.wiyn.guiUtils.ZebraJTable;
@@ -45,11 +50,6 @@ import org.wiyn.guiUtils.TableCellRenderers.BooleanTableCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.NumberFormatterCellRenderer;
 import org.wiyn.guiUtils.TableCellRenderers.mDateRenderer;
 import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
-import org.wiyn.odi.VisualFitsBrowser.ImageActions.OTAFileListListener;
-import org.wiyn.odi.VisualFitsBrowser.util.DirectoryChangeReceiver;
-import org.wiyn.odi.VisualFitsBrowser.util.DirectoryListener;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry.TRANSFERSTATUS;
 
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {

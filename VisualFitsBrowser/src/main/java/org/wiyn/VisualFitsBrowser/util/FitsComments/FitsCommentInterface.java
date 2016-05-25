@@ -1,6 +1,6 @@
-package org.wiyn.odi.VisualFitsBrowser.util.FitsComments;
+package org.wiyn.VisualFitsBrowser.util.FitsComments;
 
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 public interface FitsCommentInterface {
 

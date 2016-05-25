@@ -1,4 +1,4 @@
-package org.wiyn.odi.VisualFitsBrowser.util.FitsComments;
+package org.wiyn.VisualFitsBrowser.util.FitsComments;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 public class FITSTextCommentImpl implements FitsCommentInterface {
 

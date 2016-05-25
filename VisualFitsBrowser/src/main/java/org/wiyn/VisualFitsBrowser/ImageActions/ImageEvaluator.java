@@ -1,4 +1,4 @@
-package org.wiyn.odi.VisualFitsBrowser.ImageActions;
+package org.wiyn.VisualFitsBrowser.ImageActions;
 
 import java.awt.Dimension;
 import java.util.Vector;
@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JPanel;
 
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 @SuppressWarnings("serial")
 /**

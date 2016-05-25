@@ -1,4 +1,4 @@
-package org.wiyn.odi.VisualFitsBrowser.util;
+package org.wiyn.VisualFitsBrowser.util;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -14,10 +14,10 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.wiyn.VisualFitsBrowser.VisualFitsBrowserApp;
+import org.wiyn.VisualFitsBrowser.util.FitsComments.FITSTextCommentImpl;
+import org.wiyn.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
 import org.wiyn.odi.ODIFitsReader.OBSTYPE;
 import org.wiyn.odi.ODIFitsReader.QuickHeaderInfo;
-import org.wiyn.odi.VisualFitsBrowser.util.FitsComments.FITSTextCommentImpl;
-import org.wiyn.odi.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
 
 /**
  * Data holding class for an ODI Image.

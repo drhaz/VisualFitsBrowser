@@ -11,4 +11,4 @@
  *         comments are stored in a text file, header, data base, or xml files.
  *
  */
-package org.wiyn.odi.VisualFitsBrowser.util.FitsComments;
+package org.wiyn.VisualFitsBrowser.util.FitsComments;

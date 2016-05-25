@@ -18,9 +18,9 @@ import org.astrogrid.samp.client.SampException;
 import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.guiUtils.Preferences;
 import org.wiyn.guiUtils.SoundSignal;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 /**
  * Tools to talks via SAMP

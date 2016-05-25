@@ -41,13 +41,13 @@ import org.apache.log4j.PropertyConfigurator;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
+import org.wiyn.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
+import org.wiyn.VisualFitsBrowser.util.Filelist2Latex;
+import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.wiyn.guiUtils.GUIConsts;
 import org.wiyn.guiUtils.OSXAdapter;
 import org.wiyn.guiUtils.Preferences;
 import org.wiyn.odi.ODIFitsReader.SAMPUtilities;
-import org.wiyn.odi.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
-import org.wiyn.odi.VisualFitsBrowser.util.Filelist2Latex;
-import org.wiyn.odi.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
