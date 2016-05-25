@@ -4,7 +4,7 @@ import org.wiyn.VisualFitsBrowser.util.ODIFitsFileEntry;
 
 public interface FitsCommentInterface {
 
-	public void readComment(ODIFitsFileEntry e);
+	public void readComment(ODIFitsFileEntry entry);
 
 	public void writeComment(ODIFitsFileEntry e);
 
