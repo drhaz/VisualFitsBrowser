@@ -14,8 +14,52 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>create-my-bundle</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.wiyn.VisualFitsBrowser.VisualFitsBrowserApp</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+		</plugins>
+
+	</build>
 
 	<dependencies>
 		<dependency>
@@ -55,6 +99,10 @@
 			<version>3.2.1</version>
 		</dependency>
 
+
+		<!-- Note: This below is apparently extremely bad to do. Breaks Packaging 
+			of the external jars etc. Need to change this eventually! -->
+
 		<dependency>
 			<groupId>jsamp</groupId>
 			<artifactId>jsamp</artifactId>
@@ -86,10 +134,5 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/jsky-util-3.0.jar</systemPath>
 		</dependency>
-
-
 	</dependencies>
-	
-
-
 </project>

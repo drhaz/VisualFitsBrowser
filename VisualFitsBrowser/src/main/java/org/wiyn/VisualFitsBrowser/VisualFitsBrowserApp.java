@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.Box;
@@ -55,7 +56,7 @@ import org.wiyn.util.FitsComments.OTASelectionPanel;
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener, OTAInFocalPlaneSelector {
 
-	final static String VersionString = "May 2015";
+	final static String VersionString = "Version 1";
 	final static String LOOKANDFEEL = "Ocean";
 	private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
 
@@ -86,15 +87,7 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 	/** A Panel for Action items. */
 	JPanel ButtonPanel;
-	// Access to central buttons
-	// static JButton toIrafButton;
-	// static JButton toPythonButton;
-	// static JButton toStackButton;
-	// static JButton videoToDS9Button;
-	// static JButton replayVideoButton;
-	// static JButton sendPreImageButton;
-	// static JButton calcOffsetButton;
-	// static JButton masterCalButton;
+
 	/*
 	 * Functional Panels come here
 	 */
@@ -492,7 +485,7 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		JMenu debugMenu = GUIConsts.getDebugMenu();
 
-		theMenu.add(debugMenu);
+		// theMenu.add(debugMenu);
 
 		theMenu.add(Box.createHorizontalGlue());
 
@@ -525,23 +518,6 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 				// boolean heart = true;
 				while (true) {
 
-					// long Now = System.currentTimeMillis();
-					// final String t = "RAM: " // + (rt.totalMemory() / 1024 /
-					// 1024)
-					// + " MB ";
-					// memorylabel.setText(t);
-					// memorylabel.repaint();
-
-					// if (getmBrowserPanel() != null &&
-					// getmBrowserPanel().myDirectoryListener != null) {
-					//
-					// final String t2 = "Files watched: " +
-					// getmBrowserPanel().myDirectoryListener.getNFileWatched()
-					// + " ";
-					// fileWatch.setText(t2);
-					// fileWatch.repaint();
-					// }
-
 					boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
 					ds9Label.setEnabled(ds9Status);
 
@@ -560,15 +536,13 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 						total = getmBrowserPanel().mRootDirectory.getTotalSpace();
 						if (total != 0) {
 							int progress = (int) ((total - free) / total * 1000);
-							// System.out.println (progress+ " " + free + " / "
-							// + total);
 
 							mProgressBar.setValue(progress);
 							if (progress < 8000)
 								mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
 							else
 								mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
-							mProgressBar.setString(String.format("%6.1f TB free", free / 1000. / 1000 / 1000 / 1000));
+							mProgressBar.setString(String.format("%6.2f TB free", free / 1000. / 1000 / 1000 / 1000));
 
 						}
 
@@ -683,6 +657,8 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 
 		GUIConsts.setLookAndFeel();
 
+		System.out.println("VisualFitsBrowser Version " + getVersion());
+		System.out.println("(c) 2016 Daniel Harbeck, WIYN Observatory");
 		System.out.println("Starting Samp Interface ...");
 		initSampHub();
 
@@ -759,6 +735,20 @@ public class VisualFitsBrowserApp extends JFrame implements OTAFileListListener,
 		}
 	}
 
+	private static String getVersion() {
+
+		String v = "";
+		try {
+			InputStream i = VisualFitsBrowserApp.class.getResourceAsStream(".properties");
+			java.util.Properties p = new Properties();
+			p.load(i);
+			v = p.getProperty("version");
+		} catch (Exception e) {
+			myLogger.error("While reading version number: ", e);
+		}
+
+		return v;
+	}
 }
 
 interface OTAFileListListener {
