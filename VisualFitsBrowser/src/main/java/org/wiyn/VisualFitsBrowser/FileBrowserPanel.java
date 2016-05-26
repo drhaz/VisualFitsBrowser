@@ -89,7 +89,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		mRootDirectoryString = Preferences.thePreferences.getProperty(PROP_LASTDIRECTORY, mRootDirectoryString);
 
 		mRootDirectory = new File(this.mRootDirectoryString);
-		assert (mRootDirectory != null);
 
 		mImageList = new Vector<ODIFitsFileEntry>(50);
 

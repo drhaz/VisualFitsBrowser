@@ -76,10 +76,14 @@ public class VisualFitsBrowserApp extends JFrame {
 	 * 
 	 */
 	private static FileBrowserPanel mBrowserPanel = null;
-	private static ImageToolBoxPanel mToolBoxPanel = null;
+	private  ImageToolBoxPanel mToolBoxPanel = null;
 	private JFrame ToolBoxFrame = null;
 
 	private boolean showUtilities;
+
+
+	static long IRAF_MSGID = 0;
+	static long IrafLastAttemt = 0;
 
 	/**
 	 * A singleton file browser application
@@ -361,13 +365,13 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	}
 
-	public void onExit() {
+	private void onExit() {
 		Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
-		Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
+		Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
 		Preferences.thePreferences.save();
 	}
 
-	static void initSampHub() {
+	private static void initSampHub() {
 
 		SAMPUtilities.initHubConnector("ODI File Browser", "ODI File Browser & Image Analysis tool.", true);
 
@@ -415,7 +419,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	}
 
-	public static void parseArgs(String[] args) {
+	private static void parseArgs(String[] args) {
 		Options options = new Options();
 
 		options.addOption("noodi", false, "Ommit ODI-specific GUI items.");
@@ -479,8 +483,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	}
 
-	static long IRAF_MSGID = 0;
-	static long IrafLastAttemt = 0;
+
 
 	public static FileBrowserPanel getmBrowserPanel() {
 		return mBrowserPanel;
