@@ -14,4 +14,4 @@ To start the VisualFitsBrowser, execute on your computer:
 
  java -jar VisualFitsBrowser-1.0.0-jar-with-dependencies.jar 
 
-replace the version number / name of the jar fiel with the file you actually downloaded. 
+replace the version number / name of the jar file with the file you actually downloaded. 
