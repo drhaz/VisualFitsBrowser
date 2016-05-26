@@ -66,17 +66,15 @@ public class VisualFitsBrowserApp extends JFrame {
 	/**
 	 * Configuration Parameter: Omit all ODI-things from FileBrowser and
 	 * configure for flat fits files.
-	 * 
 	 */
 
 	static public boolean noODI = true;
 
 	/**
 	 * Class to Manage & Display image directory
-	 * 
 	 */
 	private static FileBrowserPanel mBrowserPanel = null;
-	private  ImageToolBoxPanel mToolBoxPanel = null;
+	private ImageToolBoxPanel mToolBoxPanel = null;
 	private JFrame ToolBoxFrame = null;
 
 	private boolean showUtilities;
@@ -87,7 +85,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	/**
 	 * A singleton file browser application
-	 * 
 	 */
 	public static VisualFitsBrowserApp theFileBrowserApp = null;
 
@@ -174,7 +171,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
 	/**
 	 * Enable or disable display of the toolbox section right of the list.
-	 * 
+	 *
 	 * @param show
 	 */
 
@@ -199,24 +196,6 @@ public class VisualFitsBrowserApp extends JFrame {
 		menu.getAccessibleContext().setAccessibleDescription("File Menu");
 		theMenu.add(menu);
 
-		{
-			menuItem = new JCheckBoxMenuItem("ToolBox");
-			menuItem.setSelected(
-					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
-
-			menu.add(menuItem);
-			menuItem.addItemListener(new ItemListener() {
-
-				public void itemStateChanged(ItemEvent e) {
-					boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
-					setShowUtiltiies(show);
-
-				}
-
-			});
-		}
-
-		menu.add(new JSeparator());
 
 		{
 			menuItem = new JMenuItem("Change Directory ...", KeyEvent.VK_L);
@@ -235,7 +214,7 @@ public class VisualFitsBrowserApp extends JFrame {
 			menuItem = new JMenuItem("Reload Directory", KeyEvent.VK_R);
 			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
 			menu.add(menuItem);// Possible error source: generate thumbnail
-								// after closure
+			// after closure
 			// finished.);
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -244,6 +223,49 @@ public class VisualFitsBrowserApp extends JFrame {
 				}
 			});
 		}
+
+
+		menu.add(new JSeparator());
+
+		{
+			menuItem = new JCheckBoxMenuItem("ToolBox");
+			menuItem.setSelected(
+					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+
+			menu.add(menuItem);
+			menuItem.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent e) {
+					boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
+					setShowUtiltiies(show);
+
+				}
+
+			});
+		}
+
+
+		{
+			menuItem = new JCheckBoxMenuItem("Auto display new image in ds9");
+			menuItem.setSelected(Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false")));
+			if (this.getmBrowserPanel() != null)
+				getmBrowserPanel().autoLoadImageToListener =
+						Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
+
+			menuItem.addItemListener(new ItemListener() {
+
+				public void itemStateChanged(ItemEvent e) {
+					boolean auto = ((JCheckBoxMenuItem) e.getSource()).getState();
+					if (getmBrowserPanel() != null)
+						getmBrowserPanel().autoLoadImageToListener = auto;
+
+					Preferences.thePreferences.setProperty(PROP_AUTODISPLAY, auto + "");
+				}
+
+			});
+			menu.add(menuItem);
+		}
+
 
 		menu.add(new JSeparator());
 
@@ -303,9 +325,9 @@ public class VisualFitsBrowserApp extends JFrame {
 		theMenu.add(fileWatch);
 
 		final JLabel memorylabel = new JLabel("  "); // "RAM: " +
-														// Runtime.getRuntime().totalMemory()
-														// / 1024 / 1024 + "
-														// MB");
+		// Runtime.getRuntime().totalMemory()
+		// / 1024 / 1024 + "
+		// MB");
 
 		theMenu.add(memorylabel);
 
@@ -482,7 +504,6 @@ public class VisualFitsBrowserApp extends JFrame {
 		System.out.println("File Browser is up and running.");
 
 	}
-
 
 
 	public static FileBrowserPanel getmBrowserPanel() {

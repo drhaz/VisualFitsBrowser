@@ -13,221 +13,216 @@ import org.wiyn.guiUtils.SoundSignal;
 
 /**
  * Class that handles watching a directory for any new ODI images.
- * 
+ * <p>
  * The class polls a directory and investiages all directories in there ( == ODI
  * images) that are newer than the latest image addition. Since it can take a
  * while between creating an image directory and an actual image to be written
  * (e.g., exposure time plus readout time), new detected fields are added to a
  * watch list, and once an image is finished, a notificatoon is sent.
- * 
- * 
  */
 
 public class DirectoryListener implements Runnable {
 
-  final static private Logger myLogger = Logger
-      .getLogger(DirectoryListener.class);
+	final static private Logger myLogger = Logger
+			.getLogger(DirectoryListener.class);
 
-  /** The directory to Watch */
-  File myDirectory;
+	/**
+	 * The directory to Watch
+	 */
+	File myDirectory;
 
-  /**
-   * The last time we have checked the directory.
-   * 
-   * When instantiating this listener, it is assumed that the directory has been
-   * parsed already, i.e., we do not include already existing files.
-   * 
-   */
-  long timeOfLastDirectoryRead = 0; //new Date().getTime();
+	/**
+	 * The last time we have checked the directory.
+	 * <p>
+	 * When instantiating this listener, it is assumed that the directory has been
+	 * parsed already, i.e., we do not include already existing files.
+	 */
+	long timeOfLastDirectoryRead = 0; //new Date().getTime();
 
-  /**
-   * Listener to notify when a new file has arrived
-   * 
-   */
+	/**
+	 * Listener to notify when a new file has arrived
+	 */
 
-  private DirectoryChangeReceiver rec;
+	private DirectoryChangeReceiver rec;
 
-  /**
-   * Internal flag if listener should die.
-   * 
-   */
-  private boolean abort = false;
+	/**
+	 * Internal flag if listener should die.
+	 */
+	private boolean abort = false;
 
-  /**
-   * Flag whether to beep when a new file has arrived.
-   * 
-   */
-  public boolean beepOnNew = true;
-  /**
-   * The kind of files we are looking for
-   * 
-   */
-  private FilenameFilter mFileNameFilter;
+	/**
+	 * Flag whether to beep when a new file has arrived.
+	 */
+	public boolean beepOnNew = true;
+	/**
+	 * The kind of files we are looking for
+	 */
+	private FilenameFilter mFileNameFilter;
 
-  /**
-   * The image directory that was the most recent one
-   * 
-   */
-  // private File lastNewFile = null;
+	/**
+	 * The image directory that was the most recent one
+	 */
+	// private File lastNewFile = null;
 
-  private  Queue<File> newFileQueue = null;
+	private Queue<File> newFileQueue = null;
 
-  private Semaphore abortWait;
+	private Semaphore abortWait;
 
-  public DirectoryListener(File dir, DirectoryChangeReceiver rec) {
-    myDirectory = dir;
-    this.rec = rec;
-    mFileNameFilter = new ODIImageDirectoryFilter();
-    newFileQueue = new ConcurrentLinkedQueue<File>();
-    abortWait = new Semaphore(1);
-    try {
-      abortWait.acquire();
-    } catch (InterruptedException e) {
-      myLogger.error("Error while acqurieing initial semaphore.");
-    }
-  }
-  
-  public long getNFileWatched () {
-    long retVal = 0;
-    if (newFileQueue != null)
-      retVal = newFileQueue.size();
-    return retVal;
-  }
+	public DirectoryListener(File dir, DirectoryChangeReceiver rec) {
+		myDirectory = dir;
+		this.rec = rec;
+		mFileNameFilter = new ODIImageDirectoryFilter();
+		newFileQueue = new ConcurrentLinkedQueue<File>();
+		abortWait = new Semaphore(1);
+		try {
+			abortWait.acquire();
+		} catch (InterruptedException e) {
+			myLogger.error("Error while acquiring initial semaphore.");
+		}
+	}
 
-  public void run() {
-    myLogger.info("Starting new Directory Listener Thread for: "
-        + myDirectory.getAbsolutePath());
-    while (!abort) {
+	public long getNFileWatched() {
+		long retVal = 0;
+		if (newFileQueue != null)
+			retVal = newFileQueue.size();
+		return retVal;
+	}
 
-      long lastModified = myDirectory.lastModified();
+	public void run() {
+		myLogger.info("Starting new Directory Listener Thread for: "
+				+ myDirectory.getAbsolutePath());
+		while (!abort) {
 
-      // Step 1: Check if directory has new files to look for in it
-      if (lastModified > timeOfLastDirectoryRead) {
+			long lastModified = myDirectory.lastModified();
 
-        Vector<File> newFiles = getNewFilesSinceChange();
+			// Step 1: Check if directory has new files to look for in it
+			if (lastModified > timeOfLastDirectoryRead) {
 
-        // If new directories showed up, check if they are complete, or if we
-        // have to monitor some files.
+				Vector<File> newFiles = getNewFilesSinceChange();
 
-        if (!abort && newFiles.size() > 0) {
+				// If new directories showed up, check if they are complete, or if we
+				// have to monitor some files.
 
-          for (File f : newFiles) {
+				if (!abort && newFiles.size() > 0) {
 
-            if (myLogger.isDebugEnabled())
-              myLogger.debug("Adding new file candidate to queue: "
-                  + f.getAbsolutePath());
+					for (File f : newFiles) {
 
-            newFileQueue.add(f);
+						if (myLogger.isDebugEnabled())
+							myLogger.debug("Adding new file candidate to queue: "
+									+ f.getAbsolutePath());
 
-          }
+						newFileQueue.add(f);
 
-        }
-        timeOfLastDirectoryRead = lastModified;
+					}
 
-      }
+				}
+				timeOfLastDirectoryRead = lastModified;
 
-      // list of files we will remove from our watch list when finished
-      Vector<File> removeList = new Vector<File>();
+			}
 
-      for (File f : newFileQueue) {
+			// list of files we will remove from our watch list when finished
+			Vector<File> removeList = new Vector<File>();
 
-        File m = new File(f.getAbsoluteFile() + "/temp/.finished");
+			for (File f : newFileQueue) {
 
-        StringBuffer b = new StringBuffer("... " + m.getAbsolutePath() + " ");
+				File m = new File(f.getAbsoluteFile() + "/temp/.finished");
 
-        // We have a valid, completed file
-        if (m.exists() || ODIFitsFileEntry.ArchiveMode) {
-          b.append(" exists. Notifying");
-          removeList.add(f);
-          rec.addSingleNewItem(f);
-          if (beepOnNew)
-            SoundSignal.notifyNewImage();
 
-        } else {
+				// We have a valid, completed file
+				if (m.exists() || ODIFitsFileEntry.ArchiveMode || !ODIFitsFileEntry.ODIMode) {
 
-          if (myLogger.isDebugEnabled())
-            b.append(" not there yet. Time lapsed: "
-                + (System.currentTimeMillis() - f.lastModified()) / 1000 + " s");
-          // If file is too old, give up on it.
-          if ((System.currentTimeMillis() - f.lastModified()) / 1000 > 3600) {
-            myLogger.warn("giving up on file: " + f.getAbsoluteFile());
-            removeList.add(f);
-          }
-        }
+					removeList.add(f);
+					rec.addSingleNewItem(f);
+					if (beepOnNew)
+						SoundSignal.notifyNewImage();
 
-        myLogger.debug(b.toString());
-      }
-      newFileQueue.removeAll(removeList);
+				} else {
 
-      try {
-        Thread.sleep(600);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+					if (myLogger.isDebugEnabled())
 
-    }
-    myLogger.info("Exiting Listener Thread for Directory "
-        + myDirectory.getAbsolutePath());
-    newFileQueue.clear();
-    abortWait.release();
-  }
+						// If file is too old, give up on it.
+						if ((System.currentTimeMillis() - f.lastModified()) / 1000 > 3600) {
+							myLogger.warn("giving up on file: " + f.getAbsoluteFile());
+							removeList.add(f);
+						}
+				}
 
-  public void waitToabort() {
-    this.abort = true;
-    myLogger.info("Waiting for Directorylistener to quit.");
-    try {
-      this.abortWait.acquire();
-    } catch (InterruptedException e) {
-      myLogger.error("Error while waiting for listener thread to finish.", e);
-    }
-  }
 
-  Vector<File> getNewFilesSinceChange() {
+			}
+			newFileQueue.removeAll(removeList);
 
-    Vector<File> newFiles = new Vector<File>();
+			try {
+				Thread.sleep(600);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-    File[] fArray = myDirectory.listFiles(ODIFitsFileEntry.thefileFilter);
+		}
+		myLogger.info("Exiting Listener Thread for Directory "
+				+ myDirectory.getAbsolutePath());
+		newFileQueue.clear();
+		abortWait.release();
+	}
 
-    for (File f : fArray) {
-      if (f.isDirectory() && f.lastModified() > this.timeOfLastDirectoryRead) {
+	public void waitToabort() {
+		this.abort = true;
+		myLogger.info("Waiting for Directorylistener to quit.");
+		try {
+			this.abortWait.acquire();
+		} catch (InterruptedException e) {
+			myLogger.error("Error while waiting for listener thread to finish.", e);
+		}
+	}
 
-        boolean alreadyInQueue = false;
-        boolean alreadyInList = false;
-        for (File watchedFiles : newFileQueue) {
-          if (watchedFiles.equals(f))
-            alreadyInQueue = true;
-        }
+	Vector<File> getNewFilesSinceChange() {
 
-        for (File listedFiles : this.rec.getListedFiles()) {
-          if (listedFiles.equals(f))
-            alreadyInList = true;
-        }
+		Vector<File> newFiles = new Vector<File>();
 
-        if (!alreadyInQueue && !alreadyInList)
-          newFiles.add(f);
-        else
-          myLogger.debug("Rejecting file from new candidate list: Queue: "
-              + alreadyInQueue + " List:" + alreadyInList + " File: "
-              + f.getAbsolutePath());
-      }
+		File[] fArray = myDirectory.listFiles(ODIFitsFileEntry.thefileFilter);
 
-    }
+		for (File f : fArray) {
+			if ((f.isDirectory() || !ODIFitsFileEntry.ODIMode) && f.lastModified() > this.timeOfLastDirectoryRead) {
 
-    return newFiles;
+				boolean alreadyInQueue = false;
+				boolean alreadyInList = false;
+				for (File watchedFiles : newFileQueue) {
+					if (watchedFiles.equals(f)) {
+						alreadyInQueue = true;
+						myLogger.debug("File " + f.getAbsolutePath() + " is already under observation");
+					}
+				}
 
-  }
+				for (File listedFiles : this.rec.getListedFiles()) {
+					if (listedFiles.equals(f)) {
+						alreadyInList = true;
+						myLogger.debug("File " + f.getAbsolutePath() + " is already in browser");
+					}
+				}
+
+				if (!alreadyInQueue && !alreadyInList)
+					newFiles.add(f);
+				else
+					myLogger.debug("Rejecting file from new candidate list: Queue: "
+							+ alreadyInQueue + " List:" + alreadyInList + " File: "
+							+ f.getAbsolutePath());
+			}
+		}
+
+		return newFiles;
+
+	}
 }
 
 class FileQueueEntry {
 
-  protected FileQueueEntry(File f, Date lastModified) {
-    super();
-    this.f = f;
-    this.lastModified = lastModified;
-  }
+	protected FileQueueEntry(File f, Date lastModified) {
+		super();
+		this.f = f;
+		this.lastModified = lastModified;
+	}
 
-  public File f;
-  public Date lastModified;
+	public File f;
+	public Date lastModified;
 
 }

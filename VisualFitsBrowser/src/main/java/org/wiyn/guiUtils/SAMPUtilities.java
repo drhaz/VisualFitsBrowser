@@ -249,7 +249,7 @@ public class SAMPUtilities {
 
 	}
 
-	public static void loadMosaicDS9(String fname) {
+	public static void loadMosaicDS9(String fname, int fno) {
 		myLogger.debug("SAMP: Loading Mosiac image to ds9: " + fname);
 
 		if (!isClientAvailable("DS9")) {
@@ -259,6 +259,7 @@ public class SAMPUtilities {
 			return;
 		}
 
+		SAMPUtilities.selectFrameDS9(fno);
 		try {
 
 			Message m = new Message("ds9.set");

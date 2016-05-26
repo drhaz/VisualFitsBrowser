@@ -56,18 +56,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
 
-	protected String mRootDirectoryString = "/";
+	String mRootDirectoryString = "/";
 
-	public File mRootDirectory = null;
+	File mRootDirectory = null;
 	// private Date lastUpdate = null;
 
-	public DirectoryListener myDirectoryListener = null;
+	private DirectoryListener myDirectoryListener = null;
 	private Vector<ODIFitsFileEntry> mImageList;
 
 	private JTable mTable;
 	private FitsViewerTableModel mTableDataModel = null;
 
-	JLabel rootDirLabel;
+	private JLabel rootDirLabel;
 	// private JButton mFileOpenButton = null;
 	// private JButton mReloadButton = null;
 
@@ -76,13 +76,25 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	private final String PROP_LASTDIRECTORY = FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY";
 
-	OTAFileListListener mFileListListener = null;
+	private OTAFileListListener mFileListListener = null;
 
-	JButton reloadButton = null;
+	private JButton reloadButton = null;
 
-	protected boolean autoLoadImageToListener = false;
+	boolean autoLoadImageToListener = false;
 
-	public FileBrowserPanel(OTAFileListListener mFileListListener) {
+	private static String DisplayedImage = null;
+
+
+	public FileBrowserPanel() {
+		this(null);
+	}
+
+	/**
+	 * Initialize file browser panel.
+	 *
+	 * @param mFileListListener a listener to file select events. can be null.
+	 */
+	FileBrowserPanel(OTAFileListListener mFileListListener) {
 
 		super();
 		this.mFileListListener = mFileListListener;
@@ -122,7 +134,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 			});
 			Box topBox = Box.createHorizontalBox();
-			// topBox.setLayout (new FlowLayout());
 			topBox.setOpaque(true);
 			topBox.setBackground(GUIConsts.InformationBackgroundColor);
 			topBox.add(reloadButton);
@@ -141,10 +152,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 					int colIndex = columnAtPoint(p);
 					int realColumnIndex = convertColumnIndexToModel(colIndex);
 
-					if (rowIndex >= 0 && colIndex >= 0
-							&& (realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL
-									|| realColumnIndex == FitsViewerTableModel.OBJECT_COL
-									|| realColumnIndex == FitsViewerTableModel.FNAME_COL)) {
+					if ((rowIndex >= 0) && (colIndex >= 0)
+							&& ((realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL)
+							|| (realColumnIndex == FitsViewerTableModel.OBJECT_COL)
+							|| (realColumnIndex == FitsViewerTableModel.FNAME_COL))) {
 						Object o = getValueAt(rowIndex, colIndex);
 						tip = o != null ? (String) o : "";
 
@@ -154,6 +165,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 					return tip;
 				}
 			};
+
 			mTableDataModel = new FitsViewerTableModel();
 			mTable.setModel(mTableDataModel);
 			mTable.setFillsViewportHeight(true);
@@ -230,16 +242,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 							ODIFitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
-								if (!VisualFitsBrowserApp.noODI) {
-									// In ODI mode, we sent image to OTA
-									// Listener
-									SAMPUtilities.sendImageToListener(fname);
-								} else {
-									SAMPUtilities.loadMosaicDS9(fname);
-								}
+
+								SAMPUtilities.loadMosaicDS9(fname, 1);
+
 							}
 						}
-						return;
+
 					}
 
 				}
@@ -256,7 +264,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		table.getColumnModel().getColumn(c).setWidth(0);
 	}
 
-	public synchronized void setDisplayedImage(final String fname) {
+	synchronized void setDisplayedImage(final String fname) {
 
 		if (!fname.equals("preimage")) {
 			final int lastIndex;
@@ -286,12 +294,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		}
 	}
 
-	public static String DisplayedImage = null;
 
-	class ImageIDRenderer extends DefaultTableCellRenderer {
+	private class ImageIDRenderer extends DefaultTableCellRenderer {
 
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
+													   int row, int column) {
 			JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
 					column);
 
@@ -311,12 +318,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	}
 
-	// public void print() {
-	// if (this.mImageList != null) {
-	// Filelist2Latex.writeFileList2Latex(this.mRootDirectoryString,
-	// mImageList);
-	// }
-	// }
 
 	public void packColumns(JTable table, int margin) {
 		for (int c = 0; c < table.getColumnCount(); c++) {
@@ -331,7 +332,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 	// margin pixels are added to the left and right
 	// (resulting in an additional width of 2*margin pixels).
 
-	public void packColumn(JTable table, int vColIndex, int margin) {
+	private void packColumn(JTable table, int vColIndex, int margin) {
 		// TableModel model = table.getModel ();
 		DefaultTableColumnModel colModel = (DefaultTableColumnModel) table.getColumnModel();
 		TableColumn col = colModel.getColumn(vColIndex);
@@ -370,7 +371,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				int rows[] = mTable.getSelectedRows();
 				for (int row : rows) {
 
-					selected.add(this.mImageList.elementAt(mTable.convertRowIndexToModel(row)));
+					selected.add(mImageList.elementAt(mTable.convertRowIndexToModel(row)));
 
 				}
 			}
@@ -380,10 +381,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	/**
 	 * Open a new directory for browsing
-	 * 
 	 */
 
-	public void selectNewDirectory() {
+	void selectNewDirectory() {
 
 		// FsURL retVal = null;
 		JFileChooser chooser = new JFileChooser();
@@ -412,7 +412,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		}
 	}
 
-	public void reload() {
+	void reload() {
 		if (mRootDirectory != null && mRootDirectory.exists())
 			readDirectory(mRootDirectory);
 
@@ -428,14 +428,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	}
 
-	public int getNumberOfEntries() {
+	int getNumberOfEntries() {
 		int retVal = -1;
 		if (this.mImageList != null)
 			retVal = mImageList.size();
 		return retVal;
 	}
 
-	public Vector<ODIFitsFileEntry> getImageList() {
+	Vector<ODIFitsFileEntry> getImageList() {
 		return (Vector<ODIFitsFileEntry>) mImageList.clone();
 	}
 
@@ -483,11 +483,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 	/**
 	 * Finds an image entry by name and returns the row of the underlying table
 	 * model
-	 * 
+	 *
 	 * @param Name
 	 * @return
 	 */
-	public int getRowbyName(String Name) {
+	private int getRowbyName(String Name) {
 		int retVal = -1;
 
 		synchronized (mImageList) {
@@ -542,7 +542,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				myLogger.debug("Autoloading image: " + autoLoadImageToListener);
 				if (autoLoadImageToListener) {
 					String fname = newItem.getAbsolutePath();
-					SAMPUtilities.sendImageToListener(fname);
+					SAMPUtilities.loadMosaicDS9(fname, 1);
 
 				}
 			}
@@ -552,10 +552,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	/**
 	 * Read an entire directory in from scratch
-	 * 
+	 *
 	 * @param RootDirectory
 	 */
-	public void readDirectory(final File RootDirectory) {
+	void readDirectory(final File RootDirectory) {
 
 		// stop the directory listener.
 		if (myDirectoryListener != null) {
@@ -630,9 +630,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		}.execute();
 	}
 
-	class SelectionListener implements ListSelectionListener {
+	private class SelectionListener implements ListSelectionListener {
 
-		public SelectionListener() {
+		SelectionListener() {
 
 		}
 
@@ -658,25 +658,25 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		}
 	}
 
-	class FitsViewerTableModel extends AbstractTableModel {
+	private class FitsViewerTableModel extends AbstractTableModel {
 
-		protected final static int ARCHIVESTAT_COL = 0;
-		protected final static int PONTIME_COL = 1;
-		protected final static int FNAME_COL = 2;
-		protected final static int OBJECT_COL = 3;
-		protected final static int TEXP_COL = 4;
-		protected final static int FILTER_COL = 5;
-		protected final static int AIRMASS_COL = 6;
-		protected final static int DATEOBS_COL = 7;
-		protected final static int USERCOMMENT_COL = 8;
-		protected final static int HASVIDEO_COL = 9;
+		final static int ARCHIVESTAT_COL = 0;
+		final static int PONTIME_COL = 1;
+		final static int FNAME_COL = 2;
+		final static int OBJECT_COL = 3;
+		final static int TEXP_COL = 4;
+		final static int FILTER_COL = 5;
+		final static int AIRMASS_COL = 6;
+		final static int DATEOBS_COL = 7;
+		final static int USERCOMMENT_COL = 8;
+		final static int HASVIDEO_COL = 9;
 
-		protected final static int EXTRA_COL = 10;
-		protected final static int SELECT_COL = 11;
+		final static int EXTRA_COL = 10;
+		final static int SELECT_COL = 11;
 
-		protected boolean displayExtra = false;
+		boolean displayExtra = false;
 
-		public FitsViewerTableModel() {
+		FitsViewerTableModel() {
 			super();
 		}
 
@@ -702,7 +702,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 					return entry.TransferStatus;
 
 				if (col == FNAME_COL) {
-					String prefix = " ";
+					String prefix;
+					prefix = " ";
 					if (entry.isBinned)
 						prefix = "\u00B7";
 					return prefix + entry.FName;
@@ -749,25 +750,25 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				ODIFitsFileEntry entry = null;
 				switch (col) {
 
-				case SELECT_COL:
-					entry = mImageList.elementAt(row);
-					entry.Selected = (Boolean) Value;
-					break;
+					case SELECT_COL:
+						entry = mImageList.elementAt(row);
+						entry.Selected = (Boolean) Value;
+						break;
 
-				case USERCOMMENT_COL:
+					case USERCOMMENT_COL:
 
-					entry = mImageList.elementAt(row);
-					entry.UserComment = (String) Value;
-					entry.writeBackMetaInformation();
-					break;
+						entry = mImageList.elementAt(row);
+						entry.UserComment = (String) Value;
+						entry.writeBackMetaInformation();
+						break;
 
-				case ARCHIVESTAT_COL:
-					entry = mImageList.elementAt(row);
-					entry.TransferStatus = (TRANSFERSTATUS) Value;
-					break;
+					case ARCHIVESTAT_COL:
+						entry = mImageList.elementAt(row);
+						entry.TransferStatus = (TRANSFERSTATUS) Value;
+						break;
 
-				default:
-					myLogger.warn("SetValueAt request for non-editable field");
+					default:
+						myLogger.warn("SetValueAt request for non-editable field");
 
 				}
 				fireTableCellUpdated(row, col);
@@ -891,7 +892,7 @@ class TRANSFERCellRenderer extends JLabel implements TableCellRenderer {
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-			int rowIndex, int vColIndex) {
+												   int rowIndex, int vColIndex) {
 		this.setIcon(getImageIcon((ODIFitsFileEntry.TRANSFERSTATUS) value));
 
 		return this;

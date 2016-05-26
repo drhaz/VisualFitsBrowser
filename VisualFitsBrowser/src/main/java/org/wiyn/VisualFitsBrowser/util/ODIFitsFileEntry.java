@@ -21,17 +21,18 @@ import org.wiyn.odi.ODIFitsReader.QuickHeaderInfo;
 
 /**
  * Data holding class for an ODI Image.
- * 
- * @author harbeck
  *
+ * @author harbeck
  */
 
 public class ODIFitsFileEntry {
 
-	// enum OBSTYPE {
-	// INDEF, BIAS, DARK, DOMEFLAT, OBJECT, FOCUS
-	// };
 
+	private final static Logger myLogger = Logger.getLogger(ODIFitsFileEntry.class);
+
+
+
+	public static boolean ODIMode = false;
 	public static boolean ArchiveMode = false;
 
 	public enum TRANSFERSTATUS {
@@ -39,21 +40,20 @@ public class ODIFitsFileEntry {
 
 	}
 
-	static FitsCommentInterface theCommentInterface = new FITSTextCommentImpl();
+	private static FitsCommentInterface theCommentInterface = new FITSTextCommentImpl();
 
 	/**
 	 * A predefined filer for ODI fits directories
-	 * 
 	 */
 
-	public static FileFilter theODIFileFilter = new FileFilter() {
+	public static FileFilter theODIFileFilter1 = new FileFilter() {
 		public boolean accept(File file) {
 
 			boolean good_file = false;
 			good_file = file.isDirectory() && //
-												// || //
-			(file.getName().matches("[dftbo]20.*[T-].*") || //
-					file.getName().matches("focus20.*T.*"));
+					// || //
+					(file.getName().matches("[dftbo]20.*[T-].*") || //
+							file.getName().matches("focus20.*T.*"));
 			if (!good_file) {
 				myLogger.debug("Reject file " + file.getAbsolutePath());
 			}
@@ -63,7 +63,6 @@ public class ODIFitsFileEntry {
 
 	/**
 	 * A filter generic fits filter
-	 * 
 	 */
 
 	public static FileFilter theFITSFileFilter = new FileFilter() {
@@ -71,8 +70,8 @@ public class ODIFitsFileEntry {
 
 			boolean good_file = false;
 			good_file = file.exists() && //
-											// || //
-			(file.getName().matches(".*\\.fits*") || file.getName().matches(".*\\.fits\\.fz"));
+					// || //
+					(file.getName().matches(".*\\.fits*") || file.getName().matches(".*\\.fits\\.fz"));
 
 			if (!good_file) {
 				myLogger.debug("Reject file " + file.getAbsolutePath());
@@ -83,16 +82,15 @@ public class ODIFitsFileEntry {
 
 	/**
 	 * A filter specialized for the NOAO Mosaic camera
-	 * 
 	 */
 
-	public static FileFilter theMosaicFITSFileFilter = new FileFilter() {
+	public static FileFilter theMosaicFITSFileFilter1 = new FileFilter() {
 		public boolean accept(File file) {
 
 			boolean good_file = false;
 			good_file = file.exists() && //
-											// || //
-			(file.getName().matches("[dftbo].*\\.fits*"));
+					// || //
+					(file.getName().matches("[dftbo].*\\.fits*"));
 
 			if (!good_file) {
 				myLogger.debug("Reject file " + file.getAbsolutePath());
@@ -105,18 +103,9 @@ public class ODIFitsFileEntry {
 	 * The default file filter which identifies astronomical image candidates in
 	 * a given directory. There is no assumtopn made if those should be an
 	 * directory or flat files.
-	 * 
 	 */
-	public static FileFilter thefileFilter = theODIFileFilter;
+	 static FileFilter thefileFilter = theFITSFileFilter;
 
-	static {
-		if (VisualFitsBrowserApp.noODI) {
-			thefileFilter = theFITSFileFilter;
-			theCommentInterface = new FITSTextCommentImpl();
-		}
-	}
-
-	private final static Logger myLogger = Logger.getLogger(ODIFitsFileEntry.class);
 
 	public File DirectoryFile;
 	public String RootPath;
@@ -157,7 +146,7 @@ public class ODIFitsFileEntry {
 		String Filter = "n/a";
 		int ponTime = 0;
 
-		if (!(ArchiveMode || VisualFitsBrowserApp.noODI)) {
+		if (!(ArchiveMode || !ODIMode)) {
 			if (!f.exists() || !new File(f.getAbsoluteFile() + "/temp/.finished").exists()) {
 				myLogger.debug("rejecting pending file " + f.getAbsolutePath());
 				return null;
@@ -229,7 +218,6 @@ public class ODIFitsFileEntry {
 			// fetch user comment
 			ODIFitsFileEntry.theCommentInterface.readComment(entry);
 
-			
 
 		}
 
@@ -239,44 +227,17 @@ public class ODIFitsFileEntry {
 
 	/**
 	 * Write back the meta information for an image.
-	 * 
+	 * <p>
 	 * For this ODI implementation, the comment is added to the ./metainf.xml
 	 * file.
-	 * 
+	 * <p>
 	 * To provide another feedback mechanism, override this procedure.
-	 * 
 	 */
 
 	public void writeBackMetaInformation() {
 
 		ODIFitsFileEntry.theCommentInterface.writeComment(this);
-		/*
-		 * Document d = null; SAXBuilder sb = new SAXBuilder();
-		 * 
-		 * File meta = new File(this.RootPath + "/" + this.FName +
-		 * "/metainf.xml"); if (meta.exists()) {
-		 * 
-		 * try { d = sb.build(meta); MetainfUtil.setUserComment(d, UserComment);
-		 * XMLOutputter xmlo = new XMLOutputter();
-		 * 
-		 * OutputStream myOut = new FileOutputStream(this.RootPath + "/" +
-		 * this.FName + "/metainf.xml"); xmlo.output(d, myOut); myOut.flush();
-		 * myOut.close(); } catch (JDOMException e) {
-		 * 
-		 * myLogger.error("Failure while parsing xml: ", e);
-		 * 
-		 * } catch (IOException e) { myLogger.error(
-		 * "Could not write metainf file: ", e);
-		 * JOptionPane.showMessageDialog(null,
-		 * "Could not write comment to ODI image:\n\n " +
-		 * e.getLocalizedMessage(), "File Access Error",
-		 * JOptionPane.ERROR_MESSAGE); } catch (MetaInfException e) {
-		 * 
-		 * myLogger.error(e); }
-		 * 
-		 * } else { myLogger.error("metainf file " + meta.getAbsoluteFile() +
-		 * " does not exist"); }
-		 */
+
 	}
 
 	public boolean isCalibration() {
@@ -284,7 +245,7 @@ public class ODIFitsFileEntry {
 	}
 
 	public ODIFitsFileEntry(String rootPath, String fname, String ObjName, OBSTYPE obsType, Float expTime,
-			String Filter, Date dateObs, boolean selected) {
+							String Filter, Date dateObs, boolean selected) {
 		super();
 		this.RootPath = rootPath;
 		this.FName = fname;
