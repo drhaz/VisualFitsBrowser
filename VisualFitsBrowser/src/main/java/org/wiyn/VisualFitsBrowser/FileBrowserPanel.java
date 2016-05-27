@@ -56,13 +56,13 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
 
-	String mRootDirectoryString = "/";
+	public String mRootDirectoryString = "/";
 
-	File mRootDirectory = null;
+	public File mRootDirectory = null;
 	// private Date lastUpdate = null;
 
 	private DirectoryListener myDirectoryListener = null;
-	private Vector<ODIFitsFileEntry> mImageList;
+	public Vector<ODIFitsFileEntry> mImageList;
 
 	private JTable mTable;
 	private FitsViewerTableModel mTableDataModel = null;

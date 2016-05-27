@@ -12,16 +12,15 @@ import org.apache.log4j.Logger;
 
 /**
  * A wrapper class around the java Properties class for use in OTAListener
- * 
+ * <p>
  * This class internally keeps a Property list to store properties. If the class
  * is initialized without a filename the properties are loaded from
  * ~/.OTALIsterner.rc. Upon termination of this class (e.g., when the program is
  * finished), the properties will be written back to the file they were read
  * from.
- * 
+ * <p>
  * A possible extension of this class is to provide a user interface to
  * interactively change properties, or to reload them at run time.
- * 
  */
 
 public class Preferences {
@@ -83,11 +82,12 @@ public class Preferences {
 		if (thePreferences != null) {
 
 			String retVal = thePreferences.priv_getProperty(key, defaultValue);
-
+			if (retVal.equals(defaultValue))
+				thePreferences.setProperty(key, defaultValue);
 			return retVal;
 		} else {
 
-			myLogger.warn("getPropoerty: Preferences not  initialized.");
+			myLogger.error("getPropoerty: Preferences not  initialized.");
 		}
 		return (defaultValue);
 	}

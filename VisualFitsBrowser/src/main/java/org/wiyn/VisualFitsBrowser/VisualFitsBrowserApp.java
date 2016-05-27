@@ -30,7 +30,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -73,7 +72,7 @@ public class VisualFitsBrowserApp extends JFrame {
 	/**
 	 * Class to Manage & Display image directory
 	 */
-	private static FileBrowserPanel mBrowserPanel = null;
+	private  static FileBrowserPanel mBrowserPanel;
 	private ImageToolBoxPanel mToolBoxPanel = null;
 	private JFrame ToolBoxFrame = null;
 
@@ -244,6 +243,12 @@ public class VisualFitsBrowserApp extends JFrame {
 			});
 		}
 
+		{
+			menuItem = Filelist2Latex.getPDFLogFileMenuItem(this.mBrowserPanel);
+			menu.add (menuItem);
+		}
+
+
 
 		{
 			menuItem = new JCheckBoxMenuItem("Auto display new image in ds9");
@@ -304,7 +309,7 @@ public class VisualFitsBrowserApp extends JFrame {
 								getmBrowserPanel().getImageList(), "/tmp/" + fName);
 						Filelist2Latex.processLatex("/tmp/", fName);
 						Filelist2Latex.processLatex("/tmp/", fName);
-						Filelist2Latex.openLatex("/tmp/" + fName.replace("tex", "pdf"));
+						Filelist2Latex.openLatexPDF("/tmp/" + fName.replace("tex", "pdf"));
 					} else {
 						myLogger.info("Cannot genreate Latex logsheet since threre is no viable filelist");
 					}

@@ -1,10 +1,13 @@
 package org.wiyn.VisualFitsBrowser.util;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,285 +20,356 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.wiyn.VisualFitsBrowser.FileBrowserPanel;
 import org.wiyn.guiUtils.Preferences;
+
+import javax.swing.*;
 
 public class Filelist2Latex {
 
-  private final static Logger myLogger = Logger.getLogger(Filelist2Latex.class);
-  private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
-      "HH:mm:ss");
+	private final static Logger myLogger = Logger.getLogger(Filelist2Latex.class);
+	private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
+			"HH:mm:ss");
+	private static FileBrowserPanel myFileBrowserPanel;
 
-  public static String writeFileList2Latex(String Title,
-      Vector<ODIFitsFileEntry> fileLis, String fname) {
+	public static String writeFileList2Latex(String Title,
+											 Vector<ODIFitsFileEntry> fileLis, String fname) {
 
-    StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-    sb.append(generateLatexHeader(Title));
-    sb.append(generateFileTable(fileLis));
-    sb.append(generatelatexFooter());
+		sb.append(generateLatexHeader(Title));
+		sb.append(generateFileTable(fileLis));
+		sb.append(generatelatexFooter());
 
-    if (myLogger.isDebugEnabled()) {
-      myLogger.debug(sb.toString());
-    }
+		if (myLogger.isDebugEnabled()) {
+			myLogger.debug(sb.toString());
+		}
 
-    try {
-      FileUtils.writeStringToFile(new File( fname), sb.toString());
-    } catch (IOException e) {
-      myLogger.error("Error while writing latex source to File ", e);
-    }
+		try {
+			myLogger.info("Writing latex file to: " + fname);
+			FileUtils.writeStringToFile(new File(fname), sb.toString(), (Charset) null);
+		} catch (IOException e) {
+			myLogger.error("Error while writing latex source to File ", e);
+		}
 
-    return sb.toString();
+		return sb.toString();
 
-  }
+	}
 
-  private static String generateFileTable(Vector<ODIFitsFileEntry> fileList) {
+	private static String generateFileTable(Vector<ODIFitsFileEntry> fileList) {
 
-    StringBuilder sb = new StringBuilder();
-    StringBuilder CSV = new StringBuilder();
-    if (fileList != null) {
+		StringBuilder sb = new StringBuilder();
+		StringBuilder CSV = new StringBuilder();
+		if (fileList != null) {
 
-      List<ODIFitsFileEntry> sortList = new Vector<ODIFitsFileEntry>(fileList);
-      Collections.sort(sortList, new myComp());
-      for (ODIFitsFileEntry fe : sortList) {
+			List<ODIFitsFileEntry> sortList = new Vector<ODIFitsFileEntry>(fileList);
+			Collections.sort(sortList, new myComp());
+			for (ODIFitsFileEntry fe : sortList) {
 
-        sb.append(generateFileItem(fe));
-        CSV.append(generateFileItemforCVS(fe) + "\n");
-      }
-    }
+				sb.append(generateFileItem(fe));
+				CSV.append(generateFileItemforCVS(fe) + "\n");
+			}
+		}
 
-    try {
-      FileUtils.writeStringToFile(new File("/tmp/pODILogfile.txt"),
-          CSV.toString());
-    } catch (IOException e) {
-      myLogger.error("Error while writing csv table to File ", e);
-    }
-    return sb.toString();
-  }
+		try {
 
-  private static String generateFileItem(ODIFitsFileEntry fe) {
-    StringBuilder sb = new StringBuilder();
+			FileUtils.writeStringToFile(new File("/tmp/VisualFitsBrowser_Logfile.txt"),
+					CSV.toString(), (Charset) null);
 
-    if (fe != null) {
-      String s = "\\multirow{2}{*}{\\large "
-          + EscapeForLatex(fe.FName)
-          + " }& " //
-          + EscapeForLatex(fe.ObjName)
-          + " & "//
-          + "\\multirow{2}{*}{\\large "
-          + EscapeForLatex(fe.ExpTime + "")
-          + "} & " //
-          + "\\multirow{2}{*}{"
-          + EscapeForLatex(fe.Filter)
-          + "} & "//
-          + "\\multirow{2}{*}{"
-          + EscapeForLatex(mDateFormat.format(fe.DateObs))
-          + "} & " //
-          + String.format("% 6.1f", fe.Focus)
-          + " & " //
-          + "\\multirow{2}{*}{ \\vbox{" + EscapeForLatex(fe.UserComment)
-          + "}} \\\\*";
+		} catch (IOException e) {
+			myLogger.error("Error while writing csv table to File ", e);
+		}
+		return sb.toString();
+	}
 
-      sb.append(s);
-      s = " & " //
-          + "{ \\small "
-          + EscapeForLatex(fe.RA_String + " " + fe.Dec_String)
-          + "} & " //
-          + "  & & & "
-          + String.format("% 5.2f", fe.Airmass)
-          + " &\\\\ \\hline \n";
-      sb.append(s);
-    }
+	private static String generateFileItem(ODIFitsFileEntry fe) {
+		StringBuilder sb = new StringBuilder();
 
-    return sb.toString();
+		if (fe != null) {
+			String s = "\\multirow{2}{*}{\\large "
+					+ EscapeForLatex(fe.FName)
+					+ " }& " //
+					+ EscapeForLatex(fe.ObjName)
+					+ " & "//
+					+ "\\multirow{2}{*}{\\large "
+					+ EscapeForLatex(fe.ExpTime + "")
+					+ "} & " //
+					+ "\\multirow{2}{*}{"
+					+ EscapeForLatex(fe.Filter)
+					+ "} & "//
+					+ "\\multirow{2}{*}{"
+					+ EscapeForLatex(mDateFormat.format(fe.DateObs))
+					+ "} & " //
+					+ String.format("% 6.1f", fe.Focus)
+					+ " & " //
+					+ "\\multirow{2}{*}{ \\vbox{" + EscapeForLatex(fe.UserComment)
+					+ "}} \\\\*";
 
-  }
+			sb.append(s);
+			s = " & " //
+					+ "{ \\small "
+					+ EscapeForLatex(fe.RA_String + " " + fe.Dec_String)
+					+ "} & " //
+					+ "  & & & "
+					+ String.format("% 5.2f", fe.Airmass)
+					+ " &\\\\ \\hline \n\n";
+			sb.append(s);
+		}
 
-  private static String generateFileItemforCVS(ODIFitsFileEntry fe) {
-    StringBuilder sb = new StringBuilder();
+		return sb.toString();
 
-    if (fe != null) {
-      String s = "" + EscapeForLatex(fe.FName)
-          + " & " //
-          + EscapeForLatex(fe.ObjName) + " & " + EscapeForLatex(fe.RA_String)
-          + " & " + EscapeForLatex(fe.Dec_String) + " & "//
-          + EscapeForLatex(fe.ExpTime + "") + " & " //
-          + EscapeForLatex(fe.Filter) + " & "//
-          + EscapeForLatex(mDateFormat.format(fe.DateObs)) + " & " //
-          + EscapeForLatex(fe.UserComment);
+	}
 
-      sb.append(s);
+	private static String generateFileItemforCVS(ODIFitsFileEntry fe) {
+		StringBuilder sb = new StringBuilder();
 
-    }
+		if (fe != null) {
+			String s = "" + EscapeForLatex(fe.FName)
+					+ " & " //
+					+ EscapeForLatex(fe.ObjName) + " & " + EscapeForLatex(fe.RA_String)
+					+ " & " + EscapeForLatex(fe.Dec_String) + " & "//
+					+ EscapeForLatex(fe.ExpTime + "") + " & " //
+					+ EscapeForLatex(fe.Filter) + " & "//
+					+ EscapeForLatex(mDateFormat.format(fe.DateObs)) + " & " //
+					+ EscapeForLatex(fe.UserComment);
 
-    return sb.toString();
+			sb.append(s);
 
-  }
+		}
 
-  private static String generateLatexHeader(String title) {
-    String retVal = null;
+		return sb.toString();
 
-    try {
-      InputStream in = Filelist2Latex.class.getClassLoader()
-          .getResourceAsStream("resources/pODILatexLog_header.tex");
+	}
 
-      retVal = IOUtils.toString(in);
-    } catch (Exception e) {
-      myLogger.error("Error while reading latex header: ", e);
-    }
-    retVal = retVal.replace("$TITLE$", title);
-    return retVal;
+	private static String generateLatexHeader(String title) {
+		String retVal = null;
 
-  }
+		try {
+			InputStream in = Filelist2Latex.class.getClassLoader()
+					.getResourceAsStream("latexlog/LatexLog_header.tex");
 
-  private static String generatelatexFooter() {
-    String retVal = null;
+			retVal = IOUtils.toString(in, (Charset) null);
+		} catch (Exception e) {
+			myLogger.error("Error while reading latex header: ", e);
+		}
 
-    try {
-      InputStream in = Filelist2Latex.class.getClassLoader()
-          .getResourceAsStream("resources/pODILatexLog_footer.tex");
+		title = EscapeForLatex(title);
+		retVal = retVal.replace("$TITLE$", title);
 
-      retVal = IOUtils.toString(in);
-    } catch (Exception e) {
-      myLogger.error("Error while reading latex footer: ", e);
-    }
-    return retVal;
-  }
+		return retVal;
 
-  public static String EscapeForLatex(String s) {
-    String ret = "";
-    if (s == null)
-      return ret;
-    System.err.println("Escape input:" + s);
-    String a = s.replaceAll("#", "\\\\#");
-    ret = a.replaceAll("&", "\\\\&");
-    ret = ret.replaceAll("\\$", "\\\\\\$");
-    ret = ret.replaceAll("_", "\\\\_");
-    ret = ret.replaceAll("%", "\\\\%");
-    System.err.println("Escape return:" + ret);
-    return ret;
+	}
 
-  }
+	private static String generatelatexFooter() {
+		String retVal = null;
 
-  public static void main(String args[]) {
-    BasicConfigurator.configure();
-    Logger.getRootLogger().setLevel(Level.DEBUG);
-    Vector<ODIFitsFileEntry> fileList = new Vector<ODIFitsFileEntry>();
+		try {
+			InputStream in = Filelist2Latex.class.getClassLoader()
+					.getResourceAsStream("latexlog/LatexLog_footer.tex");
 
-    fileList.add(new ODIFitsFileEntry("", "filename", "Obj $ % & _ # ", null,
-        3.2f, "G\'", new Date(), false));
-    Logger.getRootLogger().setLevel(Level.DEBUG);
-    writeFileList2Latex("This is a title ", fileList, "test");
-    processLatex("/tmp/", "pODILogfile.tex");
-    int ret = processLatex("/tmp/", "pODILogfile.tex");
-    openLatex("/tmp/pODILogfile.pdf");
+			retVal = IOUtils.toString(in, (Charset) null);
+		} catch (Exception e) {
+			myLogger.error("Error while reading latex footer: ", e);
+		}
+		return retVal;
+	}
 
-  }
+	public static String EscapeForLatex(String s) {
+		String ret = "";
+		if (s == null)
+			return ret;
 
-  public static int processLatex(String Path, String fname) {
+		String a = s.replaceAll("#", "\\\\#");
+		ret = a.replaceAll("&", "\\\\&");
+		ret = ret.replaceAll("\\$", "\\\\\\$");
+		ret = ret.replaceAll("_", "\\\\_");
+		ret = ret.replaceAll("%", "\\\\%");
 
-    Runtime rt = Runtime.getRuntime();
-    Process proc = null;
-    StringBuffer output = new StringBuffer();
+		return ret;
 
-    String pdfLatex = Preferences.thePreferences.getProperty(
-        "org.wiyn.odi.FileBrowser.latex.pdflatex",
-        "/usr/local/texlive/2012/bin/x86_64-darwin/pdflatex");
+	}
 
-    StringBuffer Command = new StringBuffer(pdfLatex);
-    Command.append(" " + fname);
+	public static void main(String args[]) {
+		BasicConfigurator.configure();
+		Preferences.initPreferences("VisualFitsBrowserApp");
+		Logger.getRootLogger().setLevel(Level.INFO);
+		Vector<ODIFitsFileEntry> fileList = new Vector<ODIFitsFileEntry>();
 
-    try {
-      myLogger.debug("Executing pdflatex: " + Command.toString());
-      proc = rt.exec(Command.toString(), null, new File(Path));
-      if (proc == null) {
-        myLogger.error("Proceess for pdflatex returned null. Aborting");
-        return -1;
-      }
+		fileList.add(new ODIFitsFileEntry("", "filename", "Obj $ % & _ # ", null,
+				3.2f, "G\'", new Date(), false));
 
-      BufferedReader err = new BufferedReader(new InputStreamReader(
-          proc.getErrorStream()));
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          proc.getInputStream()));
+		writeFileList2Latex("This is a title ", fileList, "/tmp/pODILogfile.tex");
 
-      String sline = null;
-      String eline = null;
+		int ret = processLatex("/tmp/", "pODILogfile.tex");
+		openLatexPDF("/tmp/pODILogfile.pdf");
 
-      while ((sline = br.readLine()) != null
-          || (eline = err.readLine()) != null) {
-        if (output != null && sline != null)
-          output.append(sline);
-        if (eline != null)
-          if (myLogger.isDebugEnabled())
-            myLogger.debug(eline);
-      }
+	}
 
-      proc.waitFor();
+	public static int processLatex(String Path, String fname) {
 
-    } catch (Exception e) {
+		Runtime rt = Runtime.getRuntime();
+		Process proc = null;
+		StringBuffer output = new StringBuffer();
 
-      e.printStackTrace();
-    }
-    myLogger.debug("PDFLatex output\n " + output.toString());
-    int exitVal = proc.exitValue();
-    return exitVal;
+		String pdfLatex = Preferences.thePreferences.getProperty(
+				"org.wiyn.VisualFitsBrowser.latex.pdflatex",
+				"/usr/bin/pdflatex");
 
-  }
+		StringBuffer Command = new StringBuffer(pdfLatex + "  -interaction=nonstopmode ");
+		Command.append(" " + fname);
 
-  public static int openLatex(String fname) {
+		try {
+			myLogger.info("Executing pdflatex: " + Command.toString() + " in Path: " + Path);
+			proc = rt.exec(Command.toString(), null, new File(Path));
+			if (proc == null) {
+				myLogger.error("Proceess for pdflatex returned null. Aborting");
+				return -1;
+			}
 
-    Runtime rt = Runtime.getRuntime();
-    Process proc = null;
-    StringBuffer output = new StringBuffer();
+			BufferedReader err = new BufferedReader(new InputStreamReader(
+					proc.getErrorStream()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					proc.getInputStream()));
 
-    String OpenPDF = Preferences.thePreferences.getProperty(
-        "org.wiyn.odi.FileBrowser.latex.openpdf", "open");
+			String sline = null;
+			String eline = null;
 
-    StringBuffer Command = new StringBuffer(OpenPDF + " " + fname);
+			while ((sline = br.readLine()) != null
+					|| (eline = err.readLine()) != null) {
+				if (output != null && sline != null)
+					output.append(sline);
+				if (eline != null)
+					if (myLogger.isDebugEnabled())
+						myLogger.debug(eline);
+			}
 
-    try {
-      myLogger.debug("Opening logfile: " + Command.toString());
-      proc = rt.exec(Command.toString());
-      if (proc == null) {
-        myLogger.error("Proceess for pdflatex returned null. Aborting");
-        return -1;
-      }
+			proc.waitFor();
 
-      BufferedReader err = new BufferedReader(new InputStreamReader(
-          proc.getErrorStream()));
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-          proc.getInputStream()));
+		} catch (Exception e) {
 
-      String sline = null;
-      String eline = null;
+			myLogger.error("Error while processing latex", e);
+		}
+		myLogger.info("PDFLatex output\n " + output.toString());
+		int exitVal = proc.exitValue();
+		return exitVal;
 
-      while ((sline = br.readLine()) != null
-          || (eline = err.readLine()) != null) {
-        if (output != null && sline != null)
-          output.append(sline);
-        if (eline != null)
-          if (myLogger.isDebugEnabled())
-            myLogger.debug(eline);
-      }
+	}
 
-      proc.waitFor();
+	public static int openLatexPDF(String fname) {
 
-    } catch (Exception e) {
+		Runtime rt = Runtime.getRuntime();
+		Process proc = null;
+		StringBuffer output = new StringBuffer();
 
-      e.printStackTrace();
-    }
-    myLogger.debug("open output\n " + output.toString());
-    int exitVal = proc.exitValue();
-    return exitVal;
+		String OpenPDF = Preferences.thePreferences.getProperty(
+				"org.wiyn.VisualFitsBrowser.latex.openpdf", "evince");
 
-  }
+		StringBuffer Command = new StringBuffer(OpenPDF + " " + fname);
 
+		try {
+			myLogger.info("Calling PDf viewer: " + Command.toString());
+			proc = rt.exec(Command.toString());
+			if (proc == null) {
+				myLogger.error("Proceess for pdflatex returned null. Aborting");
+				return -1;
+			}
+
+			BufferedReader err = new BufferedReader(new InputStreamReader(
+					proc.getErrorStream()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					proc.getInputStream()));
+
+			String sline = null;
+			String eline = null;
+
+			while ((sline = br.readLine()) != null
+					|| (eline = err.readLine()) != null) {
+				if (output != null && sline != null)
+					output.append(sline);
+				if (eline != null)
+					if (myLogger.isDebugEnabled())
+						myLogger.debug(eline);
+			}
+
+			proc.waitFor();
+
+		} catch (Exception e) {
+
+			myLogger.error("Error while opening log pdf file", e);
+		}
+		myLogger.debug("PDF viewer said: " + output.toString());
+		int exitVal = proc.exitValue();
+		return exitVal;
+
+	}
+
+	/**
+	 * Generate a menu item that can be inserted into an application's menu.
+	 *
+	 * @param p
+	 * @return
+	 */
+	public static JMenuItem getPDFLogFileMenuItem(FileBrowserPanel p) {
+		myFileBrowserPanel = p;
+
+		final JMenuItem item = new JMenuItem("Generate PDF logfile");
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				myLogger.info("Invoking Generate PDF");
+				item.setEnabled(false);
+
+				new SwingWorker() {
+
+					protected Boolean doInBackground() throws Exception {
+
+						if (myFileBrowserPanel != null && myFileBrowserPanel.mRootDirectory != null) {
+
+							// Get file list and prepare title, get name for latex file
+							Vector<ODIFitsFileEntry> fileList = myFileBrowserPanel.mImageList;
+							String title = myFileBrowserPanel.mRootDirectory.getAbsolutePath();
+							String tempDir = Preferences.thePreferences.getProperty("VisualFitsBrowser.latex.tmp", "/tmp");
+							String LatexFname = myFileBrowserPanel.mRootDirectory.getName() + ".tex";
+
+							try {
+								writeFileList2Latex(title, fileList, tempDir + "/" + LatexFname);
+								processLatex(tempDir, tempDir + "/" + LatexFname);
+								processLatex(tempDir, tempDir + "/" + LatexFname);
+								processLatex(tempDir, tempDir + "/" + LatexFname);
+								openLatexPDF(tempDir + "/" + LatexFname.replace(".tex", ".pdf"));
+
+							} catch (Exception e1) {
+								JOptionPane.showMessageDialog(myFileBrowserPanel.getParent(),
+										"Error whlile creating pdf lof sheet:\n\n" + e1.getMessage());
+							}
+
+						} else {
+							myLogger.warn("No filebrowser panel set for logfile conversion");
+						}
+						return (true);
+					}
+
+
+					protected void done() {
+						item.setEnabled(true);
+					}
+
+
+				}.execute();
+			}
+		});
+
+
+		return item;
+
+	}
 }
 
 class myComp implements Comparator<ODIFitsFileEntry> {
 
- 
-  public int compare(ODIFitsFileEntry o1, ODIFitsFileEntry o2) {
-    return (int) (o1.DateObs.getTime() - o2.DateObs.getTime());
-  }
+
+	public int compare(ODIFitsFileEntry o1, ODIFitsFileEntry o2) {
+		return (int) (o1.DateObs.getTime() - o2.DateObs.getTime());
+	}
 
 }
