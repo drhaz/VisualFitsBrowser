@@ -327,7 +327,7 @@ public class VisualFitsBrowserApp extends JFrame {
 		theMenu.add(ds9Label);
 
 		final JLabel fileWatch = new JLabel("Files watched: " + 0);
-		theMenu.add(fileWatch);
+		// theMenu.add(fileWatch);
 
 		final JLabel memorylabel = new JLabel("  "); // "RAM: " +
 		// Runtime.getRuntime().totalMemory()
@@ -372,7 +372,7 @@ public class VisualFitsBrowserApp extends JFrame {
 							int progress = (int) ((total - free) / total * 1000);
 
 							mProgressBar.setValue(progress);
-							if (progress < 8000)
+							if (progress < 800)
 								mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
 							else
 								mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
