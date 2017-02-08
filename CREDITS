@@ -7,3 +7,15 @@ Included libraries:
 - JSamp library:
   https://github.com/mbtaylor/jsamp
 
+- JFreeChart library
+  http://www.jfree.org/jfreechart/
+   
+- Apache commons library 
+  https://commons.apache.org/
+
+- Apache log4j
+  https://logging.apache.org/log4
+  
+- non.tam.fits 
+  https://github.com/nom-tam-fits/nom-tam-fits
+
