@@ -79,6 +79,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	protected Vector<ODIFitsFileEntry> getFBPSelected() {
 
 		if (this.getmBrowserPanel() != null) {
+
 			return this.getmBrowserPanel().getSelected();
 		}
 		return new Vector<ODIFitsFileEntry>();

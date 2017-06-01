@@ -38,9 +38,11 @@ public class QuickHeaderInfo {
 			return retVal;
 		}
 
+		myLogger.debug ("Start rad header");
+		int linesRead = 0;
 		// Read primary header & first extension
 		try {
-			BufferedReader r = new BufferedReader(new FileReader(f), 2880 * 5);
+			BufferedReader r = new BufferedReader(new FileReader(f), 2880 * 1);
 
 			// primary header
 			while (r.read(b, 0, 80) == 80) {
@@ -49,18 +51,19 @@ public class QuickHeaderInfo {
 
 				if (line.startsWith("EXTEND") && QuickHeaderInfo.getStringValue(line).equalsIgnoreCase("T")) {
 
-					extend = true;
+					// extend = true;
 				}
 
 				if (line.startsWith("END"))
 					break;
 				retVal.add(line);
-
+				linesRead++;
 			}
 
 			// first extension header
 
-			if (extend)
+			if (extend) {
+				myLogger.debug ("Reading header of first extension");
 				while (r.read(b, 0, 80) == 80) {
 
 					String line = new String(b);
@@ -68,14 +71,14 @@ public class QuickHeaderInfo {
 						break;
 					retVal.add(line);
 
-				}
+				}}
 			r.close();
 
 		} catch (Exception e) {
 			myLogger.error("Error while reading in primary hedaer for file " + f.getAbsolutePath(), e);
 
 		}
-
+		myLogger.debug ("End read header " + linesRead);
 		return retVal;
 	}
 

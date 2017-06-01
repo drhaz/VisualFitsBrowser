@@ -628,13 +628,13 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 	private class FitsViewerTableModel extends AbstractTableModel {
 
 
-		final static int FNAME_COL = 1;
-		final static int OBJECT_COL = 2;
-		final static int TEXP_COL = 3;
-		final static int FILTER_COL = 4;
-		final static int AIRMASS_COL = 5;
-		final static int DATEOBS_COL = 6;
-		final static int USERCOMMENT_COL = 7;
+		final static int FNAME_COL = 0;
+		final static int OBJECT_COL = 1;
+		final static int TEXP_COL = 2;
+		final static int FILTER_COL = 3;
+		final static int AIRMASS_COL = 4;
+		final static int DATEOBS_COL = 5;
+		final static int USERCOMMENT_COL = 6;
 
 
 		boolean displayExtra = false;
@@ -645,7 +645,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		public int getColumnCount() {
 
-			int defaultColumns = 9;
+			int defaultColumns = 7;
 			return displayExtra ? defaultColumns + 1 : defaultColumns;
 
 		}

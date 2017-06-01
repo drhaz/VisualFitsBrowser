@@ -87,7 +87,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 		File f = new File(image.getAbsolutePath());
 
 		if (f.exists() && myTextArea != null) {
-
+			myLogger.debug ("Start filling in text area");
 			this.FileNameLabel.setText(image.FName);
 
 			switch (ODIImageInfoPanel.mode) {
@@ -95,8 +95,10 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 				Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
 				if (fitsHeader != null)
 					for (String card : fitsHeader) {
+					myLogger.debug ("adding: " + card);
 						myTextArea.append(card + "\n");
 					}
+					myLogger.debug ("Done reading fits header into image area");
 
 				try {
 					myTextArea.setCaretPosition(this.lastPanePosition);
