@@ -234,7 +234,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
 
-								SAMPUtilities.loadMosaicDS9(fname, 1);
+								SAMPUtilities.loadImageDS9(fname, 0);
 
 							}
 						}
