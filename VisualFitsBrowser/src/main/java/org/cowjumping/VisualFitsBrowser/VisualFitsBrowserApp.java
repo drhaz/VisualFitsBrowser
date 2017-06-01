@@ -31,10 +31,8 @@ import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.astrogrid.samp.Message;
@@ -42,7 +40,6 @@ import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.OSXAdapter;
 import org.cowjumping.guiUtils.Preferences;
@@ -51,8 +48,7 @@ import org.cowjumping.guiUtils.SAMPUtilities;
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
 
-	final static String VersionString = "Version 1";
-	final static String LOOKANDFEEL = "Ocean";
+
 	private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
 
 	private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
@@ -62,12 +58,7 @@ public class VisualFitsBrowserApp extends JFrame {
 	private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
 	private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
 
-	/**
-	 * Configuration Parameter: Omit all ODI-things from FileBrowser and
-	 * configure for flat fits files.
-	 */
 
-	static public boolean noODI = true;
 
 	/**
 	 * Class to Manage & Display image directory
@@ -449,14 +440,15 @@ public class VisualFitsBrowserApp extends JFrame {
 	private static void parseArgs(String[] args) {
 		Options options = new Options();
 
-		options.addOption("noodi", false, "Ommit ODI-specific GUI items.");
-		CommandLineParser parser = new BasicParser();
+		options.addOption("debug", false, "Debug");
+		options.addOption("h", false, "show help");
+		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine cmd = parser.parse(options, args);
 
-			if (cmd.hasOption("noodi")) {
+			if (cmd.hasOption("debug")) {
 
-				ODIFitsFileEntry.ArchiveMode = true;
+				Logger.getRootLogger().setLevel(Level.DEBUG);
 			}
 
 		} catch (Exception e) {

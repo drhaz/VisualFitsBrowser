@@ -184,11 +184,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL)
 					.setCellRenderer(new NumberFormatterCellRenderer("%2.1f"));
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.ARCHIVESTAT_COL)
-					.setCellRenderer(new TRANSFERCellRenderer());
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.PONTIME_COL)
-					.setCellRenderer(new BooleanTableCellRenderer(16));
 
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
 
@@ -200,7 +196,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			JScrollPane scrollPane = new JScrollPane(mTable);
 			scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.ARCHIVESTAT_COL).setPreferredWidth(20);
+
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(230);
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(300);
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
@@ -208,13 +204,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL).setPreferredWidth(100);
 			mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.PONTIME_COL).setPreferredWidth(30);
 
-			if (VisualFitsBrowserApp.noODI) {
-				this.hideColumn(mTable, FitsViewerTableModel.ARCHIVESTAT_COL);
-				this.hideColumn(mTable, FitsViewerTableModel.PONTIME_COL);
 
-			}
 			for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
 				TableColumn tc = mTable.getColumnModel().getColumn(ii);
 				tc.setMaxWidth(tc.getPreferredWidth());
@@ -454,31 +445,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	}
 
-	public void updateTransportByName(final String fname, final TRANSFERSTATUS newStat) {
 
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-
-				public void run() {
-
-					synchronized (mImageList) {
-						int row = getRowbyName(fname);
-
-						if (row >= 0) {
-							ODIFitsFileEntry f = mImageList.get(row);
-
-							if (f.TransferStatus != TRANSFERSTATUS.CONFIRMED_PPA)
-								mTableDataModel.setValueAt(newStat, row, mTableDataModel.ARCHIVESTAT_COL);
-
-						}
-					}
-
-				}
-			});
-		} catch (Exception e) {
-			myLogger.error("Could not update transfer status: ", e);
-		}
-	}
 
 	/**
 	 * Finds an image entry by name and returns the row of the underlying table
@@ -660,19 +627,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	private class FitsViewerTableModel extends AbstractTableModel {
 
-		final static int ARCHIVESTAT_COL = 0;
-		final static int PONTIME_COL = 1;
-		final static int FNAME_COL = 2;
-		final static int OBJECT_COL = 3;
-		final static int TEXP_COL = 4;
-		final static int FILTER_COL = 5;
-		final static int AIRMASS_COL = 6;
-		final static int DATEOBS_COL = 7;
-		final static int USERCOMMENT_COL = 8;
-		final static int HASVIDEO_COL = 9;
 
-		final static int EXTRA_COL = 10;
-		final static int SELECT_COL = 11;
+		final static int FNAME_COL = 1;
+		final static int OBJECT_COL = 2;
+		final static int TEXP_COL = 3;
+		final static int FILTER_COL = 4;
+		final static int AIRMASS_COL = 5;
+		final static int DATEOBS_COL = 6;
+		final static int USERCOMMENT_COL = 7;
+
 
 		boolean displayExtra = false;
 
@@ -698,8 +661,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			if (mImageList != null && mImageList.size() > row) {
 				ODIFitsFileEntry entry = mImageList.elementAt(row);
 
-				if (col == ARCHIVESTAT_COL)
-					return entry.TransferStatus;
+
 
 				if (col == FNAME_COL) {
 					String prefix;
@@ -718,26 +680,21 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				if (col == TEXP_COL)
 					return entry.ExpTime;
 
-				if (col == SELECT_COL)
-					return entry.Selected;
 
 				if (col == DATEOBS_COL)
 					return entry.DateObs;
 
-				if (col == HASVIDEO_COL)
-					return entry.hasVideo;
+
 
 				if (col == USERCOMMENT_COL)
 					return entry.UserComment;
 
-				if (col == EXTRA_COL)
-					return entry.ExtraKeyword;
+
 
 				if (col == AIRMASS_COL)
 					return entry.Airmass;
 
-				if (col == PONTIME_COL)
-					return (entry.PONTime > 1800);
+
 			}
 
 			return null;
@@ -750,10 +707,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				ODIFitsFileEntry entry = null;
 				switch (col) {
 
-					case SELECT_COL:
-						entry = mImageList.elementAt(row);
-						entry.Selected = (Boolean) Value;
-						break;
+
 
 					case USERCOMMENT_COL:
 
@@ -762,10 +716,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 						entry.writeBackMetaInformation();
 						break;
 
-					case ARCHIVESTAT_COL:
-						entry = mImageList.elementAt(row);
-						entry.TransferStatus = (TRANSFERSTATUS) Value;
-						break;
+
 
 					default:
 						myLogger.warn("SetValueAt request for non-editable field");
@@ -779,8 +730,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		public String getColumnName(int col) {
 
-			if (col == ARCHIVESTAT_COL)
-				return "T";
+
 
 			if (col == FNAME_COL)
 				return "Filename";
@@ -791,15 +741,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				return "Filter";
 			if (col == TEXP_COL)
 				return "Exp Time";
-			if (col == SELECT_COL)
-				return "Selected";
+
 			if (col == DATEOBS_COL)
 				return "DATE_OBS";
-			if (col == HASVIDEO_COL)
-				return "V";
 
-			if (col == PONTIME_COL)
-				return "PON";
 
 			if (col == AIRMASS_COL)
 				return "X";
@@ -812,8 +757,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		public boolean isCellEditable(int row, int col) {
 
-			if (col == SELECT_COL)
-				return true;
+
 
 			if (col == USERCOMMENT_COL) {
 				return true;
@@ -825,8 +769,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		@Override
 		public Class<?> getColumnClass(int columnIndex) {
-			if (columnIndex == HASVIDEO_COL)
-				return Boolean.class;
+
 
 			if (columnIndex == TEXP_COL)
 				return Float.class;
