@@ -24,10 +24,10 @@ import org.cowjumping.odi.ODIFitsReader.QuickHeaderInfo;
  * @author harbeck
  */
 
-public class ODIFitsFileEntry {
+public class FitsFileEntry {
 
 
-	private final static Logger myLogger = Logger.getLogger(ODIFitsFileEntry.class);
+	private final static Logger myLogger = Logger.getLogger(FitsFileEntry.class);
 
 
 
@@ -38,6 +38,8 @@ public class ODIFitsFileEntry {
 		INDEF, LOCAL, NOTIFIED_DTS, CONFIRMED_DTS, NOTIFIED_PPA, CONFIRMED_PPA, ERROR
 
 	}
+
+	public boolean mef = false;
 
 	private static FitsCommentInterface theCommentInterface = new FITSTextCommentImpl();
 
@@ -130,13 +132,13 @@ public class ODIFitsFileEntry {
 
 	public boolean isValidReadout = true;
 
-	public static ODIFitsFileEntry createFromFile(File f) {
+	public static FitsFileEntry createFromFile(File f) {
 		return createFromFile(f, null);
 	}
 
-	public static ODIFitsFileEntry createFromFile(File f, String extraKey) {
+	public static FitsFileEntry createFromFile(File f, String extraKey) {
 
-		ODIFitsFileEntry entry = null;
+		FitsFileEntry entry = null;
 		OBSTYPE ot = OBSTYPE.INDEF;
 		Float expTime = Float.NaN;
 
@@ -175,7 +177,7 @@ public class ODIFitsFileEntry {
 				ObjName = "[invalid readout]";
 			}
 
-			entry = new ODIFitsFileEntry(f.getParent(), //
+			entry = new FitsFileEntry(f.getParent(), //
 					f.getName(), ObjName, ot, //
 					expTime, //
 					Filter, //
@@ -196,6 +198,10 @@ public class ODIFitsFileEntry {
 				entry.Focus = QuickHeaderInfo.getFloatValue(fitsHeader, "TELFOCUS");
 				entry.PONTime = ponTime;
 				entry.isBinned = QuickHeaderInfo.isBinned(fitsHeader);
+				entry.mef = QuickHeaderInfo.getBooleanValue (fitsHeader, "EXTEND");
+				if (entry.mef) {
+					myLogger.debug ("MEF detected");
+				}
 			}
 
 			if (new File(f.getAbsoluteFile() + "/expVideo").exists()
@@ -215,7 +221,7 @@ public class ODIFitsFileEntry {
 			}
 
 			// fetch user comment
-			ODIFitsFileEntry.theCommentInterface.readComment(entry);
+			FitsFileEntry.theCommentInterface.readComment(entry);
 
 
 		}
@@ -235,7 +241,7 @@ public class ODIFitsFileEntry {
 
 	public void writeBackMetaInformation() {
 
-		ODIFitsFileEntry.theCommentInterface.writeComment(this);
+		FitsFileEntry.theCommentInterface.writeComment(this);
 
 	}
 
@@ -243,8 +249,8 @@ public class ODIFitsFileEntry {
 		return (ObsType == OBSTYPE.BIAS || ObsType == OBSTYPE.DARK || ObsType == OBSTYPE.DOMEFLAT);
 	}
 
-	public ODIFitsFileEntry(String rootPath, String fname, String ObjName, OBSTYPE obsType, Float expTime,
-							String Filter, Date dateObs, boolean selected) {
+	public FitsFileEntry(String rootPath, String fname, String ObjName, OBSTYPE obsType, Float expTime,
+						 String Filter, Date dateObs, boolean selected) {
 		super();
 		this.RootPath = rootPath;
 		this.FName = fname;
@@ -261,8 +267,8 @@ public class ODIFitsFileEntry {
 		return RootPath + "/" + FName;
 	}
 
-	public static Vector<ODIFitsFileEntry> getImagesInDirectory(File RootDirectory, ProgressMonitor progressM) {
-		Vector<ODIFitsFileEntry> directoryImages = new Vector<ODIFitsFileEntry>();
+	public static Vector<FitsFileEntry> getImagesInDirectory(File RootDirectory, ProgressMonitor progressM) {
+		Vector<FitsFileEntry> directoryImages = new Vector<FitsFileEntry>();
 
 		File files[] = RootDirectory.listFiles(thefileFilter);
 
@@ -281,7 +287,7 @@ public class ODIFitsFileEntry {
 						myLogger.debug("Checking out file: " + file.getAbsolutePath());
 					}
 
-					ODIFitsFileEntry e = ODIFitsFileEntry.createFromFile(file);
+					FitsFileEntry e = FitsFileEntry.createFromFile(file);
 
 					if (e != null) {
 
@@ -315,12 +321,12 @@ public class ODIFitsFileEntry {
 	public static JMenuItem getArchiveModemenuItem() {
 		JMenuItem item = new JCheckBoxMenuItem("Local archive Mode");
 
-		item.setSelected(ODIFitsFileEntry.ArchiveMode);
+		item.setSelected(FitsFileEntry.ArchiveMode);
 
 		item.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent evt) {
-				ODIFitsFileEntry.ArchiveMode = ((JCheckBoxMenuItem) evt.getSource()).getState();
+				FitsFileEntry.ArchiveMode = ((JCheckBoxMenuItem) evt.getSource()).getState();
 			}
 
 		});

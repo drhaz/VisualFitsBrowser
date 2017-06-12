@@ -18,7 +18,7 @@ import org.astrogrid.samp.client.SampException;
 import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 /**
  * Tools to talks via SAMP
@@ -98,12 +98,12 @@ public class SAMPUtilities {
 	 * 
 	 * @param fList
 	 */
-	public static void sendCalibrationProductList(Vector<ODIFitsFileEntry> fList) {
+	public static void sendCalibrationProductList(Vector<FitsFileEntry> fList) {
 
 		Message m = new Message("qr.mastercal");
 		StringBuilder sb = new StringBuilder();
 
-		for (ODIFitsFileEntry entry : fList) {
+		for (FitsFileEntry entry : fList) {
 			String file = entry.getAbsolutePath();
 			File f = new File(file);
 			if (f.exists()) {
@@ -222,11 +222,11 @@ public class SAMPUtilities {
 
 	}
 
-	public static void callQRStack(Vector<ODIFitsFileEntry> fileList, double track_ra, double track_dec, String xArgs) {
+	public static void callQRStack(Vector<FitsFileEntry> fileList, double track_ra, double track_dec, String xArgs) {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (ODIFitsFileEntry entry : fileList) {
+		for (FitsFileEntry entry : fileList) {
 			if (sb.length() > 0)
 				sb.append(",");
 			String file = entry.getAbsolutePath();

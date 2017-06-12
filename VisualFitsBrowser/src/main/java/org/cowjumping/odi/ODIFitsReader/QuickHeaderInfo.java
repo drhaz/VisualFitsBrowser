@@ -51,11 +51,13 @@ public class QuickHeaderInfo {
 
 				if (line.startsWith("EXTEND") && QuickHeaderInfo.getStringValue(line).equalsIgnoreCase("T")) {
 
-					// extend = true;
+					 extend = true;
 				}
 
 				if (line.startsWith("END"))
 					break;
+
+
 				retVal.add(line);
 				linesRead++;
 			}
@@ -69,6 +71,13 @@ public class QuickHeaderInfo {
 					String line = new String(b);
 					if (line.startsWith("END"))
 						break;
+
+					// Workaround for images that claim to be MEF, but are in fact not and you are swamped with lines
+					// of binary crap.
+
+					if (!Character.isLetter(line.charAt(0)))
+						break;
+
 					retVal.add(line);
 
 				}}
@@ -318,6 +327,22 @@ public class QuickHeaderInfo {
 			}
 		} else {
 			myLogger.warn("Attempt to search in NULL fitsHerader aborted. Returning null");
+		}
+		return value;
+	}
+
+	public static boolean getBooleanValue(Vector<String> fitsHeader, String key) {
+		boolean value = false;
+		String valuestr = getStringValue(fitsHeader, "EXTEND");
+		if (valuestr != null) {
+			try {
+				myLogger.debug ("bolean " + key + " " + valuestr);
+				value = valuestr.equalsIgnoreCase("T");
+
+			} catch (Exception e) {
+				myLogger.error ("While boolean parsing " + key + " -> " + valuestr, e);
+				value = false;
+			}
 		}
 		return value;
 	}
