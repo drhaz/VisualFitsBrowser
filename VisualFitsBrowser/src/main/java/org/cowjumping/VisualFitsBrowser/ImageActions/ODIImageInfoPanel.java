@@ -95,7 +95,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 				Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
 				if (fitsHeader != null)
 					for (String card : fitsHeader) {
-					myLogger.debug ("adding: " + card);
+
 						myTextArea.append(card + "\n");
 					}
 					myLogger.debug ("Done reading fits header into image area");

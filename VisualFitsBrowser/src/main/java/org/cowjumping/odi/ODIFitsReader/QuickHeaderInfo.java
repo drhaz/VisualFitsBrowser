@@ -75,7 +75,7 @@ public class QuickHeaderInfo {
 					// Workaround for images that claim to be MEF, but are in fact not and you are swamped with lines
 					// of binary crap.
 
-					if (!Character.isLetter(line.charAt(0)))
+					if (!Character.isLetter(line.charAt(0)) && ! Character.isSpaceChar(line.charAt(0)))
 						break;
 
 					retVal.add(line);
