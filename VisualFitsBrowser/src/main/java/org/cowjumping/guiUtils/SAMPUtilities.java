@@ -187,7 +187,8 @@ public class SAMPUtilities {
 		try {
 
 			Message m = new Message("ds9.set");
-			m.addParam("cmd", "file fits " + fname);
+			String escapedFitsname = fname.replace (" ", "\\ ");
+			m.addParam("cmd", "file fits " + escapedFitsname);
 
 			getHubConnector().getConnection().notifyAll(m);
 
