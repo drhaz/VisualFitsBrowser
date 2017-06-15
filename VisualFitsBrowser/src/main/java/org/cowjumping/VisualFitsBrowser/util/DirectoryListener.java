@@ -129,7 +129,7 @@ public class DirectoryListener implements Runnable {
 
 
 				// We have a valid, completed file
-				if (m.exists() || ODIFitsFileEntry.ArchiveMode || !ODIFitsFileEntry.ODIMode) {
+				if (m.exists() || FitsFileEntry.ArchiveMode || !FitsFileEntry.ODIMode) {
 
 					removeList.add(f);
 					rec.addSingleNewItem(f);
@@ -179,10 +179,10 @@ public class DirectoryListener implements Runnable {
 
 		Vector<File> newFiles = new Vector<File>();
 
-		File[] fArray = myDirectory.listFiles(ODIFitsFileEntry.thefileFilter);
+		File[] fArray = myDirectory.listFiles(FitsFileEntry.thefileFilter);
 
 		for (File f : fArray) {
-			if ((f.isDirectory() || !ODIFitsFileEntry.ODIMode) && f.lastModified() > this.timeOfLastDirectoryRead) {
+			if ((f.isDirectory() || !FitsFileEntry.ODIMode) && f.lastModified() > this.timeOfLastDirectoryRead) {
 
 				boolean alreadyInQueue = false;
 				boolean alreadyInList = false;

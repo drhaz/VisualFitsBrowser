@@ -41,13 +41,12 @@ import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryListener;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry.TRANSFERSTATUS;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.TRANSFERSTATUS;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.SAMPUtilities;
 import org.cowjumping.guiUtils.ZebraJTable;
-import org.cowjumping.guiUtils.TableCellRenderers.BooleanTableCellRenderer;
 import org.cowjumping.guiUtils.TableCellRenderers.NumberFormatterCellRenderer;
 import org.cowjumping.guiUtils.TableCellRenderers.mDateRenderer;
 
@@ -62,7 +61,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 	// private Date lastUpdate = null;
 
 	private DirectoryListener myDirectoryListener = null;
-	public Vector<ODIFitsFileEntry> mImageList;
+	public Vector<FitsFileEntry> mImageList;
 
 	private JTable mTable;
 	private FitsViewerTableModel mTableDataModel = null;
@@ -102,7 +101,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		mRootDirectory = new File(this.mRootDirectoryString);
 
-		mImageList = new Vector<ODIFitsFileEntry>(50);
+		mImageList = new Vector<FitsFileEntry>(50);
 
 		this.setLayout(new BorderLayout());
 
@@ -230,11 +229,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 						int row = (mTable.getSelectedRow());
 						if (row >= 0 && row < mTable.getRowCount()) {
-							ODIFitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
+							FitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
 
+
+
 								SAMPUtilities.loadImageDS9(fname, 0);
+
 
 							}
 						}
@@ -352,9 +354,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		col.setPreferredWidth(width);
 	}
 
-	public Vector<ODIFitsFileEntry> getSelected() {
+	public Vector<FitsFileEntry> getSelected() {
 
-		Vector<ODIFitsFileEntry> selected = new Vector<ODIFitsFileEntry>();
+		Vector<FitsFileEntry> selected = new Vector<FitsFileEntry>();
 
 		synchronized (mImageList) {
 			if (mTable.getSelectedRowCount() > 0) {
@@ -426,15 +428,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		return retVal;
 	}
 
-	Vector<ODIFitsFileEntry> getImageList() {
-		return (Vector<ODIFitsFileEntry>) mImageList.clone();
+	Vector<FitsFileEntry> getImageList() {
+		return (Vector<FitsFileEntry>) mImageList.clone();
 	}
 
 	public Vector<String> getMyUnconfirmedFileIDs() {
 		Vector<String> ret = new Vector<String>();
 
 		synchronized (mImageList) {
-			for (ODIFitsFileEntry f : mImageList) {
+			for (FitsFileEntry f : mImageList) {
 				if (f.TransferStatus != TRANSFERSTATUS.CONFIRMED_PPA) {
 					ret.add(f.FName);
 				}
@@ -459,7 +461,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		synchronized (mImageList) {
 			for (int ii = 0; ii < mImageList.size(); ii++) {
-				ODIFitsFileEntry f = mImageList.get(ii);
+				FitsFileEntry f = mImageList.get(ii);
 				if (f != null) {
 					if (f.FName.equals(Name))
 						return ii;
@@ -474,7 +476,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 		// Issue at hand is that java only handles last modification date.
 		synchronized (mImageList) {
-			for (ODIFitsFileEntry test : mImageList) {
+			for (FitsFileEntry test : mImageList) {
 
 				if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
 
@@ -485,7 +487,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 			}
 		}
-		final ODIFitsFileEntry e = ODIFitsFileEntry.createFromFile(newItem);
+		final FitsFileEntry e = FitsFileEntry.createFromFile(newItem);
 
 		myLogger.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
 				+ " \n This file converts to entry: " + e);
@@ -563,11 +565,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 				// Reset internal image list
 				if (mImageList == null) {
 					myLogger.warn("Imagelist did not exist. that is strange; fixed it now");
-					mImageList = new Vector<ODIFitsFileEntry>();
+					mImageList = new Vector<FitsFileEntry>();
 				}
 
 				// load images in the new directory
-				Vector<ODIFitsFileEntry> newList = ODIFitsFileEntry.getImagesInDirectory(RootDirectory,
+				Vector<FitsFileEntry> newList = FitsFileEntry.getImagesInDirectory(RootDirectory,
 						mProgressMonitor);
 
 				if (newList != null && newList.size() > 0) {
@@ -613,7 +615,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 			if (!e.getValueIsAdjusting()) {
 
-				Vector<ODIFitsFileEntry> selected = getSelected();
+				Vector<FitsFileEntry> selected = getSelected();
 				if (selected != null && selected.size() == 1) {
 
 					mFileListListener.pushFileSelection(selected);
@@ -659,7 +661,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		public Object getValueAt(int row, int col) {
 
 			if (mImageList != null && mImageList.size() > row) {
-				ODIFitsFileEntry entry = mImageList.elementAt(row);
+				FitsFileEntry entry = mImageList.elementAt(row);
 
 
 
@@ -704,7 +706,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		public void setValueAt(Object Value, int row, int col) {
 
 			if (mImageList != null && mImageList.size() > row && row >= 0) {
-				ODIFitsFileEntry entry = null;
+				FitsFileEntry entry = null;
 				switch (col) {
 
 
@@ -786,7 +788,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		Vector<File> retVec = new Vector<File>();
 		synchronized (mImageList) {
 
-			for (ODIFitsFileEntry e : this.mImageList) {
+			for (FitsFileEntry e : this.mImageList) {
 				retVec.add(e.DirectoryFile);
 			}
 
@@ -800,43 +802,43 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 @SuppressWarnings("serial")
 class TRANSFERCellRenderer extends JLabel implements TableCellRenderer {
 
-	private static HashMap<ODIFitsFileEntry.TRANSFERSTATUS, ImageIcon> statusIcons;
+	private static HashMap<FitsFileEntry.TRANSFERSTATUS, ImageIcon> statusIcons;
 	private final static int iconSize = 16;
 
-	public static ImageIcon getImageIcon(ODIFitsFileEntry.TRANSFERSTATUS status) {
+	public static ImageIcon getImageIcon(FitsFileEntry.TRANSFERSTATUS status) {
 		ImageIcon retVal = null;
 
 		if (statusIcons == null) {
-			statusIcons = new HashMap<ODIFitsFileEntry.TRANSFERSTATUS, ImageIcon>();
+			statusIcons = new HashMap<FitsFileEntry.TRANSFERSTATUS, ImageIcon>();
 			ImageIcon myImage = new ImageIcon(
 					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/Folder blue mydocuments.png"));
-			statusIcons.put(ODIFitsFileEntry.TRANSFERSTATUS.INDEF, new ImageIcon(
+			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.INDEF, new ImageIcon(
 					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
 
 			myImage = new ImageIcon(
 					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/TransportGreenTruck.png"));
-			statusIcons.put(ODIFitsFileEntry.TRANSFERSTATUS.CONFIRMED_DTS, new ImageIcon(
+			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.CONFIRMED_DTS, new ImageIcon(
 					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
 
 			myImage = new ImageIcon(
 					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/icon_Archive.svg.png"));
-			statusIcons.put(ODIFitsFileEntry.TRANSFERSTATUS.CONFIRMED_PPA, new ImageIcon(
+			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.CONFIRMED_PPA, new ImageIcon(
 					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
 
 			myImage = new ImageIcon(FileBrowserPanel.class.getClassLoader().getResource("resources/icons/Error.png"));
-			statusIcons.put(ODIFitsFileEntry.TRANSFERSTATUS.ERROR, new ImageIcon(
+			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.ERROR, new ImageIcon(
 					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
 		}
 
 		retVal = statusIcons.get(status);
 		if (retVal == null)
-			retVal = statusIcons.get(ODIFitsFileEntry.TRANSFERSTATUS.INDEF);
+			retVal = statusIcons.get(FitsFileEntry.TRANSFERSTATUS.INDEF);
 		return retVal;
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 												   int rowIndex, int vColIndex) {
-		this.setIcon(getImageIcon((ODIFitsFileEntry.TRANSFERSTATUS) value));
+		this.setIcon(getImageIcon((FitsFileEntry.TRANSFERSTATUS) value));
 
 		return this;
 	}

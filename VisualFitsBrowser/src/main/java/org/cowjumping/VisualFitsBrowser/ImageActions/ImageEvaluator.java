@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JPanel;
 
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 @SuppressWarnings("serial")
 /**
@@ -34,7 +34,7 @@ public abstract class ImageEvaluator extends JPanel {
 
 	}
 
-	 public int setImageList(Vector<ODIFitsFileEntry> imagelist, int
+	 public int setImageList(Vector<FitsFileEntry> imagelist, int
 			otaX, int otaY) {
 
 		if (imagelist != null)

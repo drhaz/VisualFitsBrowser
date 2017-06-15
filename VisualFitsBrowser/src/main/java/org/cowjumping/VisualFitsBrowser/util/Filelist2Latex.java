@@ -33,7 +33,7 @@ public class Filelist2Latex {
 	private static FileBrowserPanel myFileBrowserPanel;
 
 	public static String writeFileList2Latex(String Title,
-											 Vector<ODIFitsFileEntry> fileLis, String fname) {
+                                             Vector<FitsFileEntry> fileLis, String fname) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -56,15 +56,15 @@ public class Filelist2Latex {
 
 	}
 
-	private static String generateFileTable(Vector<ODIFitsFileEntry> fileList) {
+	private static String generateFileTable(Vector<FitsFileEntry> fileList) {
 
 		StringBuilder sb = new StringBuilder();
 		StringBuilder CSV = new StringBuilder();
 		if (fileList != null) {
 
-			List<ODIFitsFileEntry> sortList = new Vector<ODIFitsFileEntry>(fileList);
+			List<FitsFileEntry> sortList = new Vector<FitsFileEntry>(fileList);
 			Collections.sort(sortList, new myComp());
-			for (ODIFitsFileEntry fe : sortList) {
+			for (FitsFileEntry fe : sortList) {
 
 				sb.append(generateFileItem(fe));
 				CSV.append(generateFileItemforCVS(fe) + "\n");
@@ -82,7 +82,7 @@ public class Filelist2Latex {
 		return sb.toString();
 	}
 
-	private static String generateFileItem(ODIFitsFileEntry fe) {
+	private static String generateFileItem(FitsFileEntry fe) {
 		StringBuilder sb = new StringBuilder();
 
 		if (fe != null) {
@@ -120,7 +120,7 @@ public class Filelist2Latex {
 
 	}
 
-	private static String generateFileItemforCVS(ODIFitsFileEntry fe) {
+	private static String generateFileItemforCVS(FitsFileEntry fe) {
 		StringBuilder sb = new StringBuilder();
 
 		if (fe != null) {
@@ -193,9 +193,9 @@ public class Filelist2Latex {
 		BasicConfigurator.configure();
 		Preferences.initPreferences("VisualFitsBrowserApp");
 		Logger.getRootLogger().setLevel(Level.INFO);
-		Vector<ODIFitsFileEntry> fileList = new Vector<ODIFitsFileEntry>();
+		Vector<FitsFileEntry> fileList = new Vector<FitsFileEntry>();
 
-		fileList.add(new ODIFitsFileEntry("", "filename", "Obj $ % & _ # ", null,
+		fileList.add(new FitsFileEntry("", "filename", "Obj $ % & _ # ", null,
 				3.2f, "G\'", new Date(), false));
 
 		writeFileList2Latex("This is a title ", fileList, "/tmp/pODILogfile.tex");
@@ -326,7 +326,7 @@ public class Filelist2Latex {
 						if (myFileBrowserPanel != null && myFileBrowserPanel.mRootDirectory != null) {
 
 							// Get file list and prepare title, get name for latex file
-							Vector<ODIFitsFileEntry> fileList = myFileBrowserPanel.mImageList;
+							Vector<FitsFileEntry> fileList = myFileBrowserPanel.mImageList;
 							String title = myFileBrowserPanel.mRootDirectory.getAbsolutePath();
 							String tempDir = Preferences.thePreferences.getProperty("VisualFitsBrowser.latex.tmp", "/tmp");
 							String LatexFname = myFileBrowserPanel.mRootDirectory.getName() + ".tex";
@@ -365,10 +365,10 @@ public class Filelist2Latex {
 	}
 }
 
-class myComp implements Comparator<ODIFitsFileEntry> {
+class myComp implements Comparator<FitsFileEntry> {
 
 
-	public int compare(ODIFitsFileEntry o1, ODIFitsFileEntry o2) {
+	public int compare(FitsFileEntry o1, FitsFileEntry o2) {
 		return (int) (o1.DateObs.getTime() - o2.DateObs.getTime());
 	}
 
