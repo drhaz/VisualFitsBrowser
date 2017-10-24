@@ -197,6 +197,20 @@ public class SAMPUtilities {
 		}
 	}
 
+
+	public static void launchds9(String pathToBinary) {
+		try {
+
+				Runtime.getRuntime().exec(pathToBinary);
+
+		} catch (IOException e) {
+
+			myLogger.error ("While launching ds9: ", e);
+
+		}
+
+	}
+
 	public static boolean isClientAvailable(String idContain) {
 		boolean retVal = false;
 		try {
