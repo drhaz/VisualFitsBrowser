@@ -225,9 +225,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 			// capture double clicks
 			mTable.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
-					if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
 
-						int row = (mTable.getSelectedRow());
+					if (e.getClickCount()==2) {
+						int frame = 0;
+
+						if (e.getButton() == MouseEvent.BUTTON2) {
+							frame = 1;
+						}
+						if (e.getButton() == MouseEvent.BUTTON3) {
+							frame = 2;
+						}
+
+						int row = mTable.getSelectedRow();
 						if (row >= 0 && row < mTable.getRowCount()) {
 							FitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
 							if (selectedFits != null) {
@@ -235,13 +244,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
 
-								SAMPUtilities.loadImageDS9(fname, 0);
+								SAMPUtilities.loadImageDS9(fname, frame);
 
 
 							}
 						}
 
 					}
+
 
 				}
 			});
