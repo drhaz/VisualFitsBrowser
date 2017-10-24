@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
@@ -30,8 +32,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.astrogrid.samp.Message;
+import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
+import org.astrogrid.samp.client.ResponseHandler;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.guiUtils.GUIConsts;
@@ -256,6 +260,21 @@ public class VisualFitsBrowserApp extends JFrame {
 		}
 
 
+        {
+            menuItem = new JMenuItem("Get ds9 iexam");
+
+            menuItem.addActionListener( new ActionListener() {
+
+                public void  actionPerformed(ActionEvent e) {
+                    SAMPUtilities.getDS9Cursor();
+                }
+
+            });
+            menu.add(menuItem);
+        }
+
+
+
 		menu.add(new JSeparator());
 
 		{
@@ -411,36 +430,37 @@ public class VisualFitsBrowserApp extends JFrame {
 			}
 		});
 
-		SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.broadCastProposalID") {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.astrogrid.samp.client.AbstractMessageHandler#processCall
-			 * (org.astrogrid.samp.client.HubConnection, java.lang.String,
-			 * org.astrogrid.samp.Message)
-			 */
-			public Map processCall(HubConnection c, String senderId, Message msg) {
-				myLogger.info("SAMP message handler got message " + msg);
-				// TODO: Insert code to derive directory name for
-				// current proposal.
-				String newDirectory = Preferences.thePreferences.getProperty("odi.archive.root",
-						"/Volumes/odifile/archive/podi");
-				Date AstronomerDate = new Date();
-				AstronomerDate.setTime(AstronomerDate.getTime() - (12 * 3600 * 1000));
-				SimpleDateFormat lagDateFmt = new SimpleDateFormat("yyyy.MM.dd");
-				newDirectory += "/" + msg.getParam("PROPID") + "/" + lagDateFmt.format(AstronomerDate);
-				File f = new File(newDirectory);
-				if (f.exists()) {
-					if (getmBrowserPanel() != null) {
+		SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
+            @Override
+            public boolean ownsTag(String s) {
+                if (s.toLowerCase().contentEquals("donut")) {
+                    return true;
+                }
 
-						getmBrowserPanel().readDirectory(f);
-					}
-				} else
-					myLogger.warn("Directory " + newDirectory + " does not exist!");
+                return false;
+            }
 
-				return null;
-			}
-		});
+            @Override
+            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
+
+                System.out.println("Received donut response: " + msg);
+                if (msg.isOK()) {
+
+                    String result = (String) msg.getResult().get("value");
+                    System.out.println ("Message result has value: " + result);
+                    Pattern pattern = Pattern.compile("\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.*)\\}");
+                    Matcher matcher = pattern.matcher(result);
+                    if (matcher.matches()) {
+                        String fname = matcher.group(1);
+                        Double x = Double.parseDouble(matcher.group(2));
+                        Double y = Double.parseDouble(matcher.group(3));
+                        String ext = (matcher.group(4));
+                        System.out.println (String.format ("Fname %s x %f y %f  ext %s",fname,x,y,ext));
+                    }
+                }
+
+            }
+        });
 
 	}
 
@@ -502,6 +522,7 @@ public class VisualFitsBrowserApp extends JFrame {
 				return null;
 			}
 		});
+
 
 		SAMPUtilities.getHubConnector().declareSubscriptions(SAMPUtilities.getHubConnector().computeSubscriptions());
 

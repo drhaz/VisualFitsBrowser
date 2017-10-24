@@ -11,6 +11,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
+import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.CallableClient;
 import org.astrogrid.samp.client.ClientProfile;
 import org.astrogrid.samp.client.HubConnector;
@@ -264,6 +265,43 @@ public class SAMPUtilities {
 
 	}
 
+
+	public static void getDS9Cursor() {
+		myLogger.debug("SAMP: Requesting ds9 cursor selection");
+		if (!isClientAvailable("DS9")) {
+			JOptionPane.showMessageDialog(null,
+					"DS9 is not connected. DS9 conencts to SAMP only on startup, so if SAMP restarted, you need to restart ds9 as well.",
+					"SAMP Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		try {
+
+            HubConnector h = getHubConnector();
+            String id = (String) h.getConnection().getSubscribedClients("ds9.get").keySet().iterator().next();
+
+
+			if (h != null && h.getConnection() != null & id != null) {
+                Message m = new Message("ds9.get");
+                m.addParam("cmd", "iexam $filename $x $y $regions");
+
+				h.getConnection().call(id,"donut", m);
+
+			} else {
+				SoundSignal.fail2();
+				JOptionPane.showMessageDialog(null,
+						"No SAMP hub is available. Please start a SAMP hub; the OTAListener will provide one.",
+						"SAMP Error", JOptionPane.ERROR_MESSAGE);
+
+			}
+
+		} catch (Exception e) {
+			myLogger.error("While requesting cursor selection:", e);
+		}
+
+
+	}
+
 	public static void loadMosaicDS9(String fname, int fno) {
 		myLogger.debug("SAMP: Loading Mosiac image to ds9: " + fname);
 
@@ -340,6 +378,7 @@ public class SAMPUtilities {
 		}
 
 	}
+
 
 	public static void registercallBack(CallableClient client) {
 		HubConnector h = getHubConnector();
