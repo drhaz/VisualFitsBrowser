@@ -5,13 +5,13 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.cowjumping.guiUtils.Preferences;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.concurrent.Callable;
 
@@ -48,25 +48,25 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
 
     }
 
-    public pyDonutBridge(File input, boolean intrafocus, int x, int y, int width) {
+    public pyDonutBridge(File input, boolean intra, int x, int y, int width) {
 
         this.input = input;
-        this.intrafocus = intrafocus;
+        this.intrafocus = intra;
         this.x = x;
         this.y = y;
         this.w = width;
     }
 
-    private boolean callout(String g) {
+    private void callout(String g) {
         try {
             Runtime rt = Runtime.getRuntime();
             Process proc = null;
 
             log.debug("Executing donut: " + g);
 
-            proc = rt.exec(g.toString(), null, new File(donutExecutable).getParentFile());
+            proc = rt.exec(g, null, new File(donutExecutable).getParentFile());
             if (proc == null)
-                return false;
+                return;
 
             BufferedReader err = new BufferedReader(new InputStreamReader(
                     proc.getErrorStream()));
@@ -87,7 +87,6 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
 
             log.error(e);
         }
-        return true;
     }
 
 
@@ -95,17 +94,14 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
     private String generateExecString(File donut, boolean intra) {
 
 
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(this.donutExecutable);
-        sb.append(" -i " + donut.getAbsolutePath() + " ");
-        sb.append(" -p " + donutConfig + " ");
-        sb.append(" -o " + defaultpath + "/" + this.defaultOutput + " ");
-        sb.append(intra ? "--intra" : "--extra" + " ");
-        sb.append(" -x " + this.x + " ");
-        sb.append(" -y " + this.y + " ");
-        sb.append(" -w " + this.w + " ");
-        return sb.toString();
+        return this.donutExecutable +
+                " -i " + donut.getAbsolutePath() + " " +
+                " -p " + donutConfig + " " +
+                " -o " + defaultpath + "/" + this.defaultOutput + " " +
+                (intra ? "--intra" : "--extra" + " ") +
+                " -x " + this.x + " " +
+                " -y " + this.y + " " +
+                " -w " + this.w + " ";
 
     }
 
@@ -120,7 +116,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
         File resultsimg = new File(defaultpath + "/" + defaultOutput + ".png");
         if (resultstxt.exists() && resultsimg.exists()) {
 
-            this.resultsString = IOUtils.toString(new FileInputStream(resultstxt));
+            this.resultsString = IOUtils.toString(new FileInputStream(resultstxt), (Charset) null);
             this.resultImage = ImageIO.read(resultsimg);
 
             return (this);
