@@ -14,7 +14,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.odi.ODIFitsReader.QuickHeaderInfo;
 
@@ -29,7 +29,7 @@ import org.cowjumping.odi.ODIFitsReader.QuickHeaderInfo;
 @SuppressWarnings("serial")
 public class ODIImageInfoPanel extends ImageEvaluator {
 
-	ODIFitsFileEntry myCurrentImage = null;
+	FitsFileEntry myCurrentImage = null;
 	private JLabel FileNameLabel;
 
 	private int lastPanePosition = 0;
@@ -53,7 +53,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 	}
 
 	@Override
-	public int setImageList(Vector<ODIFitsFileEntry> imagelist, int otaX, int otaY) {
+	public int setImageList(Vector<FitsFileEntry> imagelist, int otaX, int otaY) {
 
 		if (imagelist != null && imagelist.size() > 0) {
 
@@ -76,7 +76,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 		return 0;
 	}
 
-	protected void loadImageInfo(ODIFitsFileEntry image, int otaX, int otaY) {
+	protected void loadImageInfo(FitsFileEntry image, int otaX, int otaY) {
 
 		if (image == null) {
 			myLogger.warn("load null image requested.aborting");
@@ -87,7 +87,7 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 		File f = new File(image.getAbsolutePath());
 
 		if (f.exists() && myTextArea != null) {
-
+			myLogger.debug ("Start filling in text area");
 			this.FileNameLabel.setText(image.FName);
 
 			switch (ODIImageInfoPanel.mode) {
@@ -95,8 +95,10 @@ public class ODIImageInfoPanel extends ImageEvaluator {
 				Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
 				if (fitsHeader != null)
 					for (String card : fitsHeader) {
+
 						myTextArea.append(card + "\n");
 					}
+					myLogger.debug ("Done reading fits header into image area");
 
 				try {
 					myTextArea.setCaretPosition(this.lastPanePosition);

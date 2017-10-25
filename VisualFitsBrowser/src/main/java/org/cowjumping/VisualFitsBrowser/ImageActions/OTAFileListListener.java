@@ -2,10 +2,10 @@ package org.cowjumping.VisualFitsBrowser.ImageActions;
 
 import java.util.Vector;
 
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 public interface OTAFileListListener {
 
-	public void pushFileSelection(Vector<ODIFitsFileEntry> fileList);
+	public void pushFileSelection(Vector<FitsFileEntry> fileList);
 
 }

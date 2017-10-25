@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.MultiFlickPanel;
 import org.cowjumping.guiUtils.VariableGridLayout;
@@ -76,12 +76,13 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	 * 
 	 * @return list of selected files. Could be empty, but will not be null.
 	 */
-	protected Vector<ODIFitsFileEntry> getFBPSelected() {
+	protected Vector<FitsFileEntry> getFBPSelected() {
 
 		if (this.getmBrowserPanel() != null) {
+
 			return this.getmBrowserPanel().getSelected();
 		}
-		return new Vector<ODIFitsFileEntry>();
+		return new Vector<FitsFileEntry>();
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	 * 
 	 * @param fileList
 	 */
-	public void pushFileSelection(Vector<ODIFitsFileEntry> fileList) {
+	public void pushFileSelection(Vector<FitsFileEntry> fileList) {
 
 		if (this.myMultiPanel.getTopComponent().equals(INFOPANEL) && fileList != null && fileList.size() == 1) {
 			this.myImageInfoPanel.setImageList(fileList, -1, -1);
@@ -112,7 +113,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 			public void actionPerformed(ActionEvent arg0) {
 
-				Vector<ODIFitsFileEntry> fileList = ImageToolBoxPanel.this.getFBPSelected();
+				Vector<FitsFileEntry> fileList = ImageToolBoxPanel.this.getFBPSelected();
 				myMultiPanel.setTopComponent(INFOPANEL);
 				myImageInfoPanel.setMode(ODIImageInfoPanel.MODE_FITSHEADER);
 				if (fileList != null && fileList.size() > 0) {

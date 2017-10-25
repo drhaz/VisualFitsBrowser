@@ -2,6 +2,11 @@ package org.cowjumping.guiUtils;
 
 import java.awt.Color;
 
+<<<<<<< HEAD
+=======
+import javax.swing.table.TableModel;
+
+>>>>>>> 5364c5b38afd53e55ac5dae7814e261b2fc45aef
 import org.apache.log4j.Logger;
 
 public class ZebraJTable extends javax.swing.JTable {
@@ -134,4 +139,8 @@ public class ZebraJTable extends javax.swing.JTable {
 		0.05f * selHSB[1] + 0.95f * bgHSB[1], //
 		bgHSB[2] + ((bgHSB[2] < 0.5f) ? 0.1f : -0.1f));
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 5364c5b38afd53e55ac5dae7814e261b2fc45aef

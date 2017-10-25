@@ -38,9 +38,11 @@ public class QuickHeaderInfo {
 			return retVal;
 		}
 
+		myLogger.debug ("Start rad header");
+		int linesRead = 0;
 		// Read primary header & first extension
 		try {
-			BufferedReader r = new BufferedReader(new FileReader(f), 2880 * 5);
+			BufferedReader r = new BufferedReader(new FileReader(f), 2880 * 1);
 
 			// primary header
 			while (r.read(b, 0, 80) == 80) {
@@ -49,33 +51,43 @@ public class QuickHeaderInfo {
 
 				if (line.startsWith("EXTEND") && QuickHeaderInfo.getStringValue(line).equalsIgnoreCase("T")) {
 
-					extend = true;
+					 extend = true;
 				}
 
 				if (line.startsWith("END"))
 					break;
-				retVal.add(line);
 
+
+				retVal.add(line);
+				linesRead++;
 			}
 
 			// first extension header
 
-			if (extend)
+			if (extend) {
+				myLogger.debug ("Reading header of first extension");
 				while (r.read(b, 0, 80) == 80) {
 
 					String line = new String(b);
 					if (line.startsWith("END"))
 						break;
+
+					// Workaround for images that claim to be MEF, but are in fact not and you are swamped with lines
+					// of binary crap.
+
+					if (!Character.isLetter(line.charAt(0)) && ! Character.isSpaceChar(line.charAt(0)))
+						break;
+
 					retVal.add(line);
 
-				}
+				}}
 			r.close();
 
 		} catch (Exception e) {
 			myLogger.error("Error while reading in primary hedaer for file " + f.getAbsolutePath(), e);
 
 		}
-
+		myLogger.debug ("End read header " + linesRead);
 		return retVal;
 	}
 
@@ -315,6 +327,22 @@ public class QuickHeaderInfo {
 			}
 		} else {
 			myLogger.warn("Attempt to search in NULL fitsHerader aborted. Returning null");
+		}
+		return value;
+	}
+
+	public static boolean getBooleanValue(Vector<String> fitsHeader, String key) {
+		boolean value = false;
+		String valuestr = getStringValue(fitsHeader, "EXTEND");
+		if (valuestr != null) {
+			try {
+				myLogger.debug ("bolean " + key + " " + valuestr);
+				value = valuestr.equalsIgnoreCase("T");
+
+			} catch (Exception e) {
+				myLogger.error ("While boolean parsing " + key + " -> " + valuestr, e);
+				value = false;
+			}
 		}
 		return value;
 	}

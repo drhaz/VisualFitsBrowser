@@ -1,11 +1,11 @@
 package org.cowjumping.VisualFitsBrowser.util.FitsComments;
 
-import org.cowjumping.VisualFitsBrowser.util.ODIFitsFileEntry;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 public interface FitsCommentInterface {
 
-	public void readComment(ODIFitsFileEntry entry);
+	public void readComment(FitsFileEntry entry);
 
-	public void writeComment(ODIFitsFileEntry e);
+	public void writeComment(FitsFileEntry e);
 
 }

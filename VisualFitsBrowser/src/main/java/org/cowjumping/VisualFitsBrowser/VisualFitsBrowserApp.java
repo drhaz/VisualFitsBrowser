@@ -2,13 +2,7 @@ package org.cowjumping.VisualFitsBrowser;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +51,7 @@ public class VisualFitsBrowserApp extends JFrame {
 			+ ".ToolsBoxWindowLocation";
 	private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
 	private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
-
+    private final static String PROP_DS9EXEC =  VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
 
 
 	/**
@@ -71,7 +65,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
 
 	static long IRAF_MSGID = 0;
-	static long IrafLastAttemt = 0;
 
 	/**
 	 * A singleton file browser application
@@ -316,6 +309,20 @@ public class VisualFitsBrowserApp extends JFrame {
 
 		final JLabel ds9Label = new JLabel("DS9  ");
 		theMenu.add(ds9Label);
+		ds9Label.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+				if (e.getClickCount()==2) {
+					if  ( !ds9Label.isEnabled()) {
+				        System.out.println("DS9 label double clicked");
+
+                        ds9Label.setEnabled(true);
+				        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC,"/usr/local/bin/ds9"));
+			        }
+				}
+			}
+		});
 
 		final JLabel fileWatch = new JLabel("Files watched: " + 0);
 		// theMenu.add(fileWatch);
