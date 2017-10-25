@@ -71,7 +71,7 @@ public class DirectoryListener implements Runnable {
 	public DirectoryListener(File dir, DirectoryChangeReceiver rec) {
 		myDirectory = dir;
 		this.rec = rec;
-		mFileNameFilter = new ODIImageDirectoryFilter();
+		//mFileNameFilter = new ODIImageDirectoryFilter();
 		newFileQueue = new ConcurrentLinkedQueue<File>();
 		abortWait = new Semaphore(1);
 		try {
@@ -130,6 +130,13 @@ public class DirectoryListener implements Runnable {
 
 				// We have a valid, completed file
 				if (m.exists() || FitsFileEntry.ArchiveMode || !FitsFileEntry.ODIMode) {
+
+					long length = f.length();
+
+					if (!f.isDirectory() && (length < 2880)) {
+						// Sanity check: fits file to be valid has to ahve a t least one full fits block length.
+					    continue;
+					}
 
 					removeList.add(f);
 					rec.addSingleNewItem(f);
