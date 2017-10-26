@@ -179,4 +179,8 @@
     </issueManagement>
 
 
+    <scm>
+        <connection>scm:git:https://github.com/drhaz/VisualFitsBrowser</connection>
+    </scm>
+
 </project>
