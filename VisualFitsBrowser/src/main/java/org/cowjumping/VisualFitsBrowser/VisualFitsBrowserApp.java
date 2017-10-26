@@ -38,6 +38,7 @@ import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.ResponseHandler;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
+import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.OSXAdapter;
@@ -48,226 +49,230 @@ import org.cowjumping.guiUtils.SAMPUtilities;
 public class VisualFitsBrowserApp extends JFrame {
 
 
-	private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
+    private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
 
-	private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
-			+ ".WindowLocation";
-	private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
-			+ ".ToolsBoxWindowLocation";
-	private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
-	private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
-    private final static String PROP_DS9EXEC =  VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
+    private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
+            + ".WindowLocation";
+    private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
+            + ".ToolsBoxWindowLocation";
+    private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
+    private final static String PROP_SHOWWAVEFRONT = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWWAVEFRONT";
 
-
-	/**
-	 * Class to Manage & Display image directory
-	 */
-	private  static FileBrowserPanel mBrowserPanel;
-	private static ImageToolBoxPanel mToolBoxPanel = null;
-	private JFrame ToolBoxFrame = null;
-
-	private boolean showUtilities;
+    private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
+    private final static String PROP_DS9EXEC = VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
 
 
-	static long IRAF_MSGID = 0;
+    /**
+     * Class to Manage & Display image directory
+     */
+    private static FileBrowserPanel mBrowserPanel;
+    private static ImageToolBoxPanel mToolBoxPanel = null;
+    private static JFrame ToolBoxFrame = null;
+    private static DonutDisplayFrame DonutFrame = DonutDisplayFrame.getInstance();
 
-	/**
-	 * A singleton file browser application
-	 */
-	public static VisualFitsBrowserApp theFileBrowserApp = null;
+    private boolean showUtilities;
+    private boolean showWavefront;
 
-	private VisualFitsBrowserApp() {
 
-		super("VisualFitsBrowser " + getVersion());
-		theFileBrowserApp = this;
+    static long IRAF_MSGID = 0;
 
-		// Get a saved parameter instance for this application.
-		Preferences.initPreferences("VisualFitsBrowserApp");
+    /**
+     * A singleton file browser application
+     */
+    public static VisualFitsBrowserApp theFileBrowserApp = null;
+
+    private VisualFitsBrowserApp() {
+
+        super("VisualFitsBrowser " + getVersion());
+        theFileBrowserApp = this;
+
+        // Get a saved parameter instance for this application.
+        Preferences.initPreferences("VisualFitsBrowserApp");
 
 		/*
-		 * Build the GUI: Basic Layout: three vertical panels from left to right
+         * Build the GUI: Basic Layout: three vertical panels from left to right
 		 */
-		BorderLayout mBorderLayout = new BorderLayout();
-		this.setLayout(mBorderLayout);
+        BorderLayout mBorderLayout = new BorderLayout();
+        this.setLayout(mBorderLayout);
 
-		this.mToolBoxPanel = new ImageToolBoxPanel(null);
-		FileBrowserPanel fbp = new FileBrowserPanel(this.mToolBoxPanel);
+        this.mToolBoxPanel = new ImageToolBoxPanel(null);
+        FileBrowserPanel fbp = new FileBrowserPanel(this.mToolBoxPanel);
 
-		this.setmBrowserPanel(fbp);
-		this.add(getmBrowserPanel(), BorderLayout.CENTER);
-		this.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
+        this.setmBrowserPanel(fbp);
+        this.add(getmBrowserPanel(), BorderLayout.CENTER);
+        this.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
 
-		this.ToolBoxFrame = new JFrame("Fits ToolBox");
+        this.ToolBoxFrame = new JFrame("Fits ToolBox");
 
-		ToolBoxFrame.getContentPane().add(mToolBoxPanel);
-		ToolBoxFrame.pack();
+        ToolBoxFrame.getContentPane().add(mToolBoxPanel);
+        ToolBoxFrame.pack();
 
 		/*
 		 * Define the MenuBar
 		 */
 
-		this.setJMenuBar(createTheMenu());
+        this.setJMenuBar(createTheMenu());
 
 		/*
 		 * Ensure graceful handling of window close events
 		 */
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				myLogger.info("Closing down Directory Listener");
-				onExit();
-				System.exit(0);
-			}
-		});
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                myLogger.info("Closing down Directory Listener");
+                onExit();
+                System.exit(0);
+            }
+        });
 
 		/*
 		 * Finally, restore window location and some look and feel fine-tuning
 		 */
-		Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
-		Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
+        Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
+        Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
 
-		getContentPane().setBackground(new java.awt.Color(198, 206, 217));
-		try {
-			Thread.sleep(20);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+        getContentPane().setBackground(new java.awt.Color(198, 206, 217));
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
-		pack();
-		setVisible(true);
+        pack();
+        setVisible(true);
 
-		this.setShowUtiltiies(
-				Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+        this.setShowUtiltiies(
+                Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
 
 		/*
 		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
 		 */
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Thread.sleep(1000);
-					setResizable(false);
-					OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
-				} catch (Exception e) {
-					myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    setResizable(false);
+                    OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
+                } catch (Exception e) {
+                    myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
 
-				}
-			}
-		});
+                }
+            }
+        });
 
-	}
+    }
 
-	/**
-	 * Enable or disable display of the toolbox section right of the list.
-	 *
-	 * @param show
-	 */
+    /**
+     * Enable or disable display of the toolbox section right of the list.
+     *
+     * @param show
+     */
 
-	private void setShowUtiltiies(boolean show) {
+    private void setShowUtiltiies(boolean show) {
 
-		Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
-		this.showUtilities = show;
-		if (this.ToolBoxFrame != null) {
+        Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
+        this.showUtilities = show;
+        if (this.ToolBoxFrame != null) {
 
-			this.ToolBoxFrame.setVisible(show);
-		}
+            this.ToolBoxFrame.setVisible(show);
+        }
 
-	}
-
-	private JMenuBar createTheMenu() {
-
-		JMenuBar theMenu = new JMenuBar();
-
-		JMenu menu = new JMenu("File");
-		JMenuItem menuItem;
-
-		menu.getAccessibleContext().setAccessibleDescription("File Menu");
-		theMenu.add(menu);
+    }
 
 
-		{
-			menuItem = new JMenuItem("Change Directory ...", KeyEvent.VK_L);
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (getmBrowserPanel() != null)
-						getmBrowserPanel().selectNewDirectory();
-				}
-			});
+    private void setShowWavefront(boolean show) {
 
-			menu.add(menuItem);
-		}
+        Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
+        this.showWavefront = show;
+        if (this.DonutFrame != null) {
 
-		{
-			menuItem = new JMenuItem("Reload Directory", KeyEvent.VK_R);
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
-			menu.add(menuItem);// Possible error source: generate thumbnail
-			// after closure
-			// finished.);
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (getmBrowserPanel() != null)
-						getmBrowserPanel().reload();
-				}
-			});
-		}
+            this.DonutFrame.setVisible(show);
+        }
 
+    }
 
-		menu.add(new JSeparator());
+    private JMenuBar createTheMenu() {
 
-		{
-			menuItem = new JCheckBoxMenuItem("ToolBox");
-			menuItem.setSelected(
-					Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+        JMenuBar theMenu = new JMenuBar();
 
-			menu.add(menuItem);
-			menuItem.addItemListener(new ItemListener() {
+        JMenu menu = new JMenu("File");
+        JMenuItem menuItem;
 
-				public void itemStateChanged(ItemEvent e) {
-					boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
-					setShowUtiltiies(show);
-
-				}
-
-			});
-		}
-
-		{
-			menuItem = Filelist2Latex.getPDFLogFileMenuItem(this.mBrowserPanel);
-			menu.add (menuItem);
-		}
-
-
-
-		{
-			menuItem = new JCheckBoxMenuItem("Auto display new image in ds9");
-			menuItem.setSelected(Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false")));
-			if (this.getmBrowserPanel() != null)
-				getmBrowserPanel().autoLoadImageToListener =
-						Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
-
-			menuItem.addItemListener(new ItemListener() {
-
-				public void itemStateChanged(ItemEvent e) {
-					boolean auto = ((JCheckBoxMenuItem) e.getSource()).getState();
-					if (getmBrowserPanel() != null)
-						getmBrowserPanel().autoLoadImageToListener = auto;
-
-					Preferences.thePreferences.setProperty(PROP_AUTODISPLAY, auto + "");
-				}
-
-			});
-			menu.add(menuItem);
-		}
+        menu.getAccessibleContext().setAccessibleDescription("File Menu");
+        theMenu.add(menu);
 
 
         {
-            menuItem = new JMenuItem("Get ds9 iexam");
+            menuItem = new JMenuItem("Change Directory ...", KeyEvent.VK_L);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().selectNewDirectory();
+                }
+            });
 
-            menuItem.addActionListener( new ActionListener() {
+            menu.add(menuItem);
+        }
 
-                public void  actionPerformed(ActionEvent e) {
-                    SAMPUtilities.getDS9Cursor();
+        {
+            menuItem = new JMenuItem("Reload Directory", KeyEvent.VK_R);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+            menu.add(menuItem);// Possible error source: generate thumbnail
+            // after closure
+            // finished.);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().reload();
+                }
+            });
+        }
+
+
+        menu.add(new JSeparator());
+
+        {
+            menuItem = new JCheckBoxMenuItem("Show ToolBox");
+            menuItem.setSelected(
+                    Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
+
+            menu.add(menuItem);
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    setShowUtiltiies(show);
+
+                }
+
+            });
+        }
+
+
+
+
+        {
+            menuItem = Filelist2Latex.getPDFLogFileMenuItem(this.mBrowserPanel);
+            menu.add(menuItem);
+        }
+
+
+        {
+            menuItem = new JCheckBoxMenuItem("Auto display new image in ds9");
+            menuItem.setSelected(Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false")));
+            if (this.getmBrowserPanel() != null)
+                getmBrowserPanel().autoLoadImageToListener =
+                        Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
+
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean auto = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().autoLoadImageToListener = auto;
+
+                    Preferences.thePreferences.setProperty(PROP_AUTODISPLAY, auto + "");
                 }
 
             });
@@ -275,163 +280,199 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
 
+        menu.add(new JSeparator());
 
-		menu.add(new JSeparator());
+        {
+            menuItem = new JMenuItem("Exit", KeyEvent.VK_X);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK));
+            menu.add(menuItem);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    onExit();
+                    System.exit(0);
+                }
+            });
+        }
 
-		{
-			menuItem = new JMenuItem("Exit", KeyEvent.VK_X);
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-			menu.add(menuItem);
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					onExit();
-					System.exit(0);
-				}
-			});
-		}
+        menu = new JMenu("LogSheets");
+        menu.getAccessibleContext().setAccessibleDescription("Logsheets Menu");
 
-		menu = new JMenu("LogSheets");
-		menu.getAccessibleContext().setAccessibleDescription("Logsheets Menu");
+        if (false)
+            theMenu.add(menu);
 
-		if (false)
-			theMenu.add(menu);
+        {
+            menuItem = new JMenuItem("Create Logsheets", KeyEvent.VK_P);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
+            menu.add(menuItem);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null && getmBrowserPanel().getNumberOfEntries() > 0) {
+                        // mBrowserPanel.print();
 
-		{
-			menuItem = new JMenuItem("Create Logsheets", KeyEvent.VK_P);
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
-			menu.add(menuItem);
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (getmBrowserPanel() != null && getmBrowserPanel().getNumberOfEntries() > 0) {
-						// mBrowserPanel.print();
+                        String fName = "Log_" + getmBrowserPanel().mRootDirectoryString
+                                .substring(getmBrowserPanel().mRootDirectoryString.indexOf("podi") + 5);
+                        fName = fName.replaceAll("/", "_");
+                        fName = fName.replaceAll("\\.", "") + ".tex";
+                        Filelist2Latex.writeFileList2Latex(getmBrowserPanel().mRootDirectoryString,
+                                getmBrowserPanel().getImageList(), "/tmp/" + fName);
+                        Filelist2Latex.processLatex("/tmp/", fName);
+                        Filelist2Latex.processLatex("/tmp/", fName);
+                        Filelist2Latex.openLatexPDF("/tmp/" + fName.replace("tex", "pdf"));
+                    } else {
+                        myLogger.info("Cannot genreate Latex logsheet since threre is no viable filelist");
+                    }
+                }
+            });
+        }
 
-						String fName = "Log_" + getmBrowserPanel().mRootDirectoryString
-								.substring(getmBrowserPanel().mRootDirectoryString.indexOf("podi") + 5);
-						fName = fName.replaceAll("/", "_");
-						fName = fName.replaceAll("\\.", "") + ".tex";
-						Filelist2Latex.writeFileList2Latex(getmBrowserPanel().mRootDirectoryString,
-								getmBrowserPanel().getImageList(), "/tmp/" + fName);
-						Filelist2Latex.processLatex("/tmp/", fName);
-						Filelist2Latex.processLatex("/tmp/", fName);
-						Filelist2Latex.openLatexPDF("/tmp/" + fName.replace("tex", "pdf"));
-					} else {
-						myLogger.info("Cannot genreate Latex logsheet since threre is no viable filelist");
-					}
-				}
-			});
-		}
 
-		JMenu debugMenu = GUIConsts.getDebugMenu();
+        menu = new JMenu("Wavefront");
+        theMenu.add(menu);
 
-		// theMenu.add(debugMenu);
 
-		theMenu.add(Box.createHorizontalGlue());
+        {
+            menuItem = new JCheckBoxMenuItem("Show Wavefront Frame");
+            menuItem.setSelected(
+                    Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWWAVEFRONT, "false")));
 
-		final JLabel ds9Label = new JLabel("DS9  ");
-		theMenu.add(ds9Label);
-		ds9Label.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				super.mouseClicked(e);
-				if (e.getClickCount()==2) {
-					if  ( !ds9Label.isEnabled()) {
-				        System.out.println("DS9 label double clicked");
+            menu.add(menuItem);
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    setShowWavefront(show);
+
+                }
+
+            });
+        }
+
+        {
+
+            menuItem = new JMenuItem("DONUT from ds9 pick");
+
+            menuItem.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+                    SAMPUtilities.getDS9Cursor();
+                }
+
+            });
+            menu.add(menuItem);
+
+        }
+
+        JMenu debugMenu = GUIConsts.getDebugMenu();
+
+        // theMenu.add(debugMenu);
+
+        theMenu.add(Box.createHorizontalGlue());
+
+        final JLabel ds9Label = new JLabel("DS9  ");
+        theMenu.add(ds9Label);
+        ds9Label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                    if (!ds9Label.isEnabled()) {
+                        System.out.println("DS9 label double clicked");
 
                         ds9Label.setEnabled(true);
-				        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC,"/usr/local/bin/ds9"));
-			        }
-				}
-			}
-		});
+                        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC, "/usr/local/bin/ds9"));
+                    }
+                }
+            }
+        });
 
-		final JLabel fileWatch = new JLabel("Files watched: " + 0);
-		// theMenu.add(fileWatch);
+        final JLabel fileWatch = new JLabel("Files watched: " + 0);
+        // theMenu.add(fileWatch);
 
-		final JLabel memorylabel = new JLabel("  "); // "RAM: " +
-		// Runtime.getRuntime().totalMemory()
-		// / 1024 / 1024 + "
-		// MB");
+        final JLabel memorylabel = new JLabel("  "); // "RAM: " +
+        // Runtime.getRuntime().totalMemory()
+        // / 1024 / 1024 + "
+        // MB");
 
-		theMenu.add(memorylabel);
+        theMenu.add(memorylabel);
 
-		final JProgressBar mProgressBar = new JProgressBar(0, 1000);
-		mProgressBar.setStringPainted(true);
+        final JProgressBar mProgressBar = new JProgressBar(0, 1000);
+        mProgressBar.setStringPainted(true);
 
-		mProgressBar.setMaximumSize(new Dimension(100, mProgressBar.getPreferredSize().height));
-		theMenu.add(mProgressBar);
+        mProgressBar.setMaximumSize(new Dimension(100, mProgressBar.getPreferredSize().height));
+        theMenu.add(mProgressBar);
 
-		Thread t = new Thread(new Runnable() {
+        Thread t = new Thread(new Runnable() {
 
-			public void run() {
+            public void run() {
 
-				final Runtime rt = Runtime.getRuntime();
-				double free = 0;
-				double total = 1;
-				// boolean heart = true;
-				while (true) {
+                final Runtime rt = Runtime.getRuntime();
+                double free = 0;
+                double total = 1;
+                // boolean heart = true;
+                while (true) {
 
-					boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
-					ds9Label.setEnabled(ds9Status);
+                    boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
+                    ds9Label.setEnabled(ds9Status);
 
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						myLogger.warn("Error in memory monitoring thread.", e);
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        myLogger.warn("Error in memory monitoring thread.", e);
 
-					}
+                    }
 
-					if (getmBrowserPanel() != null && getmBrowserPanel().mRootDirectory != null
-							&& getmBrowserPanel().mRootDirectory.exists()) {
+                    if (getmBrowserPanel() != null && getmBrowserPanel().mRootDirectory != null
+                            && getmBrowserPanel().mRootDirectory.exists()) {
 
-						free = getmBrowserPanel().mRootDirectory.getFreeSpace();
+                        free = getmBrowserPanel().mRootDirectory.getFreeSpace();
 
-						total = getmBrowserPanel().mRootDirectory.getTotalSpace();
-						if (total != 0) {
-							int progress = (int) ((total - free) / total * 1000);
+                        total = getmBrowserPanel().mRootDirectory.getTotalSpace();
+                        if (total != 0) {
+                            int progress = (int) ((total - free) / total * 1000);
 
-							mProgressBar.setValue(progress);
-							if (progress < 800)
-								mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
-							else
-								mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
-							mProgressBar.setString(String.format("%6.2f TB free", free / 1000. / 1000 / 1000 / 1000));
+                            mProgressBar.setValue(progress);
+                            if (progress < 800)
+                                mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
+                            else
+                                mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
+                            mProgressBar.setString(String.format("%6.2f TB free", free / 1000. / 1000 / 1000 / 1000));
 
-						}
+                        }
 
-					}
-				}
-			}
+                    }
+                }
+            }
 
-		});
-		t.setName("Memory Display Thread");
-		t.start();
+        });
+        t.setName("Memory Display Thread");
+        t.start();
 
-		return theMenu;
+        return theMenu;
 
-	}
+    }
 
-	private void onExit() {
-		Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
-		Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
-		Preferences.thePreferences.save();
-	}
+    private void onExit() {
+        Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
+        Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
+        Preferences.thePreferences.save();
+    }
 
-	private static void initSampHub() {
+    private static void initSampHub() {
 
-		SAMPUtilities.initHubConnector("ODI File Browser", "ODI File Browser & Image Analysis tool.", true);
+        SAMPUtilities.initHubConnector("ODI File Browser", "ODI File Browser & Image Analysis tool.", true);
 
-		SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.otalistener.displayedImage") {
-			public Map processCall(HubConnection c, String senderId, Message msg) {
-				myLogger.debug("SAMP message handler");
-				if (getmBrowserPanel() != null) {
-					getmBrowserPanel().setDisplayedImage((String) msg.getParam("fname"));
-				}
+        SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.otalistener.displayedImage") {
+            public Map processCall(HubConnection c, String senderId, Message msg) {
+                myLogger.debug("SAMP message handler");
+                if (getmBrowserPanel() != null) {
+                    getmBrowserPanel().setDisplayedImage((String) msg.getParam("fname"));
+                }
 
-				return null;
-			}
-		});
+                return null;
+            }
+        });
 
-		SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
+        SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
             @Override
             public boolean ownsTag(String s) {
                 if (s.toLowerCase().contentEquals("donut")) {
@@ -448,7 +489,7 @@ public class VisualFitsBrowserApp extends JFrame {
                 if (msg.isOK()) {
 
                     String result = (String) msg.getResult().get("value");
-                    System.out.println ("Message result has value: " + result);
+                    System.out.println("Message result has value: " + result);
                     Pattern pattern = Pattern.compile("\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.*)\\}");
                     Matcher matcher = pattern.matcher(result);
                     if (matcher.matches()) {
@@ -456,9 +497,9 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double x = Double.parseDouble(matcher.group(2));
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
-                        System.out.println (String.format ("Fname %s x %f y %f  ext %s",fname,x,y,ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File (fname), false,650,101,200);
-                        newtask.setResultListener(mToolBoxPanel);
+                        System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, 650, 101, 200);
+                        newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
                 }
@@ -466,125 +507,125 @@ public class VisualFitsBrowserApp extends JFrame {
             }
         });
 
-	}
+    }
 
-	private static void parseArgs(String[] args) {
-		Options options = new Options();
+    private static void parseArgs(String[] args) {
+        Options options = new Options();
 
-		options.addOption("debug", false, "Debug");
-		options.addOption("h", false, "show help");
-		CommandLineParser parser = new DefaultParser();
-		try {
-			CommandLine cmd = parser.parse(options, args);
+        options.addOption("debug", false, "Debug");
+        options.addOption("h", false, "show help");
+        CommandLineParser parser = new DefaultParser();
+        try {
+            CommandLine cmd = parser.parse(options, args);
 
-			if (cmd.hasOption("debug")) {
+            if (cmd.hasOption("debug")) {
 
-				Logger.getRootLogger().setLevel(Level.DEBUG);
-			}
+                Logger.getRootLogger().setLevel(Level.DEBUG);
+            }
 
-		} catch (Exception e) {
-			myLogger.warn("Command line parsing error!");
+        } catch (Exception e) {
+            myLogger.warn("Command line parsing error!");
 
-		}
+        }
 
-	}
+    }
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		PropertyConfigurator.configure(
-				VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
+        PropertyConfigurator.configure(
+                VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
 
-		parseArgs(args);
+        parseArgs(args);
 
-		GUIConsts.setLookAndFeel();
+        GUIConsts.setLookAndFeel();
 
-		System.out.println("VisualFitsBrowser Version " + getVersion());
-		System.out.println("(c) 2017 Daniel Harbeck, cowjumping.org");
-		System.out.println("Starting Samp Interface ...");
-		initSampHub();
+        System.out.println("VisualFitsBrowser Version " + getVersion());
+        System.out.println("(c) 2017 Daniel Harbeck, cowjumping.org");
+        System.out.println("Starting Samp Interface ...");
+        initSampHub();
 
-		System.out.println("Starting Directory Browser & Listener ...");
-		@SuppressWarnings("unused")
-		VisualFitsBrowserApp b = new VisualFitsBrowserApp();
+        System.out.println("Starting Directory Browser & Listener ...");
+        @SuppressWarnings("unused")
+        VisualFitsBrowserApp b = new VisualFitsBrowserApp();
 
-		System.out.println("Registering functions with SAMP ...");
-		SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.iraf.imageLoadReply") {
-			public Map processCall(HubConnection c, String senderId, Message msg) {
+        System.out.println("Registering functions with SAMP ...");
+        SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.iraf.imageLoadReply") {
+            public Map processCall(HubConnection c, String senderId, Message msg) {
 
-				if (msg.getParam("msgid") == null) {
-					myLogger.info("Invalid image return message for awaiting: " + IRAF_MSGID + "\n Got event: " + msg);
-					return null;
-				}
-				long msgID = Integer.parseInt((String) msg.getParam("msgID"));
-				if (msgID != IRAF_MSGID) {
-					myLogger.debug("image load response does not match a request of mine: " + msgID + " != "
-							+ IRAF_MSGID + " . Ignoring");
-				}
+                if (msg.getParam("msgid") == null) {
+                    myLogger.info("Invalid image return message for awaiting: " + IRAF_MSGID + "\n Got event: " + msg);
+                    return null;
+                }
+                long msgID = Integer.parseInt((String) msg.getParam("msgID"));
+                if (msgID != IRAF_MSGID) {
+                    myLogger.debug("image load response does not match a request of mine: " + msgID + " != "
+                            + IRAF_MSGID + " . Ignoring");
+                }
 
-				myLogger.debug("SAMP message handler: Reply to loaded Image received.");
+                myLogger.debug("SAMP message handler: Reply to loaded Image received.");
 
-				return null;
-			}
-		});
-
-
-		SAMPUtilities.getHubConnector().declareSubscriptions(SAMPUtilities.getHubConnector().computeSubscriptions());
-
-		System.out.println("File Browser is up and running.");
-
-	}
+                return null;
+            }
+        });
 
 
-	public static FileBrowserPanel getmBrowserPanel() {
-		return mBrowserPanel;
-	}
+        SAMPUtilities.getHubConnector().declareSubscriptions(SAMPUtilities.getHubConnector().computeSubscriptions());
 
-	public static void setmBrowserPanel(FileBrowserPanel mBrowserPanel) {
-		VisualFitsBrowserApp.mBrowserPanel = mBrowserPanel;
-	}
+        System.out.println("File Browser is up and running.");
 
-	class StreamGobbler extends Thread {
-		InputStream is;
-		String type;
+    }
 
-		StreamGobbler(InputStream is, String type) {
-			this.is = is;
-			this.type = type;
-		}
 
-		public void run() {
-			try {
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					if (type.matches("stderr"))
-						myLogger.error(line);
-					if (type.matches("stdout"))
-						myLogger.debug(line);
-				}
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-		}
-	}
+    public static FileBrowserPanel getmBrowserPanel() {
+        return mBrowserPanel;
+    }
 
-	private static String getVersion() {
+    public static void setmBrowserPanel(FileBrowserPanel mBrowserPanel) {
+        VisualFitsBrowserApp.mBrowserPanel = mBrowserPanel;
+    }
 
-		String v = "";
-		try {
-			InputStream i = VisualFitsBrowserApp.class.getResourceAsStream("/resources/properties");
-			if (i == null) {
-				myLogger.warn("Could not read version file.");
-				return v;
-			}
-			java.util.Properties p = new Properties();
-			p.load(i);
-			v = p.getProperty("version");
-		} catch (Exception e) {
-			myLogger.error("While reading version number: ", e);
-		}
+    class StreamGobbler extends Thread {
+        InputStream is;
+        String type;
 
-		return v;
-	}
+        StreamGobbler(InputStream is, String type) {
+            this.is = is;
+            this.type = type;
+        }
+
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    if (type.matches("stderr"))
+                        myLogger.error(line);
+                    if (type.matches("stdout"))
+                        myLogger.debug(line);
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
+
+    private static String getVersion() {
+
+        String v = "";
+        try {
+            InputStream i = VisualFitsBrowserApp.class.getResourceAsStream("/resources/properties");
+            if (i == null) {
+                myLogger.warn("Could not read version file.");
+                return v;
+            }
+            java.util.Properties p = new Properties();
+            p.load(i);
+            v = p.getProperty("version");
+        } catch (Exception e) {
+            myLogger.error("While reading version number: ", e);
+        }
+
+        return v;
+    }
 }
