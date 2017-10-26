@@ -29,7 +29,7 @@ public class SAMPUtilities {
 	private static HubConnector sampHubConnector = null;
 	private static Hub theHub = null;
 
-	private static void initHubConnector(String name, String Descr, boolean runHub) {
+    public static void initHubConnector(String name, String Descr, boolean runHub) {
 
 		if (runHub) {
 			try {
