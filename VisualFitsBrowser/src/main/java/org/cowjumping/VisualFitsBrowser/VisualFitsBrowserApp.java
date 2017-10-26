@@ -508,7 +508,7 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, 650, 101, 200);
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(),  y.intValue(), 200);
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
