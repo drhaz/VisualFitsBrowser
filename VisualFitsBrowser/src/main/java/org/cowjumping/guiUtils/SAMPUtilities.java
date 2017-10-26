@@ -111,6 +111,42 @@ public class SAMPUtilities {
 	}
 
 
+	public static void lockScale() {
+	    sendCommand("scale lock yes");
+    }
+
+    public static void lockFrame () {
+	    sendCommand("lock frame image");
+    }
+
+    public static  void lockColorbar () {
+	    sendCommand("cmap lock yes");
+    }
+
+    public static void clearAllFrames () {
+	    sendCommand("frame delete all");
+    }
+
+    public static void lockAll () {
+	    lockColorbar();
+	    lockScale();
+	    lockFrame();
+    }
+
+	private static void sendCommand (String command) {
+        try {
+
+            Message m = new Message("ds9.set");
+            m.addParam("cmd", command);
+
+            getHubConnector().getConnection().notifyAll(m);
+
+        } catch (Exception e) {
+            log.error("Could not send command " + command + " to ds9 via SAMP", e);
+        }
+    }
+
+
 	public static void launchds9(String pathToBinary) {
 		try {
 
@@ -186,16 +222,13 @@ public class SAMPUtilities {
 	}
 
 
+    public static boolean isMEF (String fname) {
 
-	public static void loadImageCheckMEG (String fname, int no){
-
+        Fits f = null;
         int numberofImages = 0;
         boolean compresscorrect = false;
 
-        Fits f = null;
         try {
-
-
             f = new Fits(fname);
             BasicHDU[] HDUs = f.read();
             for (int j = 0; j < HDUs.length; j++) {
@@ -209,13 +242,13 @@ public class SAMPUtilities {
                     }
                 }
 
-            if (numberofImages>1)
-                continue;
+                if (numberofImages>1)
+                    continue;
             }
 
         } catch (Exception e) {
             log.error (e);
-            return;
+            return false;
         } finally {
             try {
                 f.close();
@@ -223,7 +256,12 @@ public class SAMPUtilities {
 
         }
 
-        if (numberofImages > 1) {
+        return (numberofImages > 1);
+    }
+
+	public static void loadImageCheckMEG (String fname, int no){
+
+        if (isMEF(fname)) {
             loadMosaicDS9(fname, no);
         } else {
             loadImageDS9(fname, no);
