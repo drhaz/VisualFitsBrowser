@@ -55,6 +55,8 @@ public class VisualFitsBrowserApp extends JFrame {
             + ".WindowLocation";
     private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
             + ".ToolsBoxWindowLocation";
+    private final static String PROP_WINDOWLOCATION_WAVEFRONT = VisualFitsBrowserApp.class.getCanonicalName()
+            + ".WavefrontWindowLocation";
     private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
     private final static String PROP_SHOWWAVEFRONT = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWWAVEFRONT";
 
@@ -68,7 +70,7 @@ public class VisualFitsBrowserApp extends JFrame {
     private static FileBrowserPanel mBrowserPanel;
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
-    private static DonutDisplayFrame DonutFrame = DonutDisplayFrame.getInstance();
+    private static DonutDisplayFrame DonutFrame = null;
 
     private boolean showUtilities;
     private boolean showWavefront;
@@ -107,6 +109,12 @@ public class VisualFitsBrowserApp extends JFrame {
         ToolBoxFrame.getContentPane().add(mToolBoxPanel);
         ToolBoxFrame.pack();
 
+        /*
+         * Wavefront analysis
+         */
+
+        DonutFrame = DonutDisplayFrame.getInstance();
+
 		/*
 		 * Define the MenuBar
 		 */
@@ -129,6 +137,7 @@ public class VisualFitsBrowserApp extends JFrame {
 		 */
         Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
+        Preferences.thePreferences.restoreWindowLocation(this.DonutFrame, this.PROP_WINDOWLOCATION_WAVEFRONT);
 
         getContentPane().setBackground(new java.awt.Color(198, 206, 217));
         try {
@@ -454,6 +463,7 @@ public class VisualFitsBrowserApp extends JFrame {
     private void onExit() {
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
+        Preferences.thePreferences.storeWindowLocation(this.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);
         Preferences.thePreferences.save();
     }
 
