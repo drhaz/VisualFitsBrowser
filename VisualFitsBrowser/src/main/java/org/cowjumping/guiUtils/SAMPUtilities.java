@@ -1,9 +1,9 @@
 package org.cowjumping.guiUtils;
 
 import java.io.IOException;
-
 import javax.swing.JOptionPane;
 
+import nom.tam.image.compression.hdu.CompressedImageHDU;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -16,6 +16,8 @@ import org.astrogrid.samp.client.SampException;
 import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
+import nom.tam.fits.*;
+
 
 /**
  * Tools to use via SAMP. This is mostly concerning interaction with ds9.
@@ -182,6 +184,52 @@ public class SAMPUtilities {
 			log.error("While requesting cursor selection:", e);
 		}
 	}
+
+
+
+	public static void loadImageCheckMEG (String fname, int no){
+
+        int numberofImages = 0;
+        boolean compresscorrect = false;
+
+        Fits f = null;
+        try {
+
+
+            f = new Fits(fname);
+            BasicHDU[] HDUs = f.read();
+            for (int j = 0; j < HDUs.length; j++) {
+                if ((HDUs[j] instanceof ImageHDU)
+                        || (HDUs[j] instanceof CompressedImageHDU)) {
+                    numberofImages++;
+                    log.debug("Found imaging extension, total number is " +numberofImages + "  " + HDUs[j]);
+                    if (! compresscorrect && (HDUs[j] instanceof CompressedImageHDU)) {
+                        compresscorrect = true;
+                        numberofImages--;
+                    }
+                }
+
+            if (numberofImages>1)
+                continue;
+            }
+
+        } catch (Exception e) {
+            log.error (e);
+            return;
+        } finally {
+            try {
+                f.close();
+            } catch (Exception e) {log.error(e);}
+
+        }
+
+        if (numberofImages > 1) {
+            loadMosaicDS9(fname, no);
+        } else {
+            loadImageDS9(fname, no);
+        }
+
+    }
 
 	public static void loadMosaicDS9(String fname, int fno) {
 		log.debug("SAMP: Loading Mosiac image to ds9: " + fname);
