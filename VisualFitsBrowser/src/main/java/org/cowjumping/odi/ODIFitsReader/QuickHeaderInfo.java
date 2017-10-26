@@ -38,7 +38,7 @@ public class QuickHeaderInfo {
 			return retVal;
 		}
 
-		myLogger.debug ("Start rad header");
+		myLogger.debug ("Start read header");
 		int linesRead = 0;
 		// Read primary header & first extension
 		try {
