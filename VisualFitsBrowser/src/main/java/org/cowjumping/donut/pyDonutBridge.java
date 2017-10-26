@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by harbeck on 6/30/16.
@@ -31,13 +33,25 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
     private final int x;
     private final int y;
 
-    String resultsString = null;
-    Image resultImage = null;
+    public String resultsString = null;
+    public Image resultImage = null;
     private String donutExecutable = "/home/dharbeck/Software/donut/script/donut_odi";
     private String donutConfig = "/home/dharbeck/Software/donut/script/lco-1m.json";
     private String defaultpath = "/tmp";
     private String defaultOutput = "donutfit_" + new Date().getTime();
     private File input;
+
+    public void setResultListener(DonutBridgeResultListener resultListener) {
+        this.resultListener = resultListener;
+    }
+
+    private DonutBridgeResultListener resultListener = null;
+
+    private static final ExecutorService myThreadPool = Executors.newFixedThreadPool(2);
+
+    public static void submitTask (pyDonutBridge newTask) {
+        myThreadPool.submit(newTask);
+    }
 
 
     public pyDonutBridge(File input, int x, int y, int width, boolean intrafocus, Preferences p) {
@@ -47,6 +61,10 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
         this.donutConfig =     p.getProperty("donutbridge.donutconfig", this.donutConfig);
 
     }
+
+
+
+
 
     public pyDonutBridge(File input, boolean intra, int x, int y, int width) {
 
@@ -118,7 +136,9 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
 
             this.resultsString = IOUtils.toString(new FileInputStream(resultstxt), (Charset) null);
             this.resultImage = ImageIO.read(resultsimg);
-
+            log.debug("\n" + this.resultsString);
+            if (this.resultListener != null)
+                this.resultListener.notifyResult(this);
             return (this);
 
         } else {

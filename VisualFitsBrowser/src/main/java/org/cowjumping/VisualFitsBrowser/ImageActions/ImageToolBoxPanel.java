@@ -15,6 +15,8 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
+import org.cowjumping.donut.DonutBridgeResultListener;
+import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.MultiFlickPanel;
 import org.cowjumping.guiUtils.VariableGridLayout;
@@ -27,7 +29,7 @@ import org.cowjumping.guiUtils.VariableGridLayout;
  *
  */
 
-public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
+public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, DonutBridgeResultListener {
 	private static final Logger log = Logger.getLogger(ImageToolBoxPanel.class);
 
 	/**
@@ -48,7 +50,10 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	// Actual items follow now:
 
 	ODIImageInfoPanel myImageInfoPanel = null;
+	DonutPanel myDonutPanel = null;
+
 	private static final String INFOPANEL = "INFOVIEW";
+	private static final String DONUTPANEL = "DONUTVIEW";
 
 	public ImageToolBoxPanel(FileBrowserPanel fbp) {
 
@@ -63,6 +68,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 		myMultiPanel = new MultiFlickPanel();
 		this.add(myMultiPanel, BorderLayout.EAST);
+
 
 		this.fillButtonPanelForODI(ButtonPanel);
 		this.fillMultiPanelView();
@@ -128,6 +134,21 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 		});
 
+
+		JButton donutPanel = new JButton("Donut Panel");
+		generateHeader.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent arg0) {
+
+
+				myMultiPanel.setTopComponent(DONUTPANEL);
+
+
+			}
+
+		});
+
+
 		GridLayout ButtonPanelLayout = new VariableGridLayout(12, 1);
 		ButtonPanelLayout.setColumns(1);
 		ButtonPanelLayout.setRows(19);
@@ -143,6 +164,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		ButtonPanel.add(ImageTitleLabel);
 
 		ButtonPanel.add(generateHeader);
+		ButtonPanel.add(donutPanel);
 
 		ButtonPanel.add (Box.createVerticalGlue ());
 
@@ -155,6 +177,11 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		myImageInfoPanel = new ODIImageInfoPanel();
 		myImageInfoPanel.setName(INFOPANEL);
 		myMultiPanel.addComponent(myImageInfoPanel);
+
+		myDonutPanel = new DonutPanel();
+		myDonutPanel.setName(DONUTPANEL);
+		myMultiPanel.addComponent(myDonutPanel);
+
 
 	}
 
@@ -175,4 +202,9 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 	}
 
+	@Override
+	public void notifyResult(pyDonutBridge result) {
+		myMultiPanel.setTopComponent(DONUTPANEL);
+		this.myDonutPanel.notifyResult(result);
+	}
 }

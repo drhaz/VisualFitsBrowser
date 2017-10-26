@@ -38,6 +38,7 @@ import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.ResponseHandler;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
+import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.OSXAdapter;
 import org.cowjumping.guiUtils.Preferences;
@@ -62,7 +63,7 @@ public class VisualFitsBrowserApp extends JFrame {
 	 * Class to Manage & Display image directory
 	 */
 	private  static FileBrowserPanel mBrowserPanel;
-	private ImageToolBoxPanel mToolBoxPanel = null;
+	private static ImageToolBoxPanel mToolBoxPanel = null;
 	private JFrame ToolBoxFrame = null;
 
 	private boolean showUtilities;
@@ -456,6 +457,9 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println (String.format ("Fname %s x %f y %f  ext %s",fname,x,y,ext));
+                        pyDonutBridge newtask = new pyDonutBridge(new File (fname), false,650,101,200);
+                        newtask.setResultListener(mToolBoxPanel);
+                        pyDonutBridge.submitTask(newtask);
                     }
                 }
 
