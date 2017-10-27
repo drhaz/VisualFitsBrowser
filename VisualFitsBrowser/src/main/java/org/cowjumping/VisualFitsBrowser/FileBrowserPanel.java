@@ -13,7 +13,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -36,7 +35,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
-
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
@@ -55,32 +53,23 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 	private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
 
-	public String mRootDirectoryString = "/";
+	String mRootDirectoryString = "/";
 
 	public File mRootDirectory = null;
-	// private Date lastUpdate = null;
 
 	private DirectoryListener myDirectoryListener = null;
 	public Vector<FitsFileEntry> mImageList;
 
 	private JTable mTable;
 	private FitsViewerTableModel mTableDataModel = null;
-
 	private JLabel rootDirLabel;
-	// private JButton mFileOpenButton = null;
-	// private JButton mReloadButton = null;
-
-	protected int otaX = 0;
-	protected int otaY = 0;
+	private JButton reloadButton = null;
 
 	private final String PROP_LASTDIRECTORY = FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY";
 
 	private OTAFileListListener mFileListListener = null;
 
-	private JButton reloadButton = null;
-
 	boolean autoLoadImageToListener = false;
-
 	private static String DisplayedImage = null;
 
 
@@ -145,7 +134,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		{
 			mTable = new ZebraJTable(mTableDataModel) {
 				public String getToolTipText(MouseEvent e) {
-					String tip = null;
+					String tip;
 					java.awt.Point p = e.getPoint();
 					int rowIndex = rowAtPoint(p);
 					int colIndex = columnAtPoint(p);
@@ -158,9 +147,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 						Object o = getValueAt(rowIndex, colIndex);
 						tip = o != null ? (String) o : "";
 
-					} else {
-						tip = super.getToolTipText(e);
-					}
+					} else tip = super.getToolTipText(e);
+
 					return tip;
 				}
 			};
@@ -478,24 +466,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		return (Vector<FitsFileEntry>) mImageList.clone();
 	}
 
-	public Vector<String> getMyUnconfirmedFileIDs() {
-		Vector<String> ret = new Vector<String>();
 
-		synchronized (mImageList) {
-			for (FitsFileEntry f : mImageList) {
-				if (f.TransferStatus != TRANSFERSTATUS.CONFIRMED_PPA) {
-					ret.add(f.FName);
-				}
-			}
-		}
-
-		return ret;
-
-	}
-
-
-
-	/**
+    /**
 	 * Finds an image entry by name and returns the row of the underlying table
 	 * model
 	 *
@@ -570,7 +542,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 	 *
 	 * @param RootDirectory
 	 */
-	void readDirectory(final File RootDirectory) {
+    private void readDirectory(final File RootDirectory) {
 
 		// stop the directory listener.
 		if (myDirectoryListener != null) {
@@ -845,47 +817,3 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 }
 
-@SuppressWarnings("serial")
-class TRANSFERCellRenderer extends JLabel implements TableCellRenderer {
-
-	private static HashMap<FitsFileEntry.TRANSFERSTATUS, ImageIcon> statusIcons;
-	private final static int iconSize = 16;
-
-	public static ImageIcon getImageIcon(FitsFileEntry.TRANSFERSTATUS status) {
-		ImageIcon retVal = null;
-
-		if (statusIcons == null) {
-			statusIcons = new HashMap<FitsFileEntry.TRANSFERSTATUS, ImageIcon>();
-			ImageIcon myImage = new ImageIcon(
-					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/Folder blue mydocuments.png"));
-			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.INDEF, new ImageIcon(
-					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
-
-			myImage = new ImageIcon(
-					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/TransportGreenTruck.png"));
-			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.CONFIRMED_DTS, new ImageIcon(
-					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
-
-			myImage = new ImageIcon(
-					FileBrowserPanel.class.getClassLoader().getResource("resources/icons/icon_Archive.svg.png"));
-			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.CONFIRMED_PPA, new ImageIcon(
-					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
-
-			myImage = new ImageIcon(FileBrowserPanel.class.getClassLoader().getResource("resources/icons/Error.png"));
-			statusIcons.put(FitsFileEntry.TRANSFERSTATUS.ERROR, new ImageIcon(
-					myImage.getImage().getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH)));
-		}
-
-		retVal = statusIcons.get(status);
-		if (retVal == null)
-			retVal = statusIcons.get(FitsFileEntry.TRANSFERSTATUS.INDEF);
-		return retVal;
-	}
-
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-												   int rowIndex, int vColIndex) {
-		this.setIcon(getImageIcon((FitsFileEntry.TRANSFERSTATUS) value));
-
-		return this;
-	}
-}

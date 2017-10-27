@@ -32,8 +32,8 @@ public class Filelist2Latex {
 			"HH:mm:ss");
 	private static FileBrowserPanel myFileBrowserPanel;
 
-	public static String writeFileList2Latex(String Title,
-                                             Vector<FitsFileEntry> fileLis, String fname) {
+	public static void writeFileList2Latex(String Title,
+                                           Vector<FitsFileEntry> fileLis, String fname) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -52,9 +52,7 @@ public class Filelist2Latex {
 			myLogger.error("Error while writing latex source to File ", e);
 		}
 
-		return sb.toString();
-
-	}
+    }
 
 	private static String generateFileTable(Vector<FitsFileEntry> fileList) {
 
@@ -63,7 +61,7 @@ public class Filelist2Latex {
 		if (fileList != null) {
 
 			List<FitsFileEntry> sortList = new Vector<FitsFileEntry>(fileList);
-			Collections.sort(sortList, new myComp());
+			sortList.sort(new myComp());
 			for (FitsFileEntry fe : sortList) {
 
 				sb.append(generateFileItem(fe));
@@ -154,9 +152,11 @@ public class Filelist2Latex {
 		}
 
 		title = EscapeForLatex(title);
-		retVal = retVal.replace("$TITLE$", title);
+        if (retVal != null) {
+            retVal = retVal.replace("$TITLE$", title);
+        }
 
-		return retVal;
+        return retVal;
 
 	}
 
@@ -174,7 +174,7 @@ public class Filelist2Latex {
 		return retVal;
 	}
 
-	public static String EscapeForLatex(String s) {
+	private static String EscapeForLatex(String s) {
 		String ret = "";
 		if (s == null)
 			return ret;
@@ -250,28 +250,28 @@ public class Filelist2Latex {
 			myLogger.error("Error while processing latex", e);
 		}
 		myLogger.info("PDFLatex output\n " + output.toString());
-		int exitVal = proc.exitValue();
-		return exitVal;
+        return proc.exitValue();
 
 	}
 
-	public static int openLatexPDF(String fname) {
+	public static void openLatexPDF(String fname) {
 
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
-		StringBuffer output = new StringBuffer();
+
 
 		String OpenPDF = Preferences.thePreferences.getProperty(
-				"org.cowjumping.VisualFitsBrowser.latex.openpdf", "evince");
+				"org.cowjumping.VisualFitsBrowser.latex.openpdf", "/usr/bin/okular");
 
-		StringBuffer Command = new StringBuffer(OpenPDF + " " + fname);
+		StringBuilder Command = new StringBuilder(OpenPDF + " " + fname);
+		StringBuilder output = new StringBuilder();
 
 		try {
 			myLogger.info("Calling PDf viewer: " + Command.toString());
 			proc = rt.exec(Command.toString());
 			if (proc == null) {
 				myLogger.error("Proceess for pdflatex returned null. Aborting");
-				return -1;
+				return;
 			}
 
 			BufferedReader err = new BufferedReader(new InputStreamReader(
@@ -282,9 +282,10 @@ public class Filelist2Latex {
 			String sline = null;
 			String eline = null;
 
+
 			while ((sline = br.readLine()) != null
 					|| (eline = err.readLine()) != null) {
-				if (output != null && sline != null)
+				if (sline != null)
 					output.append(sline);
 				if (eline != null)
 					if (myLogger.isDebugEnabled())
@@ -298,8 +299,6 @@ public class Filelist2Latex {
 			myLogger.error("Error while opening log pdf file", e);
 		}
 		myLogger.debug("PDF viewer said: " + output.toString());
-		int exitVal = proc.exitValue();
-		return exitVal;
 
 	}
 
