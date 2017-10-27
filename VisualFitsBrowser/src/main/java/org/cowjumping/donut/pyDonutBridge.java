@@ -36,7 +36,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
     public String resultsString = null;
     public Image resultImage = null;
     private String donutExecutable = "/home/dharbeck/Software/donut/script/donut_odi";
-    private String donutConfig = "/home/dharbeck/Software/donut/script/lco-1m.json";
+    private String donutConfig = "/home/dharbeck/Software/donut/script/lco-1m-ef.json";
     private String defaultpath = "/tmp";
     private String defaultOutput = "donutfit_" + new Date().getTime();
     private File input;

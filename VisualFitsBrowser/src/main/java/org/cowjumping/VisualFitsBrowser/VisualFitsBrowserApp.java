@@ -239,6 +239,22 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
 
+        {
+            menuItem = new JMenuItem("Send all selected to ds9", KeyEvent.VK_A);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
+            menu.add(menuItem);// Possible error source: generate thumbnail
+            // after closure
+            // finished.);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().sendAllSelectedtods9();
+                }
+            });
+        }
+
+
+
         menu.add(new JSeparator());
 
         {

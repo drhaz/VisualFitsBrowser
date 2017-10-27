@@ -237,15 +237,20 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 						}
 
 						int row = mTable.getSelectedRow();
+						row = mTable.convertRowIndexToModel(row);
+
 						if (row >= 0 && row < mTable.getRowCount()) {
-							FitsFileEntry selectedFits = mImageList.elementAt(mTable.convertRowIndexToModel(row));
+							FitsFileEntry selectedFits = mImageList.elementAt(row);
 							if (selectedFits != null) {
 								String fname = selectedFits.getAbsolutePath();
 
-//                                if (!selectedFits.mef)
-//								    SAMPUtilities.loadImageDS9(fname, frame);
-//                                else
-                                    SAMPUtilities.loadImageCheckMEG(fname, frame);
+                                boolean ismef = SAMPUtilities.isMEF(fname);
+
+                                if (ismef)
+								    SAMPUtilities.loadMosaicDS9(fname, frame);
+                                else
+                                    SAMPUtilities.loadImageDS9(fname, frame);
+
 
 
 
@@ -262,6 +267,35 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 		readDirectory(mRootDirectory);
 
 	}
+
+
+	public void sendAllSelectedtods9 () {
+
+        StringBuilder sb = new StringBuilder();
+	    int rows[] = mTable.getSelectedRows();
+
+	    if ((rows != null) && (rows.length > 0)) {
+            SAMPUtilities.clearAllFrames();
+
+            for (int ii = 0; ii < rows.length; ii++) {
+                rows[ii] = mTable.convertRowIndexToModel(rows[ii]);
+                       }
+            boolean ismef = SAMPUtilities.isMEF(mImageList.elementAt(rows[0]).getAbsolutePath());
+            for (int ii =0; ii < rows.length; ii++) {
+                String fname = mImageList.elementAt(rows[ii]).getAbsolutePath() ;
+                if (ismef)
+                    SAMPUtilities.loadMosaicDS9(fname, ii);
+                else
+                    SAMPUtilities.loadImageDS9(fname, ii);
+            }
+
+            SAMPUtilities.selectFrameDS9(0);
+            SAMPUtilities.lockAll();
+        }
+
+
+
+    }
 
 	private void hideColumn(JTable table, int c) {
 		table.getColumnModel().getColumn(c).setMinWidth(0);
