@@ -379,7 +379,7 @@ public class VisualFitsBrowserApp extends JFrame {
             menuItem.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
-                    SAMPUtilities.getDS9Cursor();
+                    SAMPUtilities.getDS9Cursor("donut");
                 }
 
             });
@@ -404,7 +404,7 @@ public class VisualFitsBrowserApp extends JFrame {
                         System.out.println("DS9 label double clicked");
 
                         ds9Label.setEnabled(true);
-                        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC, "/usr/local/bin/ds9"));
+                        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC, SAMPUtilities.searchds9Binary()));
                     }
                 }
             }
@@ -477,6 +477,7 @@ public class VisualFitsBrowserApp extends JFrame {
     }
 
     private void onExit() {
+        SAMPUtilities.onExit();
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
         Preferences.thePreferences.storeWindowLocation(this.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);
