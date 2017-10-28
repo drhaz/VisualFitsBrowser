@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -120,14 +119,12 @@ public class GUIConsts {
 
 	/**
 	 * Return a label with the ODI Logo as a picture.
-	 * 
-	 * @return
+	 *
 	 */
 	public static JLabel getODIImageLabel() {
 		try {
 			ImageIcon odiIcon = (new ImageIcon(GUIConsts.class.getResource("/resources/ODILOGObig-alpha.png")));
-			JLabel l = new JLabel(odiIcon);
-			return l;
+            return new JLabel(odiIcon);
 		} catch (Exception e) {
 			log.error("Could not fine odiIcon");
 
@@ -154,7 +151,7 @@ public class GUIConsts {
 	 * 
 	 */
 	public static ImageIcon getIcon(String resource, int size) {
-		ImageIcon icon = null;
+		ImageIcon icon;
 		try {
 			icon = new ImageIcon(GUIConsts.class.getResource(resource));
 			Image newimg = icon.getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
@@ -189,20 +186,10 @@ public class GUIConsts {
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+			log.error ("While setting look & feel", e);
 		}
 
-	}
+    }
 
 }
