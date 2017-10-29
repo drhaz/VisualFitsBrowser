@@ -4,7 +4,7 @@
 
     <groupId>org.wiyn</groupId>
     <artifactId>VisualFitsBrowser</artifactId>
-    <version>1.5-RC</version>
+    <version>1.6-devel</version>
     <packaging>jar</packaging>
 
     <name>VisualFitsBrowser</name>
