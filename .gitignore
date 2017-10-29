@@ -1,6 +1,5 @@
-VisualFitsBrowser/.idea
 .idea/
+VisualFitsBrowser.iml
 Releases/temp
-VisualFitsBrowser/VisualFitsBrowser.iml
-VisualFitsBrowser/target/
+target/
 
