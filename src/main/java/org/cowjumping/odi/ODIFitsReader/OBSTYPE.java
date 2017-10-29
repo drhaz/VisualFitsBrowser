@@ -1,7 +1,6 @@
 package org.cowjumping.odi.ODIFitsReader;
 
 import java.io.File;
-
 import org.apache.log4j.Logger;
 
 public enum OBSTYPE {

@@ -3,10 +3,10 @@ package org.cowjumping.guiUtils;
 
 public class Profiler {
 
-	long start;
-	long end = 0;
-	double execTime = 0;
-	String label = null;
+	private long start;
+	private long end = 0;
+	private double execTime = 0;
+	private String label = null;
 
 	public Profiler(String label) {
 		this();
