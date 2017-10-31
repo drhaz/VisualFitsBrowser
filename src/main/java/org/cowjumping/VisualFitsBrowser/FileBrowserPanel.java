@@ -1,10 +1,8 @@
 package org.cowjumping.VisualFitsBrowser;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -280,10 +278,29 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             SAMPUtilities.selectFrameDS9(0);
             SAMPUtilities.lockAll();
         }
-
-
-
     }
+
+
+
+    public void sendAllSelectedToClipBoard () {
+		StringBuilder sb = new StringBuilder();
+		int rows[] = mTable.getSelectedRows();
+
+		if ((rows != null) && (rows.length > 0)) {
+
+			for (int ii = 0; ii < rows.length; ii++) {
+				int idx =  mTable.convertRowIndexToModel(rows[ii]);
+				String fname = mImageList.elementAt(idx).getAbsolutePath() ;
+				sb.append (fname + " ");
+			}
+
+			StringSelection stringSelection = new StringSelection(sb.toString());
+			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clpbrd.setContents(stringSelection, null);
+		}
+
+	}
+
 
 	private void hideColumn(JTable table, int c) {
 		table.getColumnModel().getColumn(c).setMinWidth(0);
