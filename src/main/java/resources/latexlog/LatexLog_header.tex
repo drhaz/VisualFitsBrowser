@@ -1,0 +1,30 @@
+\documentclass[10pt]{article}
+\usepackage{longtable}
+\usepackage[landscape,top=3cm, bottom=2cm, left=1cm, right=1cm]{geometry}
+\renewcommand{\arraystretch}{1.5}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{lastpage}
+
+\pagestyle{fancy}
+%\setlength{\headheight}{2cm}
+\rhead{\parbox[b]{15cm}{\flushright{\Large Log $TITLE$}}}
+\lhead {Page \thepage\ of \pageref{LastPage}}
+\cfoot {}
+\setlength{\headheight}{5ex}
+
+\begin{document}
+
+%% ID    Object     Texp   Filter   DateObs    Comments
+\begin{longtable}{|l|p{5cm}|r| p{3cm}|c|c|p{5cm}|} \hline
+ \multirow{2}{*}{\large \textsc{Obs. ID.}} &\textsc{Object} &
+ \multirow{2}{*}{${\rm T}_{\rm exp}$[s]} & \multirow{2}{*}{\textsc{Filter} } & \multirow{2}{*}{\textsc
+ {\small TIME-Obs [MST]}} & Focus & \multirow{2}{*}{\textsc{User Comments}} \\
+ 
+  & {\small \textsc{R.A. Dec}} & & & & Airmasss & \\
+\hline
+\endhead
+\hline \multicolumn{7}{|r|}{{Continued on next page}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
