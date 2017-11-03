@@ -318,10 +318,16 @@ public class QuickHeaderInfo {
 			for (String fitsCard : fitsHeader) {
 				StringTokenizer t = new StringTokenizer(fitsCard, "=/");
 				if ((t.nextToken().trim()).compareToIgnoreCase(key) == 0) {
-
 					String valueString = (t.nextToken().trim());
-					valueString = valueString.replace("\'", "");
-					value = Float.parseFloat(valueString);
+
+					try {
+						valueString = valueString.replace("\'", "");
+						value = Float.parseFloat(valueString);
+					} catch (Exception e) {
+						value = Float.NaN;
+						myLogger.warn ("Error while reading flaot key word: " + valueString);
+					}
+
 					continue;
 				}
 			}
