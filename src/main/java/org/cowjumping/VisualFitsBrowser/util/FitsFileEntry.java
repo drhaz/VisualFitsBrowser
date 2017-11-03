@@ -147,19 +147,18 @@ public class FitsFileEntry {
 		String Filter = "n/a";
 		int ponTime = 0;
 
-		if (!(ArchiveMode || !ODIMode)) {
-			if (!f.exists() || !new File(f.getAbsoluteFile() + "/temp/.finished").exists()) {
-				myLogger.debug("rejecting pending file " + f.getAbsolutePath());
-				return null;
-			}
-		} else {
-			myLogger.debug("Accepting image unfinished image candidate since in archive | noODI mode");
-		}
+//		if (!(ArchiveMode || !ODIMode)) {
+//			if (!f.exists() || !new File(f.getAbsoluteFile() + "/temp/.finished").exists()) {
+//				myLogger.debug("rejecting pending file " + f.getAbsolutePath());
+//				return null;
+//			}
+//		} else {
+//			myLogger.debug("Accepting image unfinished image candidate since in archive | noODI mode");
+//		}
 
-		if (f.exists() || f.isDirectory()) {
-			ot = OBSTYPE.getObstypeForFile(f);
+		if (f.exists()) {
 
-			Vector<String> fitsHeader = QuickHeaderInfo.getODIHeader(f, -1, -1);
+			Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
 			if (fitsHeader != null && fitsHeader.size() > 0) {
 
 				expTime = QuickHeaderInfo.getExpTime(fitsHeader);
@@ -171,6 +170,7 @@ public class FitsFileEntry {
 				ponTime = QuickHeaderInfo.getPONTime(fitsHeader);
 
 				DateObs = QuickHeaderInfo.getDateObs(fitsHeader, true);
+
 
 			} else {
 				myLogger.error("Fitsheader for file " + f.getName() + " is empty.");
@@ -193,24 +193,29 @@ public class FitsFileEntry {
 
 				entry.RA_String = entry.RA_String != null ? entry.RA_String.trim() : "INDEF";
 				entry.Dec_String = entry.Dec_String != null ? entry.Dec_String.trim() : "INDEF";
-
+                myLogger.debug("Added image: " + entry.FName);
 				entry.Airmass = QuickHeaderInfo.getFloatValue(fitsHeader, "AIRMASS");
+
 				entry.Focus = QuickHeaderInfo.getFloatValue(fitsHeader, "TELFOCUS");
+
 				entry.PONTime = ponTime;
+
 				entry.isBinned = QuickHeaderInfo.isBinned(fitsHeader);
+
 				entry.mef = QuickHeaderInfo.getBooleanValue (fitsHeader, "EXTEND");
 				if (entry.mef) {
 					myLogger.debug ("MEF detected");
 				}
 			}
 
-			if (new File(f.getAbsoluteFile() + "/expVideo").exists()
-					|| new File(f.getAbsoluteFile() + "/VIDEO").exists()) {
+//			if (new File(f.getAbsoluteFile() + "/expVideo").exists()
+//					|| new File(f.getAbsoluteFile() + "/VIDEO").exists()) {
+//
+//				myLogger.debug("ODI Image has video attached");
+//				entry.hasVideo = true;
+//
+//			}
 
-				myLogger.debug("ODI Image has video attached");
-				entry.hasVideo = true;
-
-			}
 
 			if (extraKey != null && fitsHeader != null) {
 				String temp = QuickHeaderInfo.getStringValue(fitsHeader, extraKey);
@@ -221,6 +226,8 @@ public class FitsFileEntry {
 			}
 
 			// fetch user comment
+
+
 			FitsFileEntry.theCommentInterface.readComment(entry);
 
 
@@ -290,7 +297,7 @@ public class FitsFileEntry {
 					FitsFileEntry e = FitsFileEntry.createFromFile(file);
 
 					if (e != null) {
-
+						myLogger.debug("Adding file: " + file.getAbsolutePath());
 						directoryImages.add(e);
 
 					} else {

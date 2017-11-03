@@ -254,6 +254,21 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
 
+        {
+            menuItem = new JMenuItem("Send all selected to clipboard", KeyEvent.VK_A);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK));
+            menu.add(menuItem);// Possible error source: generate thumbnail
+            // after closure
+            // finished.);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().sendAllSelectedToClipBoard();
+                }
+            });
+        }
+
+
 
         menu.add(new JSeparator());
 

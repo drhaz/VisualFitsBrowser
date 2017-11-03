@@ -49,7 +49,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 	// Actual items follow now:
 
-	ODIImageInfoPanel myImageInfoPanel = null;
+	FITSHeaderInspection myImageInfoPanel = null;
 	DonutPanel myDonutPanel = null;
 
 	private static final String INFOPANEL = "INFOVIEW";
@@ -121,7 +121,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 				Vector<FitsFileEntry> fileList = ImageToolBoxPanel.this.getFBPSelected();
 				myMultiPanel.setTopComponent(INFOPANEL);
-				myImageInfoPanel.setMode(ODIImageInfoPanel.MODE_FITSHEADER);
+				myImageInfoPanel.setMode(FITSHeaderInspection.MODE_FITSHEADER);
 				if (fileList != null && fileList.size() > 0) {
 
 					myImageInfoPanel.setImageList(fileList, -1, -1);
@@ -174,7 +174,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 	private void fillMultiPanelView() {
 
-		myImageInfoPanel = new ODIImageInfoPanel();
+		myImageInfoPanel = new FITSHeaderInspection();
 		myImageInfoPanel.setName(INFOPANEL);
 		myMultiPanel.addComponent(myImageInfoPanel);
 
