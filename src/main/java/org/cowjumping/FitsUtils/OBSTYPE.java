@@ -1,4 +1,4 @@
-package org.cowjumping.odi.ODIFitsReader;
+package org.cowjumping.FitsUtils;
 
 import java.io.File;
 import org.apache.log4j.Logger;

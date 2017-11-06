@@ -10,16 +10,14 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Vector;
-
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import org.apache.log4j.Logger;
-import org.cowjumping.odi.ODIFitsReader.OBSTYPE;
+import org.cowjumping.FitsUtils.OBSTYPE;
 
 /**
  * IMplements a GUI component that allows to set the z-range of an image display
