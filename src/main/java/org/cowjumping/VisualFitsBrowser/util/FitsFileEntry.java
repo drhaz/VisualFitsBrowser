@@ -15,8 +15,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentImpl;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
-import org.cowjumping.odi.ODIFitsReader.OBSTYPE;
-import org.cowjumping.odi.ODIFitsReader.QuickHeaderInfo;
+import org.cowjumping.FitsUtils.OBSTYPE;
+import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 /**
  * Data holding class for an ODI Image.
