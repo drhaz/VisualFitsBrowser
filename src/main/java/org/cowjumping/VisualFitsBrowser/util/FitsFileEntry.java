@@ -26,10 +26,7 @@ import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 public class FitsFileEntry {
 
-
 	private final static Logger myLogger = Logger.getLogger(FitsFileEntry.class);
-
-
 
 	public static boolean ODIMode = false;
 	public static boolean ArchiveMode = false;
@@ -105,8 +102,7 @@ public class FitsFileEntry {
 	 * a given directory. There is no assumtopn made if those should be an
 	 * directory or flat files.
 	 */
-	 static FileFilter thefileFilter = theFITSFileFilter;
-
+    static FileFilter thefileFilter = theFITSFileFilter;
 
 	public File DirectoryFile;
 	public String RootPath;
@@ -207,14 +203,6 @@ public class FitsFileEntry {
 					myLogger.debug ("MEF detected");
 				}
 			}
-
-//			if (new File(f.getAbsoluteFile() + "/expVideo").exists()
-//					|| new File(f.getAbsoluteFile() + "/VIDEO").exists()) {
-//
-//				myLogger.debug("ODI Image has video attached");
-//				entry.hasVideo = true;
-//
-//			}
 
 
 			if (extraKey != null && fitsHeader != null) {
