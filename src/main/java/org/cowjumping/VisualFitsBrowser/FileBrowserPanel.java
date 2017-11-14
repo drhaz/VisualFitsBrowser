@@ -690,6 +690,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 mProgressMonitor.close();
 
+                if (getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null) {
+                    tomorrowLabel.setVisible(true);
+                    yesterDayLabel.setVisible(true);
+                } else {
+                    tomorrowLabel.setVisible(false);
+                    yesterDayLabel.setVisible(false);
+                }
+
                 // Now that the directory is fully read in, instsnciate a new
                 // DirectoryListener.
 
@@ -706,7 +714,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         Date ret = null;
 
-        Pattern p = Pattern.compile(".*\\/([12][890]\\d\\d[01]\\d[0123]\\d)\\/.*");
+        Pattern p = Pattern.compile(".*\\/([12][890]\\d\\d[01]\\d[0123]\\d).*");
         Matcher m = p.matcher(name);
         String t = null;
         if (m.matches()) {
