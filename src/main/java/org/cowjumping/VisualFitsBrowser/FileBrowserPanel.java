@@ -117,10 +117,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             rootDirLabel.setHorizontalAlignment(SwingConstants.CENTER);
             rootDirLabel.setOpaque(true);
             rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
+            rootDirLabel.setToolTipText("This is the current directory");
 
             ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
             reloadButton = new JButton(reload);
+            reloadButton.setToolTipText("Reload the current directory");
             this.maskButton(reloadButton);
             reloadButton.addActionListener(new ActionListener() {
 
@@ -133,8 +135,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
             tomorrowLabel = new JButton (">");
+            tomorrowLabel.setToolTipText("Load equivalent directory for tomorrow's date");
             this.maskButton(tomorrowLabel);
             yesterDayLabel = new JButton ("<");
+            yesterDayLabel.setToolTipText("Load equivalent directory for yesterday's date");
+
             this.maskButton(yesterDayLabel);
 
             ActionListener l = new ActionListener() {
