@@ -409,6 +409,7 @@ public class VisualFitsBrowserApp extends JFrame {
         theMenu.add(Box.createHorizontalGlue());
 
         final JLabel ds9Label = new JLabel("DS9  ");
+        ds9Label.setToolTipText("Launch a new instance of ds9, if available.");
         theMenu.add(ds9Label);
         ds9Label.addMouseListener(new MouseAdapter() {
             @Override

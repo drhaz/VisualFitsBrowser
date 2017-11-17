@@ -8,9 +8,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -33,6 +38,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
@@ -49,226 +55,266 @@ import org.cowjumping.guiUtils.TableCellRenderers.mDateRenderer;
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
 
-	private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
+    private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
 
-	String mRootDirectoryString = "/";
+    String mRootDirectoryString = "/";
 
-	public File mRootDirectory = null;
+    public File mRootDirectory = null;
 
-	private DirectoryListener myDirectoryListener = null;
-	public Vector<FitsFileEntry> mImageList;
+    private DirectoryListener myDirectoryListener = null;
+    public Vector<FitsFileEntry> mImageList;
 
-	private JTable mTable;
-	private FitsViewerTableModel mTableDataModel = null;
-	private JLabel rootDirLabel;
-	private JButton reloadButton = null;
+    private JTable mTable;
+    private FitsViewerTableModel mTableDataModel = null;
+    private JLabel rootDirLabel;
+    private JButton reloadButton = null;
+    private JButton tomorrowLabel = null;
+    private JButton yesterDayLabel = null;
 
-	private final String PROP_LASTDIRECTORY = FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY";
+    private final String PROP_LASTDIRECTORY = FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY";
 
-	private OTAFileListListener mFileListListener = null;
+    private OTAFileListListener mFileListListener = null;
 
-	boolean autoLoadImageToListener = false;
-	private static String DisplayedImage = null;
+    boolean autoLoadImageToListener = false;
+    private static String DisplayedImage = null;
 
 
-	public FileBrowserPanel() {
-		this(null);
-	}
+    private void maskButton (JButton b) {
+        b.setPreferredSize(b.getMinimumSize());
+        b.setOpaque(false);
+        b.setFocusPainted(false);
+        // reloadButton.setRolloverEnabled(false);
+        b.setContentAreaFilled(false);
+        b.setBorderPainted(false);
+        b.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    }
 
-	/**
-	 * Initialize file browser panel.
-	 *
-	 * @param mFileListListener a listener to file select events. can be null.
-	 */
-	FileBrowserPanel(OTAFileListListener mFileListListener) {
+    public FileBrowserPanel() {
+        this(null);
+    }
 
-		super();
-		this.mFileListListener = mFileListListener;
-		mRootDirectoryString = Preferences.thePreferences.getProperty(PROP_LASTDIRECTORY, mRootDirectoryString);
+    /**
+     * Initialize file browser panel.
+     *
+     * @param mFileListListener a listener to file select events. can be null.
+     */
+    FileBrowserPanel(OTAFileListListener mFileListListener) {
 
-		mRootDirectory = new File(this.mRootDirectoryString);
+        super();
+        this.mFileListListener = mFileListListener;
+        mRootDirectoryString = Preferences.thePreferences.getProperty(PROP_LASTDIRECTORY, mRootDirectoryString);
 
-		mImageList = new Vector<FitsFileEntry>(50);
+        mRootDirectory = new File(this.mRootDirectoryString);
 
-		this.setLayout(new BorderLayout());
+        mImageList = new Vector<FitsFileEntry>(50);
 
-		{
+        this.setLayout(new BorderLayout());
 
-			rootDirLabel = new JLabel(mRootDirectory.getAbsolutePath());
-			rootDirLabel.setFont(GUIConsts.TitleFont);
-			rootDirLabel.setHorizontalAlignment(SwingConstants.CENTER);
-			rootDirLabel.setOpaque(true);
-			rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
+        {
 
-			ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
+            rootDirLabel = new JLabel(mRootDirectory.getAbsolutePath());
+            rootDirLabel.setFont(GUIConsts.TitleFont);
+            rootDirLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            rootDirLabel.setOpaque(true);
+            rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
+            rootDirLabel.setToolTipText("This is the current directory");
 
-			reloadButton = new JButton(reload);
-			reloadButton.setPreferredSize(reloadButton.getMinimumSize());
-			reloadButton.setOpaque(false);
-			reloadButton.setFocusPainted(false);
-			// reloadButton.setRolloverEnabled(false);
-			reloadButton.setOpaque(false);
-			reloadButton.setContentAreaFilled(false);
-			reloadButton.setBorderPainted(false);
-			reloadButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-			reloadButton.addActionListener(new ActionListener() {
+            ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
-				public void actionPerformed(ActionEvent arg0) {
-					reload();
+            reloadButton = new JButton(reload);
+            reloadButton.setToolTipText("Reload the current directory");
+            this.maskButton(reloadButton);
+            reloadButton.addActionListener(new ActionListener() {
 
-				}
+                public void actionPerformed(ActionEvent arg0) {
+                    reload();
 
-			});
-			Box topBox = Box.createHorizontalBox();
-			topBox.setOpaque(true);
-			topBox.setBackground(GUIConsts.InformationBackgroundColor);
-			topBox.add(reloadButton);
-			topBox.add(rootDirLabel);
-			topBox.add(Box.createHorizontalGlue());
-			add(topBox, BorderLayout.NORTH);
+                }
 
-		}
+            });
 
-		{
-			mTable = new ZebraJTable(mTableDataModel) {
-				public String getToolTipText(MouseEvent e) {
-					String tip;
-					java.awt.Point p = e.getPoint();
-					int rowIndex = rowAtPoint(p);
-					int colIndex = columnAtPoint(p);
-					int realColumnIndex = convertColumnIndexToModel(colIndex);
 
-					if ((rowIndex >= 0) && (colIndex >= 0)
-							&& ((realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL)
-							|| (realColumnIndex == FitsViewerTableModel.OBJECT_COL)
-							|| (realColumnIndex == FitsViewerTableModel.FNAME_COL))) {
-						Object o = getValueAt(rowIndex, colIndex);
-						tip = o != null ? (String) o : "";
+            tomorrowLabel = new JButton (">");
+            tomorrowLabel.setToolTipText("Load equivalent directory for tomorrow's date");
+            this.maskButton(tomorrowLabel);
+            yesterDayLabel = new JButton ("<");
+            yesterDayLabel.setToolTipText("Load equivalent directory for yesterday's date");
 
-					} else tip = super.getToolTipText(e);
+            this.maskButton(yesterDayLabel);
 
-					return tip;
-				}
-			};
+            ActionListener l = new ActionListener() {
 
-			mTableDataModel = new FitsViewerTableModel();
-			mTable.setModel(mTableDataModel);
-			mTable.setFillsViewportHeight(true);
-			mTable.setRowSorter(new TableRowSorter<FitsViewerTableModel>(mTableDataModel));
-			// Start out with a sort order where the newest iamge is on top of
-			// the list.
-			mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
-			mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String c = ((JButton) e.getSource()).getActionCommand();
+                    int deltadays = 0;
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL)
-					.setCellRenderer(new mDateRenderer(0, false));
+                    if (c.equalsIgnoreCase("<"))
+                        deltadays = -1;
+                    if (c.equalsIgnoreCase(">"))
+                        deltadays = +1;
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL)
-					.setCellRenderer(new NumberFormatterCellRenderer("% 5.1f", "% 5.3f"));
+                   if (deltadays != 0)
+                       changeDirectoryDate (deltadays);
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL)
-					.setCellRenderer(new NumberFormatterCellRenderer("%2.1f"));
+                }
+
+
+            };
+            tomorrowLabel.addActionListener (l);
+            yesterDayLabel.addActionListener(l);
 
 
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
+            Box topBox = Box.createHorizontalBox();
+            topBox.setOpaque(true);
+            topBox.setBackground(GUIConsts.InformationBackgroundColor);
+            topBox.add(reloadButton);
+            topBox.add(rootDirLabel);
+            topBox.add(Box.createHorizontalGlue());
+            topBox.add (yesterDayLabel);
+            topBox.add (tomorrowLabel);
+            add(topBox, BorderLayout.NORTH);
 
-			// mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-			mTable.setFont(GUIConsts.TTFont16);
-			mTable.setRowHeight(GUIConsts.TTFont16.getSize() + 8);
+        }
 
-			mTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-			JScrollPane scrollPane = new JScrollPane(mTable);
-			scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        {
+            mTable = new ZebraJTable(mTableDataModel) {
+                public String getToolTipText(MouseEvent e) {
+                    String tip;
+                    java.awt.Point p = e.getPoint();
+                    int rowIndex = rowAtPoint(p);
+                    int colIndex = columnAtPoint(p);
+                    int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+                    if ((rowIndex >= 0) && (colIndex >= 0)
+                            && ((realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL)
+                            || (realColumnIndex == FitsViewerTableModel.OBJECT_COL)
+                            || (realColumnIndex == FitsViewerTableModel.FNAME_COL))) {
+                        Object o = getValueAt(rowIndex, colIndex);
+                        tip = o != null ? (String) o : "";
+
+                    } else tip = super.getToolTipText(e);
+
+                    return tip;
+                }
+            };
+
+            mTableDataModel = new FitsViewerTableModel();
+            mTable.setModel(mTableDataModel);
+            mTable.setFillsViewportHeight(true);
+            mTable.setRowSorter(new TableRowSorter<FitsViewerTableModel>(mTableDataModel));
+            // Start out with a sort order where the newest iamge is on top of
+            // the list.
+            mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
+            mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
+
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL)
+                    .setCellRenderer(new mDateRenderer(0, false));
+
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL)
+                    .setCellRenderer(new NumberFormatterCellRenderer("% 5.1f", "% 5.3f"));
+
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL)
+                    .setCellRenderer(new NumberFormatterCellRenderer("%2.1f"));
 
 
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(230);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(300);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.FILTER_COL).setPreferredWidth(100);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL).setPreferredWidth(100);
-			mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
+
+            // mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            mTable.setFont(GUIConsts.TTFont16);
+            mTable.setRowHeight(GUIConsts.TTFont16.getSize() + 8);
+
+            mTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+            JScrollPane scrollPane = new JScrollPane(mTable);
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 
-			for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
-				TableColumn tc = mTable.getColumnModel().getColumn(ii);
-				tc.setMaxWidth(tc.getPreferredWidth());
-			}
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(230);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(300);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.FILTER_COL).setPreferredWidth(100);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL).setPreferredWidth(100);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
 
-			// scrollPane.setPreferredSize(new Dimension(1100, 550));
-			scrollPane.setPreferredSize(new Dimension(mTable.getMaximumSize().width, 550));
-			add(scrollPane, BorderLayout.CENTER);
 
-		}
+            for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
+                TableColumn tc = mTable.getColumnModel().getColumn(ii);
+                tc.setMaxWidth(tc.getPreferredWidth());
+            }
 
-		{
-			// Set up a selection listening model
-			mTable.getSelectionModel().addListSelectionListener(new SelectionListener());
-		}
+            // scrollPane.setPreferredSize(new Dimension(1100, 550));
+            scrollPane.setPreferredSize(new Dimension(mTable.getMaximumSize().width, 550));
+            add(scrollPane, BorderLayout.CENTER);
 
-		{
-			// capture double clicks
-			mTable.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
+        }
 
-					if (e.getClickCount()==2) {
-						int frame = 0;
+        {
+            // Set up a selection listening model
+            mTable.getSelectionModel().addListSelectionListener(new SelectionListener());
+        }
 
-						if (e.getButton() == MouseEvent.BUTTON2) {
-							frame = 1;
-						}
-						if (e.getButton() == MouseEvent.BUTTON3) {
-							frame = 2;
-						}
+        {
+            // capture double clicks
+            mTable.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
 
-						int row = mTable.getSelectedRow();
-						row = mTable.convertRowIndexToModel(row);
+                    if (e.getClickCount() == 2) {
+                        int frame = 0;
 
-						if (row >= 0 && row < mTable.getRowCount()) {
-							FitsFileEntry selectedFits = mImageList.elementAt(row);
-							if (selectedFits != null) {
-								String fname = selectedFits.getAbsolutePath();
+                        if (e.getButton() == MouseEvent.BUTTON2) {
+                            frame = 1;
+                        }
+                        if (e.getButton() == MouseEvent.BUTTON3) {
+                            frame = 2;
+                        }
+
+                        int row = mTable.getSelectedRow();
+                        row = mTable.convertRowIndexToModel(row);
+
+                        if (row >= 0 && row < mTable.getRowCount()) {
+                            FitsFileEntry selectedFits = mImageList.elementAt(row);
+                            if (selectedFits != null) {
+                                String fname = selectedFits.getAbsolutePath();
 
                                 boolean ismef = SAMPUtilities.isMEF(fname);
 
                                 if (ismef)
-								    SAMPUtilities.loadMosaicDS9(fname, frame);
+                                    SAMPUtilities.loadMosaicDS9(fname, frame);
                                 else
                                     SAMPUtilities.loadImageDS9(fname, frame);
 
 
+                            }
+                        }
+
+                    }
 
 
-							}
-						}
+                }
+            });
+        }
 
-					}
+        readDirectory(mRootDirectory);
 
-
-				}
-			});
-		}
-
-		readDirectory(mRootDirectory);
-
-	}
+    }
 
 
-	public void sendAllSelectedtods9 () {
+    public void sendAllSelectedtods9() {
 
         StringBuilder sb = new StringBuilder();
-	    int rows[] = mTable.getSelectedRows();
+        int rows[] = mTable.getSelectedRows();
 
-	    if ((rows != null) && (rows.length > 0)) {
+        if ((rows != null) && (rows.length > 0)) {
             SAMPUtilities.clearAllFrames();
 
             for (int ii = 0; ii < rows.length; ii++) {
                 rows[ii] = mTable.convertRowIndexToModel(rows[ii]);
-                       }
+            }
             boolean ismef = SAMPUtilities.isMEF(mImageList.elementAt(rows[0]).getAbsolutePath());
-            for (int ii =0; ii < rows.length; ii++) {
-                String fname = mImageList.elementAt(rows[ii]).getAbsolutePath() ;
+            for (int ii = 0; ii < rows.length; ii++) {
+                String fname = mImageList.elementAt(rows[ii]).getAbsolutePath();
                 if (ismef)
                     SAMPUtilities.loadMosaicDS9(fname, ii);
                 else
@@ -281,556 +327,610 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     }
 
 
+    public void sendAllSelectedToClipBoard() {
+        StringBuilder sb = new StringBuilder();
+        int rows[] = mTable.getSelectedRows();
 
-    public void sendAllSelectedToClipBoard () {
-		StringBuilder sb = new StringBuilder();
-		int rows[] = mTable.getSelectedRows();
+        if ((rows != null) && (rows.length > 0)) {
 
-		if ((rows != null) && (rows.length > 0)) {
+            for (int ii = 0; ii < rows.length; ii++) {
+                int idx = mTable.convertRowIndexToModel(rows[ii]);
+                String fname = mImageList.elementAt(idx).getAbsolutePath();
+                sb.append(fname + " ");
+            }
 
-			for (int ii = 0; ii < rows.length; ii++) {
-				int idx =  mTable.convertRowIndexToModel(rows[ii]);
-				String fname = mImageList.elementAt(idx).getAbsolutePath() ;
-				sb.append (fname + " ");
-			}
+            StringSelection stringSelection = new StringSelection(sb.toString());
+            Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clpbrd.setContents(stringSelection, null);
+        }
 
-			StringSelection stringSelection = new StringSelection(sb.toString());
-			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clpbrd.setContents(stringSelection, null);
-		}
-
-	}
-
-
-	private void hideColumn(JTable table, int c) {
-		table.getColumnModel().getColumn(c).setMinWidth(0);
-		table.getColumnModel().getColumn(c).setMaxWidth(0);
-		table.getColumnModel().getColumn(c).setWidth(0);
-	}
-
-	synchronized void setDisplayedImage(final String fname) {
-
-		if (!fname.equals("preimage")) {
-			final int lastIndex;
-			if (DisplayedImage != null)
-				lastIndex = getRowbyName(DisplayedImage);
-			else
-				lastIndex = -1;
-
-			DisplayedImage = fname.trim();
-
-			try {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-
-						int index = FileBrowserPanel.this.getRowbyName(fname);
-
-						if (index >= 0)
-							mTableDataModel.fireTableRowsUpdated(index, index);
-						if (lastIndex >= 0)
-							mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
-					}
-				});
-			} catch (Exception e) {
-				myLogger.error("Error while updating table upon displayed image notification");
-			}
-
-		}
-	}
+    }
 
 
-	private class ImageIDRenderer extends DefaultTableCellRenderer {
+    public void changeDirectoryDate(int deltadays) {
+        if (this.mRootDirectoryString != null) {
 
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-													   int row, int column) {
-			JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-					column);
+            Date d = this.getDateComponentofDirectory(this.mRootDirectoryString);
+            if (d != null) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(d);
+                c.add (Calendar.DATE, deltadays);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                String olddate = sdf.format(d.getTime());
+                String newdate = sdf.format(c.getTime());
 
-			Color c = Color.black;
+                myLogger.debug ("Input date: " + d + " transformed to " + c);
+                myLogger.info ("other day exchange from " + olddate + " to " + newdate);
+                String newDirectory = mRootDirectoryString.replace(olddate, newdate);
+                File f = new File (newDirectory);
+                if (f.exists() && f.isDirectory())
+                    readDirectory (f);
+                else
+                    myLogger.warn ("other day directory " + newDirectory + " does not exist.");
 
-			Font f = renderer.getFont().deriveFont(Font.PLAIN);
-			if (DisplayedImage != null && DisplayedImage.trim().equals(((String) value).trim())) {
-				c = Color.MAGENTA;
-				f = f.deriveFont(Font.BOLD);
+            }
 
-			}
-			renderer.setForeground(c);
-			renderer.setFont(f);
-
-			return renderer;
-		}
-
-	}
+        }
+    }
 
 
-	public void packColumns(JTable table, int margin) {
-		for (int c = 0; c < table.getColumnCount(); c++) {
-			packColumn(table, c, margin);
-		}
-	}
+    private void hideColumn(JTable table, int c) {
+        table.getColumnModel().getColumn(c).setMinWidth(0);
+        table.getColumnModel().getColumn(c).setMaxWidth(0);
+        table.getColumnModel().getColumn(c).setWidth(0);
+    }
 
-	// Sets the preferred width of the visible column specified by vColIndex.
-	// The column
-	// will be just wide enough to show the column head and the widest cell in
-	// the column.
-	// margin pixels are added to the left and right
-	// (resulting in an additional width of 2*margin pixels).
+    synchronized void setDisplayedImage(final String fname) {
 
-	private void packColumn(JTable table, int vColIndex, int margin) {
-		// TableModel model = table.getModel ();
-		DefaultTableColumnModel colModel = (DefaultTableColumnModel) table.getColumnModel();
-		TableColumn col = colModel.getColumn(vColIndex);
-		int width = 0;
+        if (!fname.equals("preimage")) {
+            final int lastIndex;
+            if (DisplayedImage != null)
+                lastIndex = getRowbyName(DisplayedImage);
+            else
+                lastIndex = -1;
 
-		// Get width of column header
-		TableCellRenderer renderer = col.getHeaderRenderer();
-		if (renderer == null) {
-			renderer = table.getTableHeader().getDefaultRenderer();
-		}
-		Component comp = renderer.getTableCellRendererComponent(table, col.getHeaderValue(), false, false, 0, 0);
-		width = comp.getPreferredSize().width;
+            DisplayedImage = fname.trim();
 
-		// Get maximum width of column data
-		for (int r = 0; r < table.getRowCount(); r++) {
-			renderer = table.getCellRenderer(r, vColIndex);
-			comp = renderer.getTableCellRendererComponent(table, table.getValueAt(r, vColIndex), false, false, r,
-					vColIndex);
-			width = Math.max(width, comp.getPreferredSize().width);
-		}
+            try {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
 
-		// Add margin
-		width += 2 * margin;
+                        int index = FileBrowserPanel.this.getRowbyName(fname);
 
-		// Set the width
-		col.setPreferredWidth(width);
-	}
+                        if (index >= 0)
+                            mTableDataModel.fireTableRowsUpdated(index, index);
+                        if (lastIndex >= 0)
+                            mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
+                    }
+                });
+            } catch (Exception e) {
+                myLogger.error("Error while updating table upon displayed image notification");
+            }
 
-	public Vector<FitsFileEntry> getSelected() {
+        }
+    }
 
-		Vector<FitsFileEntry> selected = new Vector<FitsFileEntry>();
 
-		synchronized (mImageList) {
-			if (mTable.getSelectedRowCount() > 0) {
+    private class ImageIDRenderer extends DefaultTableCellRenderer {
 
-				int rows[] = mTable.getSelectedRows();
-				for (int row : rows) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                    column);
 
-					selected.add(mImageList.elementAt(mTable.convertRowIndexToModel(row)));
+            Color c = Color.black;
 
-				}
-			}
-		}
-		return selected;
-	}
+            Font f = renderer.getFont().deriveFont(Font.PLAIN);
+            if (DisplayedImage != null && DisplayedImage.trim().equals(((String) value).trim())) {
+                c = Color.MAGENTA;
+                f = f.deriveFont(Font.BOLD);
 
-	/**
-	 * Open a new directory for browsing
-	 */
+            }
+            renderer.setForeground(c);
+            renderer.setFont(f);
 
-	void selectNewDirectory() {
+            return renderer;
+        }
 
-		// FsURL retVal = null;
-		JFileChooser chooser = new JFileChooser();
+    }
 
-		if (mRootDirectory != null)
-			chooser.setCurrentDirectory(mRootDirectory.getParentFile());
 
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int returnVal = chooser.showOpenDialog(this);
+    public void packColumns(JTable table, int margin) {
+        for (int c = 0; c < table.getColumnCount(); c++) {
+            packColumn(table, c, margin);
+        }
+    }
 
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
+    // Sets the preferred width of the visible column specified by vColIndex.
+    // The column
+    // will be just wide enough to show the column head and the widest cell in
+    // the column.
+    // margin pixels are added to the left and right
+    // (resulting in an additional width of 2*margin pixels).
 
-			myLogger.info("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+    private void packColumn(JTable table, int vColIndex, int margin) {
+        // TableModel model = table.getModel ();
+        DefaultTableColumnModel colModel = (DefaultTableColumnModel) table.getColumnModel();
+        TableColumn col = colModel.getColumn(vColIndex);
+        int width = 0;
 
-			mRootDirectory = chooser.getSelectedFile();
+        // Get width of column header
+        TableCellRenderer renderer = col.getHeaderRenderer();
+        if (renderer == null) {
+            renderer = table.getTableHeader().getDefaultRenderer();
+        }
+        Component comp = renderer.getTableCellRendererComponent(table, col.getHeaderValue(), false, false, 0, 0);
+        width = comp.getPreferredSize().width;
 
-			if (mRootDirectory.exists() && mRootDirectory.isDirectory()) {
+        // Get maximum width of column data
+        for (int r = 0; r < table.getRowCount(); r++) {
+            renderer = table.getCellRenderer(r, vColIndex);
+            comp = renderer.getTableCellRendererComponent(table, table.getValueAt(r, vColIndex), false, false, r,
+                    vColIndex);
+            width = Math.max(width, comp.getPreferredSize().width);
+        }
 
-				this.rootDirLabel.setText(mRootDirectory.getAbsolutePath());
-				this.mRootDirectoryString = mRootDirectory.getAbsolutePath();
+        // Add margin
+        width += 2 * margin;
 
-				readDirectory(mRootDirectory);
+        // Set the width
+        col.setPreferredWidth(width);
+    }
 
-			}
+    public Vector<FitsFileEntry> getSelected() {
 
-		}
-	}
+        Vector<FitsFileEntry> selected = new Vector<FitsFileEntry>();
 
-	void reload() {
-		if (mRootDirectory != null && mRootDirectory.exists())
-			readDirectory(mRootDirectory);
+        synchronized (mImageList) {
+            if (mTable.getSelectedRowCount() > 0) {
 
-	}
+                int rows[] = mTable.getSelectedRows();
+                for (int row : rows) {
 
-	public void onDirectoryChanged(File f) {
+                    selected.add(mImageList.elementAt(mTable.convertRowIndexToModel(row)));
 
-		if (f.getAbsoluteFile().equals(mRootDirectory.getAbsoluteFile())) {
-			myLogger.info("Directory changed event registered ");
-			readDirectory(this.mRootDirectory);
+                }
+            }
+        }
+        return selected;
+    }
 
-		}
+    /**
+     * Open a new directory for browsing
+     */
 
-	}
+    void selectNewDirectory() {
 
-	int getNumberOfEntries() {
-		int retVal = -1;
-		if (this.mImageList != null)
-			retVal = mImageList.size();
-		return retVal;
-	}
+        // FsURL retVal = null;
+        JFileChooser chooser = new JFileChooser();
 
-	Vector<FitsFileEntry> getImageList() {
-		return (Vector<FitsFileEntry>) mImageList.clone();
-	}
+        if (mRootDirectory != null)
+            chooser.setCurrentDirectory(mRootDirectory.getParentFile());
+
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnVal = chooser.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+            myLogger.info("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+
+            mRootDirectory = chooser.getSelectedFile();
+
+            if (mRootDirectory.exists() && mRootDirectory.isDirectory()) {
+
+                this.rootDirLabel.setText(mRootDirectory.getAbsolutePath());
+                this.mRootDirectoryString = mRootDirectory.getAbsolutePath();
+
+                readDirectory(mRootDirectory);
+
+            }
+
+        }
+    }
+
+    void reload() {
+        if (mRootDirectory != null && mRootDirectory.exists())
+            readDirectory(mRootDirectory);
+
+    }
+
+    public void onDirectoryChanged(File f) {
+
+        if (f.getAbsoluteFile().equals(mRootDirectory.getAbsoluteFile())) {
+            myLogger.info("Directory changed event registered ");
+            readDirectory(this.mRootDirectory);
+
+        }
+
+    }
+
+    int getNumberOfEntries() {
+        int retVal = -1;
+        if (this.mImageList != null)
+            retVal = mImageList.size();
+        return retVal;
+    }
+
+    Vector<FitsFileEntry> getImageList() {
+        return (Vector<FitsFileEntry>) mImageList.clone();
+    }
 
 
     /**
-	 * Finds an image entry by name and returns the row of the underlying table
-	 * model
-	 *
-	 * @param Name
-	 * @return
-	 */
-	private int getRowbyName(String Name) {
-		int retVal = -1;
+     * Finds an image entry by name and returns the row of the underlying table
+     * model
+     *
+     * @param Name
+     * @return
+     */
+    private int getRowbyName(String Name) {
+        int retVal = -1;
 
-		synchronized (mImageList) {
-			for (int ii = 0; ii < mImageList.size(); ii++) {
-				FitsFileEntry f = mImageList.get(ii);
-				if (f != null) {
-					if (f.FName.equals(Name))
-						return ii;
+        synchronized (mImageList) {
+            for (int ii = 0; ii < mImageList.size(); ii++) {
+                FitsFileEntry f = mImageList.get(ii);
+                if (f != null) {
+                    if (f.FName.equals(Name))
+                        return ii;
 
-				}
-			}
-		}
-		return retVal;
-	}
+                }
+            }
+        }
+        return retVal;
+    }
 
-	public void addSingleNewItem(File newItem) {
+    public void addSingleNewItem(File newItem) {
 
-		// Issue at hand is that java only handles last modification date.
-		synchronized (mImageList) {
-			for (FitsFileEntry test : mImageList) {
+        // Issue at hand is that java only handles last modification date.
+        synchronized (mImageList) {
+            for (FitsFileEntry test : mImageList) {
 
-				if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
+                if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
 
-					myLogger.warn("new Item " + newItem.getAbsolutePath()
-							+ " was already in the file list. Rejecting as duplicate.");
-					return;
-				}
+                    myLogger.warn("new Item " + newItem.getAbsolutePath()
+                            + " was already in the file list. Rejecting as duplicate.");
+                    return;
+                }
 
-			}
-		}
-		final FitsFileEntry e = FitsFileEntry.createFromFile(newItem);
+            }
+        }
+        final FitsFileEntry e = FitsFileEntry.createFromFile(newItem);
 
-		myLogger.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
-				+ " \n This file converts to entry: " + e);
+        myLogger.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
+                + " \n This file converts to entry: " + e);
 
-		if (e != null) {
-			try {
-				synchronized (mImageList) {
-					mImageList.add(e);
-				}
+        if (e != null) {
+            try {
+                synchronized (mImageList) {
+                    mImageList.add(e);
+                }
 
-				// Swing Thread-unsafeness safety wrapper here
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
+                // Swing Thread-unsafeness safety wrapper here
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
 
-						mTableDataModel.fireTableRowsInserted(mImageList.size() - 1, mImageList.size() - 1);
-					}
-				});
-			} catch (Exception e1) {
-				myLogger.error("Error while adding element to file table", e1);
-			} finally {
-				myLogger.debug("Autoloading image: " + autoLoadImageToListener);
-				if (autoLoadImageToListener) {
-					String fname = newItem.getAbsolutePath();
-					SAMPUtilities.loadMosaicDS9(fname, 1);
+                        mTableDataModel.fireTableRowsInserted(mImageList.size() - 1, mImageList.size() - 1);
+                    }
+                });
+            } catch (Exception e1) {
+                myLogger.error("Error while adding element to file table", e1);
+            } finally {
+                myLogger.debug("Autoloading image: " + autoLoadImageToListener);
+                if (autoLoadImageToListener) {
+                    String fname = newItem.getAbsolutePath();
+                    SAMPUtilities.loadMosaicDS9(fname, 1);
 
-				}
-			}
-		}
+                }
+            }
+        }
 
-	}
+    }
 
-	/**
-	 * Read an entire directory in from scratch
-	 *
-	 * @param RootDirectory
-	 */
+    /**
+     * Read an entire directory in from scratch
+     *
+     * @param RootDirectory
+     */
     private void readDirectory(final File RootDirectory) {
 
-		// stop the directory listener.
-		if (myDirectoryListener != null) {
-			myLogger.debug("Stopping directory listener");
-			myDirectoryListener.waitToabort();
-			myDirectoryListener = null;
-		}
+        // stop the directory listener.
+        if (myDirectoryListener != null) {
+            myLogger.debug("Stopping directory listener");
+            myDirectoryListener.waitToabort();
+            myDirectoryListener = null;
+        }
+
+        if (mImageList != null) {
+            mImageList.clear();
+            try {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        mTableDataModel.fireTableDataChanged();
+                    }
+                });
+            } catch (Exception e) {
+                myLogger.error("Error whle notifying table about table clean");
+            }
+        }
 
-		if (mImageList != null) {
-			mImageList.clear();
-			try {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						mTableDataModel.fireTableDataChanged();
-					}
-				});
-			} catch (Exception e) {
-				myLogger.error("Error whle notifying table about table clean");
-			}
-		}
+        myLogger.info("Reading  directory  in " + RootDirectory);
 
-		myLogger.info("Reading  directory  in " + RootDirectory);
+        this.mRootDirectory = RootDirectory.getAbsoluteFile();
+        this.rootDirLabel.setText(RootDirectory.getAbsolutePath());
+        this.mRootDirectoryString = RootDirectory.getAbsolutePath();
 
-		this.mRootDirectory = RootDirectory.getAbsoluteFile();
-		this.rootDirLabel.setText(RootDirectory.getAbsolutePath());
-		this.mRootDirectoryString = RootDirectory.getAbsolutePath();
+        Preferences.thePreferences.setProperty(this.PROP_LASTDIRECTORY, RootDirectory.getAbsolutePath());
 
-		Preferences.thePreferences.setProperty(this.PROP_LASTDIRECTORY, RootDirectory.getAbsolutePath());
+        final ProgressMonitor mProgressMonitor = new ProgressMonitor(FileBrowserPanel.this, "Parsing Directory", "", 0,
+                50);
+        mProgressMonitor.setMillisToDecideToPopup(200);
 
-		final ProgressMonitor mProgressMonitor = new ProgressMonitor(FileBrowserPanel.this, "Parsing Directory", "", 0,
-				50);
-		mProgressMonitor.setMillisToDecideToPopup(200);
+        new SwingWorker<String, String>() {
 
-		new SwingWorker<String, String>() {
+            public String doInBackground() {
 
-			public String doInBackground() {
+                // Reset internal image list
+                if (mImageList == null) {
+                    myLogger.warn("Imagelist did not exist. that is strange; fixed it now");
+                    mImageList = new Vector<FitsFileEntry>();
+                }
 
-				// Reset internal image list
-				if (mImageList == null) {
-					myLogger.warn("Imagelist did not exist. that is strange; fixed it now");
-					mImageList = new Vector<FitsFileEntry>();
-				}
+                // load images in the new directory
+                Vector<FitsFileEntry> newList = FitsFileEntry.getImagesInDirectory(RootDirectory,
+                        mProgressMonitor);
 
-				// load images in the new directory
-				Vector<FitsFileEntry> newList = FitsFileEntry.getImagesInDirectory(RootDirectory,
-						mProgressMonitor);
+                if (newList != null && newList.size() > 0) {
+                    mImageList.addAll(newList);
+                }
 
-				if (newList != null && newList.size() > 0) {
-					mImageList.addAll(newList);
-				}
+                myLogger.debug("done with reading the directory, notifying table");
+                // This should be safe without wrapper since invoked from
+                // Swingworker:
+                mTableDataModel.fireTableDataChanged();
 
-				myLogger.debug("done with reading the directory, notifying table");
-				// This should be safe without wrapper since invoked from
-				// Swingworker:
-				mTableDataModel.fireTableDataChanged();
+                packColumn(mTable, 0, 1);
+                packColumn(mTable, 1, 1);
+                packColumn(mTable, 2, 2);
+                packColumn(mTable, 3, 1);
 
-				packColumn(mTable, 0, 1);
-				packColumn(mTable, 1, 1);
-				packColumn(mTable, 2, 2);
-				packColumn(mTable, 3, 1);
+                mProgressMonitor.close();
 
-				mProgressMonitor.close();
+                if (getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null) {
+                    tomorrowLabel.setVisible(true);
+                    yesterDayLabel.setVisible(true);
+                } else {
+                    tomorrowLabel.setVisible(false);
+                    yesterDayLabel.setVisible(false);
+                }
 
-				// Now that the directory is fully read in, instsnciate a new
-				// DirectoryListener.
+                // Now that the directory is fully read in, instsnciate a new
+                // DirectoryListener.
 
-				myDirectoryListener = new DirectoryListener(RootDirectory, FileBrowserPanel.this);
+                myDirectoryListener = new DirectoryListener(RootDirectory, FileBrowserPanel.this);
 
-				new Thread(myDirectoryListener).start();
-				return null;
-			}
-		}.execute();
-	}
+                new Thread(myDirectoryListener).start();
+                return null;
+            }
+        }.execute();
+    }
 
-	private class SelectionListener implements ListSelectionListener {
 
-		SelectionListener() {
+    private Date getDateComponentofDirectory(String name) {
 
-		}
+        Date ret = null;
 
-		public void valueChanged(ListSelectionEvent e) {
+        Pattern p = Pattern.compile(".*\\/([12][890]\\d\\d[01]\\d[0123]\\d).*");
+        Matcher m = p.matcher(name);
+        String t = null;
+        if (m.matches()) {
+            try {
+                t = m.group(1);
+                myLogger.debug ("Found date component: " + t);
+                DateFormat df = new SimpleDateFormat("yyyyMMdd");
+                ret = df.parse(t);
 
-			if (myLogger.isDebugEnabled())
-				myLogger.debug("Table change event: " + e);
+            } catch (Exception e) {
+                myLogger.warn("Error while parsing date in directory name " + t, e);
+            }
+        } else {
+            myLogger.info ("directory string " + name + " does not contain a date");
+        }
 
-			if (mFileListListener == null)
-				return;
+        return ret;
 
-			if (!e.getValueIsAdjusting()) {
+    }
 
-				Vector<FitsFileEntry> selected = getSelected();
-				if (selected != null && selected.size() == 1) {
 
-					mFileListListener.pushFileSelection(selected);
+    private class SelectionListener implements ListSelectionListener {
 
-				}
+        SelectionListener() {
 
-			}
+        }
 
-		}
-	}
+        public void valueChanged(ListSelectionEvent e) {
 
-	private class FitsViewerTableModel extends AbstractTableModel {
+            if (myLogger.isDebugEnabled())
+                myLogger.debug("Table change event: " + e);
 
+            if (mFileListListener == null)
+                return;
 
-		final static int FNAME_COL = 0;
-		final static int OBJECT_COL = 1;
-		final static int TEXP_COL = 2;
-		final static int FILTER_COL = 3;
-		final static int AIRMASS_COL = 4;
-		final static int DATEOBS_COL = 5;
-		final static int USERCOMMENT_COL = 6;
+            if (!e.getValueIsAdjusting()) {
 
+                Vector<FitsFileEntry> selected = getSelected();
+                if (selected != null && selected.size() == 1) {
 
-		boolean displayExtra = false;
+                    mFileListListener.pushFileSelection(selected);
 
-		FitsViewerTableModel() {
-			super();
-		}
+                }
 
-		public int getColumnCount() {
+            }
 
-			int defaultColumns = 7;
-			return displayExtra ? defaultColumns + 1 : defaultColumns;
+        }
+    }
 
-		}
+    private class FitsViewerTableModel extends AbstractTableModel {
 
-		public int getRowCount() {
-			if (mImageList != null)
-				return mImageList.size();
-			return 0;
-		}
 
-		public Object getValueAt(int row, int col) {
+        final static int FNAME_COL = 0;
+        final static int OBJECT_COL = 1;
+        final static int TEXP_COL = 2;
+        final static int FILTER_COL = 3;
+        final static int AIRMASS_COL = 4;
+        final static int DATEOBS_COL = 5;
+        final static int USERCOMMENT_COL = 6;
 
-			if (mImageList != null && mImageList.size() > row) {
-				FitsFileEntry entry = mImageList.elementAt(row);
 
+        boolean displayExtra = false;
 
+        FitsViewerTableModel() {
+            super();
+        }
 
-				if (col == FNAME_COL) {
-					String prefix;
-					prefix = " ";
-					if (entry.isBinned)
-						prefix = "\u00B7";
-					return prefix + entry.FName;
-				}
+        public int getColumnCount() {
 
-				if (col == OBJECT_COL)
-					return entry.ObjName;
+            int defaultColumns = 7;
+            return displayExtra ? defaultColumns + 1 : defaultColumns;
 
-				if (col == FILTER_COL)
-					return entry.Filter;
+        }
 
-				if (col == TEXP_COL)
-					return entry.ExpTime;
+        public int getRowCount() {
+            if (mImageList != null)
+                return mImageList.size();
+            return 0;
+        }
 
+        public Object getValueAt(int row, int col) {
 
-				if (col == DATEOBS_COL)
-					return entry.DateObs;
+            if (mImageList != null && mImageList.size() > row) {
+                FitsFileEntry entry = mImageList.elementAt(row);
 
 
+                if (col == FNAME_COL) {
+                    String prefix;
+                    prefix = " ";
+                    if (entry.isBinned)
+                        prefix = "\u00B7";
+                    return prefix + entry.FName;
+                }
 
-				if (col == USERCOMMENT_COL)
-					return entry.UserComment;
+                if (col == OBJECT_COL)
+                    return entry.ObjName;
 
+                if (col == FILTER_COL)
+                    return entry.Filter;
 
+                if (col == TEXP_COL)
+                    return entry.ExpTime;
 
-				if (col == AIRMASS_COL)
-					return entry.Airmass;
 
+                if (col == DATEOBS_COL)
+                    return entry.DateObs;
 
-			}
 
-			return null;
-		}
+                if (col == USERCOMMENT_COL)
+                    return entry.UserComment;
 
-		@Override
-		public void setValueAt(Object Value, int row, int col) {
 
-			if (mImageList != null && mImageList.size() > row && row >= 0) {
-				FitsFileEntry entry = null;
-				switch (col) {
+                if (col == AIRMASS_COL)
+                    return entry.Airmass;
 
 
+            }
 
-					case USERCOMMENT_COL:
+            return null;
+        }
 
-						entry = mImageList.elementAt(row);
-						entry.UserComment = (String) Value;
-						entry.writeBackMetaInformation();
-						break;
+        @Override
+        public void setValueAt(Object Value, int row, int col) {
 
+            if (mImageList != null && mImageList.size() > row && row >= 0) {
+                FitsFileEntry entry = null;
+                switch (col) {
 
 
-					default:
-						myLogger.warn("SetValueAt request for non-editable field");
+                    case USERCOMMENT_COL:
 
-				}
-				fireTableCellUpdated(row, col);
-			} else {
-				myLogger.warn("SetvalueAt for row/col " + row + "/" + col + " failed");
-			}
-		}
+                        entry = mImageList.elementAt(row);
+                        entry.UserComment = (String) Value;
+                        entry.writeBackMetaInformation();
+                        break;
 
-		public String getColumnName(int col) {
 
+                    default:
+                        myLogger.warn("SetValueAt request for non-editable field");
 
+                }
+                fireTableCellUpdated(row, col);
+            } else {
+                myLogger.warn("SetvalueAt for row/col " + row + "/" + col + " failed");
+            }
+        }
 
-			if (col == FNAME_COL)
-				return "Filename";
-			if (col == OBJECT_COL)
-				return "OBJECT";
+        public String getColumnName(int col) {
 
-			if (col == FILTER_COL)
-				return "Filter";
-			if (col == TEXP_COL)
-				return "Exp Time";
 
-			if (col == DATEOBS_COL)
-				return "DATE_OBS";
+            if (col == FNAME_COL)
+                return "Filename";
+            if (col == OBJECT_COL)
+                return "OBJECT";
 
+            if (col == FILTER_COL)
+                return "Filter";
+            if (col == TEXP_COL)
+                return "Exp Time";
 
-			if (col == AIRMASS_COL)
-				return "X";
+            if (col == DATEOBS_COL)
+                return "DATE_OBS";
 
-			if (col == USERCOMMENT_COL)
-				return "Comment";
-			return null;
 
-		}
+            if (col == AIRMASS_COL)
+                return "X";
 
-		public boolean isCellEditable(int row, int col) {
+            if (col == USERCOMMENT_COL)
+                return "Comment";
+            return null;
 
+        }
 
+        public boolean isCellEditable(int row, int col) {
 
-			if (col == USERCOMMENT_COL) {
-				return true;
-			}
 
-			return false;
+            if (col == USERCOMMENT_COL) {
+                return true;
+            }
 
-		}
+            return false;
 
-		@Override
-		public Class<?> getColumnClass(int columnIndex) {
+        }
 
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
 
-			if (columnIndex == TEXP_COL)
-				return Float.class;
 
-			if (columnIndex == DATEOBS_COL)
-				return Date.class;
-			return super.getColumnClass(columnIndex);
-		}
+            if (columnIndex == TEXP_COL)
+                return Float.class;
 
-	}
+            if (columnIndex == DATEOBS_COL)
+                return Date.class;
+            return super.getColumnClass(columnIndex);
+        }
 
-	public Vector<File> getListedFiles() {
+    }
 
-		Vector<File> retVec = new Vector<File>();
-		synchronized (mImageList) {
+    public Vector<File> getListedFiles() {
 
-			for (FitsFileEntry e : this.mImageList) {
-				retVec.add(e.DirectoryFile);
-			}
+        Vector<File> retVec = new Vector<File>();
+        synchronized (mImageList) {
 
-		}
+            for (FitsFileEntry e : this.mImageList) {
+                retVec.add(e.DirectoryFile);
+            }
 
-		return retVec;
-	}
+        }
+
+        return retVec;
+    }
 
 }
 
