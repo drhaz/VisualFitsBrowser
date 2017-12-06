@@ -177,17 +177,20 @@ public class SAMPUtilities {
 
     public synchronized static String searchds9Binary() {
 
-        if (ds9binary != null)
+        if (ds9binary != null) {
+            log.info ("ds9 binary pre-stored at loation " + ds9binary);
             return ds9binary;
+        }
 
         for (String candidate : ds9binarycandidates) {
 
-            if (new File(candidate).exists())
+            if (new File(candidate).exists()) {
                 ds9binary = candidate;
-            break;
-
+                break;
+            }
         }
 
+        log.info ("Returned ds9 binary location from search: " + ds9binary);
         return ds9binary;
 
     }
