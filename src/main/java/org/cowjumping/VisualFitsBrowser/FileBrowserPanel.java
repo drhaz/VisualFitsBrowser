@@ -12,7 +12,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +43,6 @@ import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryListener;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
-import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.TRANSFERSTATUS;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.SAMPUtilities;
@@ -52,10 +50,12 @@ import org.cowjumping.guiUtils.ZebraJTable;
 import org.cowjumping.guiUtils.TableCellRenderers.NumberFormatterCellRenderer;
 import org.cowjumping.guiUtils.TableCellRenderers.mDateRenderer;
 
+import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
+
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
 
-    private final static Logger myLogger = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
+    private final static Logger log = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
 
     String mRootDirectoryString = "/";
 
@@ -278,12 +278,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                             if (selectedFits != null) {
                                 String fname = selectedFits.getAbsolutePath();
 
-                                boolean ismef = SAMPUtilities.isMEF(fname);
 
-                                if (ismef)
-                                    SAMPUtilities.loadMosaicDS9(fname, frame);
-                                else
-                                    SAMPUtilities.loadImageDS9(fname, frame);
+                                boolean funpack = ((e.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK);
+
+
+                                SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
 
 
                             }
@@ -299,6 +298,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         readDirectory(mRootDirectory);
 
     }
+
+
 
 
     public void sendAllSelectedtods9() {
@@ -359,14 +360,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 String olddate = sdf.format(d.getTime());
                 String newdate = sdf.format(c.getTime());
 
-                myLogger.debug ("Input date: " + d + " transformed to " + c);
-                myLogger.info ("other day exchange from " + olddate + " to " + newdate);
+                log.debug ("Input date: " + d + " transformed to " + c);
+                log.info ("other day exchange from " + olddate + " to " + newdate);
                 String newDirectory = mRootDirectoryString.replace(olddate, newdate);
                 File f = new File (newDirectory);
                 if (f.exists() && f.isDirectory())
                     readDirectory (f);
                 else
-                    myLogger.warn ("other day directory " + newDirectory + " does not exist.");
+                    log.warn ("other day directory " + newDirectory + " does not exist.");
 
             }
 
@@ -404,7 +405,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     }
                 });
             } catch (Exception e) {
-                myLogger.error("Error while updating table upon displayed image notification");
+                log.error("Error while updating table upon displayed image notification");
             }
 
         }
@@ -512,7 +513,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
 
-            myLogger.info("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+            log.info("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
 
             mRootDirectory = chooser.getSelectedFile();
 
@@ -537,7 +538,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     public void onDirectoryChanged(File f) {
 
         if (f.getAbsoluteFile().equals(mRootDirectory.getAbsoluteFile())) {
-            myLogger.info("Directory changed event registered ");
+            log.info("Directory changed event registered ");
             readDirectory(this.mRootDirectory);
 
         }
@@ -587,7 +588,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
 
-                    myLogger.warn("new Item " + newItem.getAbsolutePath()
+                    log.warn("new Item " + newItem.getAbsolutePath()
                             + " was already in the file list. Rejecting as duplicate.");
                     return;
                 }
@@ -596,7 +597,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
         final FitsFileEntry e = FitsFileEntry.createFromFile(newItem);
 
-        myLogger.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
+        log.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
                 + " \n This file converts to entry: " + e);
 
         if (e != null) {
@@ -613,9 +614,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     }
                 });
             } catch (Exception e1) {
-                myLogger.error("Error while adding element to file table", e1);
+                log.error("Error while adding element to file table", e1);
             } finally {
-                myLogger.debug("Autoloading image: " + autoLoadImageToListener);
+                log.debug("Autoloading image: " + autoLoadImageToListener);
                 if (autoLoadImageToListener) {
                     String fname = newItem.getAbsolutePath();
                     SAMPUtilities.loadMosaicDS9(fname, 1);
@@ -635,7 +636,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         // stop the directory listener.
         if (myDirectoryListener != null) {
-            myLogger.debug("Stopping directory listener");
+            log.debug("Stopping directory listener");
             myDirectoryListener.waitToabort();
             myDirectoryListener = null;
         }
@@ -649,11 +650,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     }
                 });
             } catch (Exception e) {
-                myLogger.error("Error whle notifying table about table clean");
+                log.error("Error whle notifying table about table clean");
             }
         }
 
-        myLogger.info("Reading  directory  in " + RootDirectory);
+        log.info("Reading  directory  in " + RootDirectory);
 
         this.mRootDirectory = RootDirectory.getAbsoluteFile();
         this.rootDirLabel.setText(RootDirectory.getAbsolutePath());
@@ -671,7 +672,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 // Reset internal image list
                 if (mImageList == null) {
-                    myLogger.warn("Imagelist did not exist. that is strange; fixed it now");
+                    log.warn("Imagelist did not exist. that is strange; fixed it now");
                     mImageList = new Vector<FitsFileEntry>();
                 }
 
@@ -683,7 +684,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     mImageList.addAll(newList);
                 }
 
-                myLogger.debug("done with reading the directory, notifying table");
+                log.debug("done with reading the directory, notifying table");
                 // This should be safe without wrapper since invoked from
                 // Swingworker:
                 mTableDataModel.fireTableDataChanged();
@@ -725,15 +726,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         if (m.matches()) {
             try {
                 t = m.group(1);
-                myLogger.debug ("Found date component: " + t);
+                log.debug ("Found date component: " + t);
                 DateFormat df = new SimpleDateFormat("yyyyMMdd");
                 ret = df.parse(t);
 
             } catch (Exception e) {
-                myLogger.warn("Error while parsing date in directory name " + t, e);
+                log.warn("Error while parsing date in directory name " + t, e);
             }
         } else {
-            myLogger.info ("directory string " + name + " does not contain a date");
+            log.info ("directory string " + name + " does not contain a date");
         }
 
         return ret;
@@ -749,8 +750,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         public void valueChanged(ListSelectionEvent e) {
 
-            if (myLogger.isDebugEnabled())
-                myLogger.debug("Table change event: " + e);
+            if (log.isDebugEnabled())
+                log.debug("Table change event: " + e);
 
             if (mFileListListener == null)
                 return;
@@ -858,12 +859,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
                     default:
-                        myLogger.warn("SetValueAt request for non-editable field");
+                        log.warn("SetValueAt request for non-editable field");
 
                 }
                 fireTableCellUpdated(row, col);
             } else {
-                myLogger.warn("SetvalueAt for row/col " + row + "/" + col + " failed");
+                log.warn("SetvalueAt for row/col " + row + "/" + col + " failed");
             }
         }
 
