@@ -2,6 +2,8 @@ package org.cowjumping.guiUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 
 import nom.tam.image.compression.hdu.CompressedImageHDU;
@@ -18,6 +20,7 @@ import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
 import nom.tam.fits.*;
+import org.cowjumping.FitsUtils.funpackwrapper;
 
 
 /**
@@ -36,6 +39,10 @@ public class SAMPUtilities {
     private static String ds9binary = null;
     private final static String[] ds9binarycandidates = {"/usr/local/bin/ds9",
             "/usr/bin/ds9"};
+
+
+    static ExecutorService ds9Pool = Executors.newSingleThreadExecutor();
+
 
     /** Initiate the SAMP connection.
      *
@@ -119,6 +126,38 @@ public class SAMPUtilities {
         String escapedFitsname = fname.replace(" ", "\\ ");
         sendCommandDS9("file fits " + escapedFitsname);
     }
+
+    public static void loadMEFSaveDS9(final String fname, int frame, boolean funpack) {
+
+
+        Runnable r = new Runnable () {
+
+            @Override
+            public void run() {
+
+                String myfname = fname;
+                if (funpack) {
+                    log.info("Funpacking file for you");
+                    File f;
+                    f = funpackwrapper.getInstance().funpackfile(myfname);
+                    if ( (f != null) && (f.exists()) ) {
+                        myfname = f.getAbsolutePath();
+                    }
+                }
+
+                boolean ismef = SAMPUtilities.isMEF(myfname);
+
+                if (ismef)
+                    SAMPUtilities.loadMosaicDS9(myfname, frame);
+                else
+                    SAMPUtilities.loadImageDS9(myfname, frame);
+            }
+        };
+
+        ds9Pool.submit(r);
+
+    }
+
 
     public static void lockScale() {
         sendCommandDS9("scale lock yes");

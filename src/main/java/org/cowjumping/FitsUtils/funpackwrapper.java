@@ -2,6 +2,7 @@ package org.cowjumping.FitsUtils;
 
 import jsky.util.FileUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.cowjumping.guiUtils.Preferences;
@@ -31,7 +32,7 @@ public class funpackwrapper {
     private  funpackwrapper() {
 
         execLocation = Preferences.thePreferences.getProperty("cowumping.funpack.exec",
-                "/usr/local/bin/funpack");
+                "/usr/bin/funpack");
 
         tempDirectory = Preferences.thePreferences.getProperty("tempdir", FileUtils.getTempDirectoryPath());
 
@@ -94,7 +95,9 @@ public class funpackwrapper {
             return null;
         }
 
-        String name = String.format("%s.%s", RandomStringUtils.randomAlphanumeric(8), "fits");
+        String name = FilenameUtils.getBaseName(input);
+        if (! name.endsWith(".fits"))
+            name = name + ".fits";
         File outfile = new File (new File (tempDirectory), name);
         String commandline = execLocation + " -O " + outfile.getAbsolutePath() + " " + input;
         callout(commandline);
