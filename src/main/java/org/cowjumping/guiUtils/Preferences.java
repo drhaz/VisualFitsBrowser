@@ -82,7 +82,7 @@ public class Preferences {
 		if (thePreferences != null) {
 
 			String retVal = thePreferences.priv_getProperty(key, defaultValue);
-			if (retVal.equals(defaultValue))
+			if ( (retVal != null) && retVal.equals(defaultValue))
 				thePreferences.setProperty(key, defaultValue);
 			return retVal;
 		} else {
