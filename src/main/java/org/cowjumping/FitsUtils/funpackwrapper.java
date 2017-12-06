@@ -56,8 +56,8 @@ public class funpackwrapper {
             BufferedReader br = new BufferedReader(new InputStreamReader(
                     proc.getInputStream()));
 
-            String sline = null;
-            String eline = null;
+            String sline=null;
+            String eline=null;
             while ((sline = br.readLine()) != null
                     || (eline = err.readLine()) != null) {
                 if (sline != null) log.debug(sline);
@@ -65,6 +65,7 @@ public class funpackwrapper {
             }
 
             proc.waitFor();
+            log.debug ("Done funpacking, exit code " + proc.exitValue());
 
         } catch (Exception e) {
 
