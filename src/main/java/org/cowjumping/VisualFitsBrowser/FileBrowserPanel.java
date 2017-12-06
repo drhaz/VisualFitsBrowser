@@ -278,17 +278,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                             if (selectedFits != null) {
                                 String fname = selectedFits.getAbsolutePath();
 
-                                if ((e.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK) {
-                                    log.info ("This is where I would unpack the fits file for you");
 
-                                }
+                                boolean funpack = ((e.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK);
 
-                                boolean ismef = SAMPUtilities.isMEF(fname);
 
-                                if (ismef)
-                                    SAMPUtilities.loadMosaicDS9(fname, frame);
-                                else
-                                    SAMPUtilities.loadImageDS9(fname, frame);
+                                SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
 
 
                             }
@@ -304,6 +298,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         readDirectory(mRootDirectory);
 
     }
+
+
 
 
     public void sendAllSelectedtods9() {
