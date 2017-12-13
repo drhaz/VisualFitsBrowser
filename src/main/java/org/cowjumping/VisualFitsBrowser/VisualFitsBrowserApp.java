@@ -35,6 +35,7 @@ import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.ResponseHandler;
+import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.donut.DonutDisplayFrame;
@@ -580,32 +581,11 @@ public class VisualFitsBrowserApp extends JFrame {
             @Override
             public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
 
-                System.out.println("Received donut response: " + msg);
                 if (msg.isOK()) {
 
                     String result = (String) msg.getResult().get("value");
                     System.out.println("Message result has value: " + result);
-
-                    Vector<Double> db = new Vector<Double>();
-                    StringTokenizer st = new StringTokenizer (result);
-                    while (st.hasMoreTokens()) {
-                        try {
-                            Double d = Double.parseDouble(st.nextToken());
-                            db.add(d);
-                        } catch (Exception e) {
-                            myLogger.error ("While parsing output from imexam: " + e.getMessage() + " Data were: " +result);
-                            break;
-                        }
-                    }
-
-                    double size = Math.sqrt(db.size());
-                    if (size * size != db.size()) {
-                        myLogger.error ("Image dimension does not fit! " + size + " "  + db.size());
-                    }
-
-                    myLogger.debug ("Got imexam image dimension " + size);
-
-
+                    ImageContainer im = new ImageContainer(result);
 
                 }
 

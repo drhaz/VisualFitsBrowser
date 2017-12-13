@@ -55,7 +55,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
     /**
      * Internal buffer to hold the image
      */
-    public short[] rawImageBuffer = null;
+    public float[] rawImageBuffer = null;
 
     /**
      * Hashmap to contain all meta information
@@ -238,6 +238,41 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         MetaInfo = new HashMap<String, Object>();
     }
 
+
+    public ImageContainer (String listOfPixelValues) {
+        Vector<Float> db = new Vector<Float>();
+        StringTokenizer st = new StringTokenizer (listOfPixelValues);
+        while (st.hasMoreTokens()) {
+            try {
+                Float d = Float.parseFloat(st.nextToken());
+                db.add(d);
+            } catch (Exception e) {
+                log.error ("While parsing output from imexam: " + e.getMessage() + " Data were: " +listOfPixelValues);
+                break;
+            }
+        }
+
+        double size = Math.sqrt(db.size());
+        if (size * size != db.size()) {
+            log.error ("Image dimension does not fit! " + size + " "  + db.size());
+            return;
+        }
+
+
+        log.debug ("Got imexam image dimension " + size);
+        this.imageDimX = (int) size;
+        this.imageDimY = (int) size;
+        this.rawImageBuffer =  new float [db.size()];
+        for (int ii = 0; ii < db.size(); ii++) {
+            this.rawImageBuffer[ii] = db.elementAt(ii);
+        }
+
+
+        db.clear();
+
+    }
+
+
     public ImageContainer(ImageContainer gs) {
         this(gs, true);
     }
@@ -254,7 +289,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         if (gs.rawImageBuffer != null && copyImage) {
             this.imageDimX = gs.imageDimX;
             this.imageDimY = gs.imageDimY;
-            this.rawImageBuffer = new short[gs.rawImageBuffer.length];
+            this.rawImageBuffer = new float[gs.rawImageBuffer.length];
             System.arraycopy(gs.rawImageBuffer, 0, this.rawImageBuffer, 0, rawImageBuffer.length);
         }
 
@@ -607,17 +642,17 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         this.imageDimY = imageDimY;
     }
 
-    public short[] getRawImageBuffer() {
+    public float[] getRawImageBuffer() {
         return rawImageBuffer;
     }
 
-    public void setRawImageBuffer(short[] rawImageBuffer) {
+    public void setRawImageBuffer(float[] rawImageBuffer) {
         this.rawImageBuffer = rawImageBuffer;
     }
 
 
 
-    public void setImage(short[] ImageBuffer, int dimX, int dimY) {
+    public void setImage(float[] ImageBuffer, int dimX, int dimY) {
 
         this.rawImageBuffer = ImageBuffer;
         this.imageDimX = dimX;
@@ -871,7 +906,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
             }
 
             for (int ii = 0; ii < max; ii++) {
-                myBBuffer.putShort(this.rawImageBuffer[ii]);
+                myBBuffer.putShort((short) this.rawImageBuffer[ii]);
 
             }
 
@@ -925,7 +960,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void readImageFromByteBuffer(ByteBuffer b, int size) {
 
-        this.rawImageBuffer = new short[size];
+        this.rawImageBuffer = new float[size];
         // System.arraycopy (b.asShortBuffer (), 0, rawImageBuffer, 0, size);
 
         for (int ii = 0; ii < size; ii++) {
@@ -950,7 +985,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         BasicConfigurator.configure();
         ImageContainer gs = new ImageContainer();
         gs.setCycle(10);
-        gs.setImage(new short[10 * 10], 10, 10);
+        gs.setImage(new float[10 * 10], 10, 10);
         gs.addHashFromString("EXPTIME=0.020");
 
         System.out.println(gs.Hash2String());
@@ -1002,7 +1037,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
         target.setWindow_Offset_X((short) x1);
         target.setWindow_Offset_Y((short) y1);
-        short[] myBuffer = new short[tsize * tsize];
+        float[] myBuffer = new float[tsize * tsize];
         int dimX = source.getImageDimX();
         int dimY = source.getImageDimY();
         for (int yy = 0; yy < tsize; yy++) {
@@ -1010,8 +1045,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
                 if (x1 + xx >= 0 && x1 + xx < dimX && y1 + yy >= 0 && y1 + yy < dimY) {
 
-                    myBuffer[yy * tsize + xx] = (short) Math
-                            .round(source.getRawImageBuffer()[(y1 + yy) * dimX + x1 + xx]);
+                    myBuffer[yy * tsize + xx] = (source.getRawImageBuffer()[(y1 + yy) * dimX + x1 + xx]);
 
                 }
             }
