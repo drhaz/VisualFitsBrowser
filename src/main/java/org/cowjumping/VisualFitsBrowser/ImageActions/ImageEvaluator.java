@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JPanel;
 
+import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 @SuppressWarnings("serial")
@@ -34,13 +35,21 @@ public abstract class ImageEvaluator extends JPanel {
 
 	}
 
-	 public int setImageList(Vector<FitsFileEntry> imagelist, int
-			otaX, int otaY) {
+	 public int setImageList(Vector<FitsFileEntry> imagelist) {
 
 		if (imagelist != null)
 			return imagelist.size();
 
 		return -1;
 	}
+
+
+	public int setImageContainer (Vector<ImageContainer> imageContainers) {
+
+	        if (imageContainers != null)
+	            return imageContainers.size();
+
+	        return -1;
+    }
 
 }

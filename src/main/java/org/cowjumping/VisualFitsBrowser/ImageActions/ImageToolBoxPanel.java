@@ -15,10 +15,9 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
-import org.cowjumping.donut.DonutBridgeResultListener;
-import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.MultiFlickPanel;
+import org.cowjumping.guiUtils.SAMPUtilities;
 import org.cowjumping.guiUtils.VariableGridLayout;
 
 /**
@@ -50,8 +49,10 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	// Actual items follow now:
 
 	FITSHeaderInspection myImageInfoPanel = null;
+	ImexamDisplay myImexamDisplay = null;
 
 	private static final String INFOPANEL = "INFOVIEW";
+	private static final String IMEXAMPANEL = "IMEXAMVIEW";
 	private static final String DONUTPANEL = "DONUTVIEW";
 
 	public ImageToolBoxPanel(FileBrowserPanel fbp) {
@@ -69,7 +70,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		this.add(myMultiPanel, BorderLayout.EAST);
 
 
-		this.fillButtonPanelForODI(ButtonPanel);
+		this.fillButtonPanel(ButtonPanel);
 		this.fillMultiPanelView();
 
 	}
@@ -98,7 +99,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	public void pushFileSelection(Vector<FitsFileEntry> fileList) {
 
 		if (this.myMultiPanel.getTopComponent().equals(INFOPANEL) && fileList != null && fileList.size() == 1) {
-			this.myImageInfoPanel.setImageList(fileList, -1, -1);
+			this.myImageInfoPanel.setImageList(fileList);
 			return;
 
 		}
@@ -110,7 +111,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	 * @param ButtonPanel
 	 */
 
-	private void fillButtonPanelForODI(JPanel ButtonPanel) {
+	private void fillButtonPanel(JPanel ButtonPanel) {
 
 		// Generate Image Info Panel
 		JButton generateHeader = new JButton("Image Header");
@@ -123,11 +124,23 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 				myImageInfoPanel.setMode(FITSHeaderInspection.MODE_FITSHEADER);
 				if (fileList != null && fileList.size() > 0) {
 
-					myImageInfoPanel.setImageList(fileList, -1, -1);
+					myImageInfoPanel.setImageList(fileList);
 
 				} else {
 					log.debug("No file list or empty file list for image header display.");
 				}
+
+			}
+
+		});
+
+		JButton imexamDS9 = new JButton("Imexam");
+        imexamDS9.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent arg0) {
+
+				SAMPUtilities.getDS9ImageCutout("imexam", 20);
+				myMultiPanel.setTopComponent(IMEXAMPANEL);
 
 			}
 
@@ -150,6 +163,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		ButtonPanel.add(ImageTitleLabel);
 
 		ButtonPanel.add(generateHeader);
+        ButtonPanel.add(imexamDS9);
 
 		ButtonPanel.add (Box.createVerticalGlue ());
 
@@ -164,6 +178,11 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		myMultiPanel.addComponent(myImageInfoPanel);
 
 
+
+
+		myImexamDisplay = new ImexamDisplay();
+		myImexamDisplay.setName(IMEXAMPANEL);
+		myMultiPanel.addComponent(myImageInfoPanel);
 	}
 
 	public FileBrowserPanel getmBrowserPanel() {
