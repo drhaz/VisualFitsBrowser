@@ -40,10 +40,7 @@ import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
-import org.cowjumping.guiUtils.GUIConsts;
-import org.cowjumping.guiUtils.OSXAdapter;
-import org.cowjumping.guiUtils.Preferences;
-import org.cowjumping.guiUtils.SAMPUtilities;
+import org.cowjumping.guiUtils.*;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
@@ -586,6 +583,8 @@ public class VisualFitsBrowserApp extends JFrame {
                     String result = (String) msg.getResult().get("value");
                     System.out.println("Message result has value: " + result);
                     ImageContainer im = new ImageContainer(result);
+                    myLogger.info (im);
+                    RadialPlotComponent.updateImage(im);
 
                 }
 
