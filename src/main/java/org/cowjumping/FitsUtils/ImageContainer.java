@@ -240,6 +240,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
 
     public ImageContainer (String listOfPixelValues) {
+        this();
         Vector<Float> db = new Vector<Float>();
         StringTokenizer st = new StringTokenizer (listOfPixelValues);
         while (st.hasMoreTokens()) {
