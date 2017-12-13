@@ -8,10 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.DoubleBuffer;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -402,6 +401,22 @@ public class VisualFitsBrowserApp extends JFrame {
 
         }
 
+
+        {
+
+            menuItem = new JMenuItem("ds9 Imexam");
+
+            menuItem.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+                    SAMPUtilities.getDS9ImageCutout("imexam", 20);
+                }
+
+            });
+            menu.add(menuItem);
+
+        }
+
         JMenu debugMenu = GUIConsts.getDebugMenu();
 
         // theMenu.add(debugMenu);
@@ -545,6 +560,53 @@ public class VisualFitsBrowserApp extends JFrame {
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
+                }
+
+            }
+        });
+
+
+// imexam
+        SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
+            @Override
+            public boolean ownsTag(String s) {
+                if (s.toLowerCase().contentEquals("imexam")) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
+
+                System.out.println("Received donut response: " + msg);
+                if (msg.isOK()) {
+
+                    String result = (String) msg.getResult().get("value");
+                    System.out.println("Message result has value: " + result);
+
+                    Vector<Double> db = new Vector<Double>();
+                    StringTokenizer st = new StringTokenizer (result);
+                    while (st.hasMoreTokens()) {
+                        try {
+                            Double d = Double.parseDouble(st.nextToken());
+                            db.add(d);
+                        } catch (Exception e) {
+                            myLogger.error ("While parsing output from imexam: " + e.getMessage() + " Data were: " +result);
+                            break;
+                        }
+                    }
+
+                    double size = Math.sqrt(db.size());
+                    if (size * size != db.size()) {
+                        myLogger.error ("Image dimension does not fit! " + size + " "  + db.size());
+                    }
+
+                    myLogger.debug ("Got imexam image dimension " + size);
+
+
+
                 }
 
             }
