@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
@@ -105,6 +106,14 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		}
 	}
 
+
+	public void pushImageBufferSelection (Vector<ImageContainer> imageList) {
+	    if (this.myMultiPanel.getTopComponent().equals(IMEXAMPANEL) && imageList != null && imageList.size() == 1) {
+	        this.myImexamDisplay.setImageContainer(imageList);
+        }
+
+    }
+
 	/**
 	 * Create the Button Panel context for VisualFitsBrowser use
 	 * 
@@ -147,7 +156,6 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		});
 
 
-
 		GridLayout ButtonPanelLayout = new VariableGridLayout(12, 1);
 		ButtonPanelLayout.setColumns(1);
 		ButtonPanelLayout.setRows(19);
@@ -175,14 +183,11 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 		myImageInfoPanel = new FITSHeaderInspection();
 		myImageInfoPanel.setName(INFOPANEL);
-		myMultiPanel.addComponent(myImageInfoPanel);
-
-
-
+		myMultiPanel.add(myImageInfoPanel);
 
 		myImexamDisplay = new ImexamDisplay();
 		myImexamDisplay.setName(IMEXAMPANEL);
-		myMultiPanel.addComponent(myImageInfoPanel);
+		myMultiPanel.add(myImexamDisplay);
 	}
 
 	public FileBrowserPanel getmBrowserPanel() {

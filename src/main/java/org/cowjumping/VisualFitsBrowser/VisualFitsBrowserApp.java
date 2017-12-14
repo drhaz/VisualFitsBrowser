@@ -88,9 +88,9 @@ public class VisualFitsBrowserApp extends JFrame {
         // Get a saved parameter instance for this application.
         Preferences.initPreferences("VisualFitsBrowserApp");
 
-		/*
+        /*
          * Build the GUI: Basic Layout: three vertical panels from left to right
-		 */
+         */
         BorderLayout mBorderLayout = new BorderLayout();
         this.setLayout(mBorderLayout);
 
@@ -112,15 +112,15 @@ public class VisualFitsBrowserApp extends JFrame {
 
         DonutFrame = DonutDisplayFrame.getInstance();
 
-		/*
-		 * Define the MenuBar
-		 */
+        /*
+         * Define the MenuBar
+         */
 
         this.setJMenuBar(createTheMenu());
 
-		/*
-		 * Ensure graceful handling of window close events
-		 */
+        /*
+         * Ensure graceful handling of window close events
+         */
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 myLogger.info("Closing down Directory Listener");
@@ -129,9 +129,9 @@ public class VisualFitsBrowserApp extends JFrame {
             }
         });
 
-		/*
-		 * Finally, restore window location and some look and feel fine-tuning
-		 */
+        /*
+         * Finally, restore window location and some look and feel fine-tuning
+         */
         Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
         Preferences.thePreferences.restoreWindowLocation(this.DonutFrame, this.PROP_WINDOWLOCATION_WAVEFRONT);
@@ -150,9 +150,9 @@ public class VisualFitsBrowserApp extends JFrame {
         this.setShowUtiltiies(
                 Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
 
-		/*
-		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
-		 */
+        /*
+         * Ensure graceful handling when Command-Q is pressed in Mac Os X
+         */
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
@@ -266,7 +266,6 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
 
-
         menu.add(new JSeparator());
 
         {
@@ -285,8 +284,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
             });
         }
-
-
 
 
         {
@@ -554,7 +551,7 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(),  y.intValue(), 200);
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(), 200);
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
@@ -564,7 +561,7 @@ public class VisualFitsBrowserApp extends JFrame {
         });
 
 
-// imexam
+        // imexam
         SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
             @Override
             public boolean ownsTag(String s) {
@@ -583,8 +580,9 @@ public class VisualFitsBrowserApp extends JFrame {
                     String result = (String) msg.getResult().get("value");
                     System.out.println("Message result has value: " + result);
                     ImageContainer im = new ImageContainer(result);
-                    myLogger.info (im);
-                    RadialPlotComponent.updateImage(im);
+                    Vector<ImageContainer> v = new Vector<ImageContainer>();
+                    v.add(im);
+                    mToolBoxPanel.pushImageBufferSelection(v);
 
                 }
 
