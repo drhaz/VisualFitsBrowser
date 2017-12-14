@@ -4,6 +4,7 @@ import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.FitsUtils.odiCentroidSupport;
 import org.cowjumping.guiUtils.GuideStarDisplayComponent;
 import org.cowjumping.guiUtils.RadialPlotComponent;
+import org.cowjumping.guiUtils.ZScaleSelectorComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,13 +20,17 @@ public class ImexamDisplay extends ImageEvaluator {
         super();
         setLayout(new BorderLayout());
 
-        rp = new RadialPlotComponent();
-        gd = new GuideStarDisplayComponent();
+        rp = new RadialPlotComponent(200,200);
+        gd = new GuideStarDisplayComponent(200,200,0,65000);
         Box b = Box.createHorizontalBox();
         this.add(b);
 
         b.add (gd);
         b.add (rp);
+
+        ZScaleSelectorComponent zs = new ZScaleSelectorComponent(gd,400,100);
+
+        this.add (zs, BorderLayout.SOUTH);
 
     }
 

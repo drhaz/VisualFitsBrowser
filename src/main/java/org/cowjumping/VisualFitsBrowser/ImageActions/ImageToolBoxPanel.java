@@ -148,7 +148,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 			public void actionPerformed(ActionEvent arg0) {
 
-				SAMPUtilities.getDS9ImageCutout("imexam", 20);
+				SAMPUtilities.getDS9ImageCutout("imexam", 50);
 				myMultiPanel.setTopComponent(IMEXAMPANEL);
 
 			}
