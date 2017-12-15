@@ -13,12 +13,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
-import org.cowjumping.donut.DonutBridgeResultListener;
-import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.MultiFlickPanel;
+import org.cowjumping.guiUtils.SAMPUtilities;
 import org.cowjumping.guiUtils.VariableGridLayout;
 
 /**
@@ -29,7 +29,7 @@ import org.cowjumping.guiUtils.VariableGridLayout;
  *
  */
 
-public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, DonutBridgeResultListener {
+public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	private static final Logger log = Logger.getLogger(ImageToolBoxPanel.class);
 
 	/**
@@ -50,9 +50,10 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 	// Actual items follow now:
 
 	FITSHeaderInspection myImageInfoPanel = null;
-	DonutPanel myDonutPanel = null;
+	ImexamDisplay myImexamDisplay = null;
 
 	private static final String INFOPANEL = "INFOVIEW";
+	private static final String IMEXAMPANEL = "IMEXAMVIEW";
 	private static final String DONUTPANEL = "DONUTVIEW";
 
 	public ImageToolBoxPanel(FileBrowserPanel fbp) {
@@ -70,7 +71,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 		this.add(myMultiPanel, BorderLayout.EAST);
 
 
-		this.fillButtonPanelForODI(ButtonPanel);
+		this.fillButtonPanel(ButtonPanel);
 		this.fillMultiPanelView();
 
 	}
@@ -99,11 +100,19 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 	public void pushFileSelection(Vector<FitsFileEntry> fileList) {
 
 		if (this.myMultiPanel.getTopComponent().equals(INFOPANEL) && fileList != null && fileList.size() == 1) {
-			this.myImageInfoPanel.setImageList(fileList, -1, -1);
+			this.myImageInfoPanel.setImageList(fileList);
 			return;
 
 		}
 	}
+
+
+	public void pushImageBufferSelection (Vector<ImageContainer> imageList) {
+	    if (this.myMultiPanel.getTopComponent().equals(IMEXAMPANEL) && imageList != null && imageList.size() == 1) {
+	        this.myImexamDisplay.setImageContainer(imageList);
+        }
+
+    }
 
 	/**
 	 * Create the Button Panel context for VisualFitsBrowser use
@@ -111,7 +120,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 	 * @param ButtonPanel
 	 */
 
-	private void fillButtonPanelForODI(JPanel ButtonPanel) {
+	private void fillButtonPanel(JPanel ButtonPanel) {
 
 		// Generate Image Info Panel
 		JButton generateHeader = new JButton("Image Header");
@@ -124,7 +133,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 				myImageInfoPanel.setMode(FITSHeaderInspection.MODE_FITSHEADER);
 				if (fileList != null && fileList.size() > 0) {
 
-					myImageInfoPanel.setImageList(fileList, -1, -1);
+					myImageInfoPanel.setImageList(fileList);
 
 				} else {
 					log.debug("No file list or empty file list for image header display.");
@@ -134,15 +143,13 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 		});
 
-
-		JButton donutPanel = new JButton("Donut Panel");
-		generateHeader.addActionListener(new ActionListener() {
+		JButton imexamDS9 = new JButton("Imexam");
+        imexamDS9.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
 
-
-				myMultiPanel.setTopComponent(DONUTPANEL);
-
+				SAMPUtilities.getDS9ImageCutout("imexam", 50);
+				myMultiPanel.setTopComponent(IMEXAMPANEL);
 
 			}
 
@@ -164,7 +171,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 		ButtonPanel.add(ImageTitleLabel);
 
 		ButtonPanel.add(generateHeader);
-		ButtonPanel.add(donutPanel);
+        ButtonPanel.add(imexamDS9);
 
 		ButtonPanel.add (Box.createVerticalGlue ());
 
@@ -176,13 +183,11 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 		myImageInfoPanel = new FITSHeaderInspection();
 		myImageInfoPanel.setName(INFOPANEL);
-		myMultiPanel.addComponent(myImageInfoPanel);
+		myMultiPanel.add(myImageInfoPanel);
 
-		myDonutPanel = new DonutPanel();
-		myDonutPanel.setName(DONUTPANEL);
-		myMultiPanel.addComponent(myDonutPanel);
-
-
+		myImexamDisplay = new ImexamDisplay();
+		myImexamDisplay.setName(IMEXAMPANEL);
+		myMultiPanel.add(myImexamDisplay);
 	}
 
 	public FileBrowserPanel getmBrowserPanel() {
@@ -202,9 +207,4 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener, Do
 
 	}
 
-	@Override
-	public void notifyResult(pyDonutBridge result) {
-		myMultiPanel.setTopComponent(DONUTPANEL);
-		this.myDonutPanel.notifyResult(result);
-	}
 }

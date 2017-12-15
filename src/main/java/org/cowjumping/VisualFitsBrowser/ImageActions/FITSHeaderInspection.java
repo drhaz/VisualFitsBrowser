@@ -3,7 +3,6 @@ package org.cowjumping.VisualFitsBrowser.ImageActions;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.Vector;
 
@@ -14,7 +13,7 @@ import javax.swing.text.Highlighter;
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
-import org.cowjumping.odi.ODIFitsReader.QuickHeaderInfo;
+import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 /**
  * Display the FITS header of an image, or the acquisition log of an ODi image,
@@ -53,7 +52,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
     }
 
     @Override
-    public int setImageList(Vector<FitsFileEntry> imagelist, int otaX, int otaY) {
+    public int setImageList(Vector<FitsFileEntry> imagelist) {
 
         if (imagelist != null && imagelist.size() > 0) {
 
@@ -61,7 +60,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
 
             if (f.exists()) {
 
-                loadImageInfo(imagelist.firstElement(), otaX, otaY);
+                loadImageInfo(imagelist.firstElement());
                 return 1;
 
             } else {
@@ -72,11 +71,11 @@ public class FITSHeaderInspection extends ImageEvaluator {
             log.warn("Received an invalid request for image update: " + imagelist);
         }
 
-        loadImageInfo(null, -1, -1);
+        loadImageInfo(null);
         return 0;
     }
 
-    protected void loadImageInfo(FitsFileEntry image, int otaX, int otaY) {
+    protected void loadImageInfo(FitsFileEntry image) {
 
         if (image == null) {
             log.warn("load null image requested.aborting");
