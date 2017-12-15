@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.DoubleBuffer;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,7 +139,7 @@ public class VisualFitsBrowserApp extends JFrame {
             Thread.sleep(20);
         } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
-            e1.printStackTrace();
+            myLogger.error (e1);
         }
 
         pack();
@@ -157,13 +155,25 @@ public class VisualFitsBrowserApp extends JFrame {
             public void run() {
                 try {
                     Thread.sleep(1000);
-                    setResizable(false);
+                    //setResizable(false);
                     OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
                 } catch (Exception e) {
                     myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
 
                 }
             }
+        });
+
+        final int preferredWidth = this.getWidth();
+
+        addComponentListener(new ComponentAdapter() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                setSize(new Dimension(preferredWidth, getHeight()));
+                super.componentResized(e);
+            }
+
         });
 
     }
