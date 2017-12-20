@@ -240,7 +240,7 @@ public class SAMPUtilities {
 
     public static void getDS9ImageCutout (String callbackIdentifier, int width) {
         log.debug ("SAMP: requesting iamge cutout from ds9");
-        sendCallbackDS9 (String.format("iexam data %d %d", width, width), callbackIdentifier);
+        sendCallbackDS9 (String.format("iexam key data %d %d", width, width), callbackIdentifier);
 
     }
 

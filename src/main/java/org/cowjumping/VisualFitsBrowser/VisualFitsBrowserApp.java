@@ -589,10 +589,17 @@ public class VisualFitsBrowserApp extends JFrame {
 
                     String result = (String) msg.getResult().get("value");
                     System.out.println("Message result has value: " + result);
-                    ImageContainer im = new ImageContainer(result);
+                    StringTokenizer tok = new StringTokenizer (result);
+                    String key = tok.nextToken();
+
+                    ImageContainer im = new ImageContainer(tok.nextToken(""));
                     Vector<ImageContainer> v = new Vector<ImageContainer>();
                     v.add(im);
-                    mToolBoxPanel.pushImageBufferSelection(v);
+                    if ( ! key.equalsIgnoreCase ("Q")) {
+                        SAMPUtilities.getDS9ImageCutout("imexam", 50);
+                        mToolBoxPanel.pushImageBufferSelection(v);
+                    }
+
 
                 }
 
