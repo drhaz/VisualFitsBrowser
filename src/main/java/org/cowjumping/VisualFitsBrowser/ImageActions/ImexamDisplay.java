@@ -51,14 +51,20 @@ public class ImexamDisplay extends ImageEvaluator {
         if (imageContainers != null && imageContainers.size() > 0) {
 
             ImageContainer gs = imageContainers.elementAt(0);
-            odiCentroidSupport.findSkyandPeak(gs, 1, 5);
-            odiCentroidSupport.MomentAnalysis(gs, 1, gs.getImageDimX() - 1, 1, gs.getImageDimY() - 1);
-            float delta = (int) (gs.getFWHM_X() * 3.);
-            odiCentroidSupport.MomentAnalysis(gs, (int) (gs.getCenterX()-delta),
-                    (int) (gs.getCenterX() +delta),
-                    (int) (gs.getCenterY()-delta),
-                    (int) (gs.getCenterY() + delta));
 
+            odiCentroidSupport.findSkyandPeak(gs, 2, 3);
+            double peakX = gs.getCenterX();
+            double peakY = gs.getCenterY();
+            odiCentroidSupport.MomentAnalysis(gs, 2, gs.getImageDimX() - 2, 2, gs.getImageDimY() - 2);
+            double deltaX = Math.min(15, gs.getFWHM_X());
+            double deltaY = Math.min(15, gs.getFWHM_Y());
+            int minx = (int) (gs.getCenterX() - deltaX);
+            int maxx = (int) (gs.getCenterX() + deltaX);
+            int miny = (int) (gs.getCenterY() - deltaY);
+            int maxy = (int) (gs.getCenterY() + deltaY);
+            odiCentroidSupport.MomentAnalysis(gs,minx, maxx, miny, maxy);
+            odiCentroidSupport.gaussianFitFWHM (gs);
+            odiCentroidSupport.aperturePhotometry(gs);
             rp.updateData(gs);
             gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX(), gs.getCenterY(), 0);
             gd.setZScale(gs.getBackground() - gs.getBackNoise(), gs.getPeak());
