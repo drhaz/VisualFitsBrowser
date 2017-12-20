@@ -61,11 +61,9 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
 
         initBuffers(gs.getImageDimX(), gs.getImageDimY());
 
-        double fwhm = gs.getFWHM_X();
+        double fwhm = 0.5 * (gs.getFWHM_X() + gs.getFWHM_Y() );
         double peak = gs.getPeak();
         double sky = gs.getBackground();
-        double cX = gs.getCenterX();
-        double cY = gs.getCenterY();
 
 
         this.fwhm = fwhm;
@@ -74,7 +72,7 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
 
         if (!this.lockData()) {
             if (myLogger.isDebugEnabled())
-                myLogger.debug("update data skipped doe to data lock.");
+                myLogger.debug("update data skipped due to data lock.");
             return;
         }
 
