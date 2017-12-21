@@ -74,7 +74,7 @@ public class ImexamDisplay extends ImageEvaluator {
             rp.updateData(gs);
             gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX(), gs.getCenterY(), 0);
             gd.setZScale(gs.getBackground() - 3 * gs.getBackNoise(), gs.getPeak());
-
+            gd.setMeanCenter((float)peakX, (float)peakY);
 
             sd.update(gs);
         }
