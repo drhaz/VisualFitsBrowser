@@ -303,8 +303,9 @@ public class GuideStarDisplayComponent extends
 			}
 		}
 
+
 		if (this.meanCenter.getX() > 0 && this.meanCenter.getY() > 0) {
-			drawMeanCenter(g, meanCenter.getX(), meanCenter.getY(), 1);
+			drawMeanCenter(g, meanCenter.getX(), meanCenter.getY(), 2);
 
 		}
 
