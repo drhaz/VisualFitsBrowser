@@ -66,6 +66,12 @@ public class GuideStarDisplayComponent extends
 	/** Data value used for auto set bias */
 	float zExtraOffset = 0;
 
+    public void setMyZscaleSelector(ZScaleSelectorComponent myZscaleSelector) {
+        this.myZscaleSelector = myZscaleSelector;
+    }
+
+    ZScaleSelectorComponent myZscaleSelector = null;
+
 	/** marker for the current location of the guide star */
 	protected Point2D currentCenter = new Point2D.Float();
 	Point2D centerOnScreen = new Point2D.Float();
@@ -411,6 +417,9 @@ public class GuideStarDisplayComponent extends
 		this.z1 = z1;
 		this.z2 = z2;
 		updateScaleing();
+
+		if (this.myZscaleSelector != null)
+		    myZscaleSelector.setZScale((int) z1, (int) z2,false);
 
 	}
 

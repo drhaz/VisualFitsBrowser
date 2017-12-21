@@ -183,6 +183,7 @@ public class ZScaleSelectorComponent extends JPanel implements ChangeListener,
 
 		if (client != null && myClients != null) {
 			myClients.add(client);
+			client.setMyZscaleSelector(this);
 		}
 	}
 
@@ -200,7 +201,7 @@ public class ZScaleSelectorComponent extends JPanel implements ChangeListener,
 
 	}
 
-	public void setZScale(int z1, int z2) {
+	public void setZScale(int z1, int z2, boolean updateClient) {
 		if (z2 <= this.faintRange)
 			this.FaintStar.setSelected(true);
 		else
@@ -208,7 +209,13 @@ public class ZScaleSelectorComponent extends JPanel implements ChangeListener,
 
 		ZScaleSlider.setValues(z1, z2);
 		this.LastZScale.get(this.currentImageMode).setLocation(z1, z2);
-		sendZScale(z1, z2);
+		if (updateClient)
+		  sendZScale(z1, z2);
+	}
+
+
+	public void setZScale (int z1, int z2) {
+		setZScale (z1,z2,true);
 	}
 
 	public void stateChanged(ChangeEvent e) {

@@ -73,7 +73,7 @@ public class ImexamDisplay extends ImageEvaluator {
             odiCentroidSupport.aperturePhotometry(gs);
             rp.updateData(gs);
             gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX(), gs.getCenterY(), 0);
-            gd.setZScale(gs.getBackground() - gs.getBackNoise(), gs.getPeak());
+            gd.setZScale(gs.getBackground() - 3 * gs.getBackNoise(), gs.getPeak());
 
 
             sd.update(gs);
@@ -91,7 +91,7 @@ public class ImexamDisplay extends ImageEvaluator {
         f.pack();
         f.setVisible(true);
         gaussImage gi = new gaussImage(50, 50);
-        gi.create(20, 20, 1000, 4, 5, 10, 100);
+        gi.create(20, 20, 1000, 4, 4, 10, 100);
         Vector<ImageContainer> v = new Vector<ImageContainer>();
         v.add(gi);
         d.setImageContainer(v);
