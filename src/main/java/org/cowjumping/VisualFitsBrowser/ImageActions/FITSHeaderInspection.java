@@ -52,7 +52,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
     }
 
     @Override
-    public int setImageList(Vector<FitsFileEntry> imagelist, int otaX, int otaY) {
+    public int setImageList(Vector<FitsFileEntry> imagelist) {
 
         if (imagelist != null && imagelist.size() > 0) {
 
@@ -60,7 +60,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
 
             if (f.exists()) {
 
-                loadImageInfo(imagelist.firstElement(), otaX, otaY);
+                loadImageInfo(imagelist.firstElement());
                 return 1;
 
             } else {
@@ -71,11 +71,11 @@ public class FITSHeaderInspection extends ImageEvaluator {
             log.warn("Received an invalid request for image update: " + imagelist);
         }
 
-        loadImageInfo(null, -1, -1);
+        loadImageInfo(null);
         return 0;
     }
 
-    protected void loadImageInfo(FitsFileEntry image, int otaX, int otaY) {
+    protected void loadImageInfo(FitsFileEntry image) {
 
         if (image == null) {
             log.warn("load null image requested.aborting");

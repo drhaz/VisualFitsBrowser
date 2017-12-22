@@ -221,7 +221,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
 
-            // mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             mTable.setFont(GUIConsts.TTFont16);
             mTable.setRowHeight(GUIConsts.TTFont16.getSize() + 8);
 
@@ -230,8 +230,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(230);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(300);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(400);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(200);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FILTER_COL).setPreferredWidth(100);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
@@ -244,7 +244,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 tc.setMaxWidth(tc.getPreferredWidth());
             }
 
-            // scrollPane.setPreferredSize(new Dimension(1100, 550));
             scrollPane.setPreferredSize(new Dimension(mTable.getMaximumSize().width, 550));
             add(scrollPane, BorderLayout.CENTER);
 

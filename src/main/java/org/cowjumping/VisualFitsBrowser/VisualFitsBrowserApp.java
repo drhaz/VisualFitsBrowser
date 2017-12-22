@@ -8,10 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,14 +33,12 @@ import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.ResponseHandler;
+import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
-import org.cowjumping.guiUtils.GUIConsts;
-import org.cowjumping.guiUtils.OSXAdapter;
-import org.cowjumping.guiUtils.Preferences;
-import org.cowjumping.guiUtils.SAMPUtilities;
+import org.cowjumping.guiUtils.*;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
@@ -91,9 +86,9 @@ public class VisualFitsBrowserApp extends JFrame {
         // Get a saved parameter instance for this application.
         Preferences.initPreferences("VisualFitsBrowserApp");
 
-		/*
+        /*
          * Build the GUI: Basic Layout: three vertical panels from left to right
-		 */
+         */
         BorderLayout mBorderLayout = new BorderLayout();
         this.setLayout(mBorderLayout);
 
@@ -115,15 +110,15 @@ public class VisualFitsBrowserApp extends JFrame {
 
         DonutFrame = DonutDisplayFrame.getInstance();
 
-		/*
-		 * Define the MenuBar
-		 */
+        /*
+         * Define the MenuBar
+         */
 
         this.setJMenuBar(createTheMenu());
 
-		/*
-		 * Ensure graceful handling of window close events
-		 */
+        /*
+         * Ensure graceful handling of window close events
+         */
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 myLogger.info("Closing down Directory Listener");
@@ -132,9 +127,9 @@ public class VisualFitsBrowserApp extends JFrame {
             }
         });
 
-		/*
-		 * Finally, restore window location and some look and feel fine-tuning
-		 */
+        /*
+         * Finally, restore window location and some look and feel fine-tuning
+         */
         Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
         Preferences.thePreferences.restoreWindowLocation(this.DonutFrame, this.PROP_WINDOWLOCATION_WAVEFRONT);
@@ -144,7 +139,7 @@ public class VisualFitsBrowserApp extends JFrame {
             Thread.sleep(20);
         } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
-            e1.printStackTrace();
+            myLogger.error (e1);
         }
 
         pack();
@@ -153,20 +148,32 @@ public class VisualFitsBrowserApp extends JFrame {
         this.setShowUtiltiies(
                 Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
 
-		/*
-		 * Ensure graceful handling when Command-Q is pressed in Mac Os X
-		 */
+        /*
+         * Ensure graceful handling when Command-Q is pressed in Mac Os X
+         */
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
                     Thread.sleep(1000);
-                    setResizable(false);
+                    //setResizable(false);
                     OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
                 } catch (Exception e) {
                     myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
 
                 }
             }
+        });
+
+        final int preferredWidth = this.getWidth();
+
+        addComponentListener(new ComponentAdapter() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                setSize(new Dimension(preferredWidth, getHeight()));
+                super.componentResized(e);
+            }
+
         });
 
     }
@@ -269,7 +276,6 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
 
-
         menu.add(new JSeparator());
 
         {
@@ -288,8 +294,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
             });
         }
-
-
 
 
         {
@@ -395,6 +399,22 @@ public class VisualFitsBrowserApp extends JFrame {
 
                 public void actionPerformed(ActionEvent e) {
                     SAMPUtilities.getDS9Cursor("donut");
+                }
+
+            });
+            menu.add(menuItem);
+
+        }
+
+
+        {
+
+            menuItem = new JMenuItem("ds9 Imexam");
+
+            menuItem.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+                    SAMPUtilities.getDS9ImageCutout("imexam", 20);
                 }
 
             });
@@ -541,10 +561,39 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(),  y.intValue(), 200);
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(), 200);
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
+                }
+
+            }
+        });
+
+
+        // imexam
+        SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
+            @Override
+            public boolean ownsTag(String s) {
+                if (s.toLowerCase().contentEquals("imexam")) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
+
+                if (msg.isOK()) {
+
+                    String result = (String) msg.getResult().get("value");
+                    System.out.println("Message result has value: " + result);
+                    ImageContainer im = new ImageContainer(result);
+                    Vector<ImageContainer> v = new Vector<ImageContainer>();
+                    v.add(im);
+                    mToolBoxPanel.pushImageBufferSelection(v);
+
                 }
 
             }
