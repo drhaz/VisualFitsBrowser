@@ -59,6 +59,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     String mRootDirectoryString = "/";
 
+    /** How long to wait before displaying a newly arrived file; aims to prevent ds0 load errors when laoding while system is still writing the file
+     *
+     */
+    public int waitSecondsBeforeDS9load = 2000;
+
     public File mRootDirectory = null;
 
     private DirectoryListener myDirectoryListener = null;
@@ -616,11 +621,20 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 log.error("Error while adding element to file table", e1);
             } finally {
                 log.debug("Autoloading image: " + autoLoadImageToListener);
-                if (autoLoadImageToListener) {
-                    String fname = newItem.getAbsolutePath();
-                    SAMPUtilities.loadMosaicDS9(fname, 1);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            Thread.sleep (waitSecondsBeforeDS9load);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        if (autoLoadImageToListener) {
+                            String fname = newItem.getAbsolutePath();
+                            SAMPUtilities.loadMosaicDS9(fname, 1);
 
-                }
+                        }
+                    }
+                });
             }
         }
 

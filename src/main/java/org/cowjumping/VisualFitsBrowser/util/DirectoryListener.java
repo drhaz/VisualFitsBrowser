@@ -54,6 +54,9 @@ public class DirectoryListener implements Runnable {
 	 * Flag whether to beep when a new file has arrived.
 	 */
 	public boolean beepOnNew = true;
+
+
+
 	/**
 	 * The kind of files we are looking for
 	 */
