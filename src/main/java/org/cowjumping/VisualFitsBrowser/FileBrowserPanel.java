@@ -287,6 +287,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
                                 SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
+                                setDisplayedImage(selectedFits.FName);
 
 
                             }
@@ -387,6 +388,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     synchronized void setDisplayedImage(final String fname) {
 
+
+
+        log.debug ("Request to mark image " + fname + " as displayed image in table view.");
         if (!fname.equals("preimage")) {
             final int lastIndex;
             if (DisplayedImage != null)
@@ -394,16 +398,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             else
                 lastIndex = -1;
 
-            DisplayedImage = fname.trim();
+            DisplayedImage = fname;
 
             try {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
 
                         int index = FileBrowserPanel.this.getRowbyName(fname);
-
+                        log.debug ("Displayed image at index " + index);
                         if (index >= 0)
                             mTableDataModel.fireTableRowsUpdated(index, index);
+                        else
+                            log.warn ("Displayed Image " + fname + " does not appear in table index!");
                         if (lastIndex >= 0)
                             mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
                     }
@@ -633,6 +639,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                         if (autoLoadImageToListener) {
 
                             SAMPUtilities.loadMEFSaveDS9(fname, 1, false);
+                            setDisplayedImage(newItem.getName());
 
                         }
                     }
