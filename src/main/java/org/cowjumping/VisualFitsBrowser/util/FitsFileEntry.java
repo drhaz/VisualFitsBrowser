@@ -69,7 +69,7 @@ public class FitsFileEntry {
 			boolean good_file = false;
 			good_file = file.exists() && //
 					// || //
-					(file.getName().matches(".*\\.fits*") || file.getName().matches(".*\\.fits\\.fz"));
+					(file.getName().matches(".*\\.fits$") || file.getName().matches(".*\\.fits\\.fz$"));
 
 			if (!good_file) {
 				myLogger.debug("Reject file " + file.getAbsolutePath());

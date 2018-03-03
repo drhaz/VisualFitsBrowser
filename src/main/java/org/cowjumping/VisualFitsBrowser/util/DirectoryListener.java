@@ -96,11 +96,11 @@ public class DirectoryListener implements Runnable {
 				+ myDirectory.getAbsolutePath());
 		while (!abort) {
 
+
 			long lastModified = myDirectory.lastModified();
 
 			// Step 1: Check if directory has new files to look for in it
 			if (lastModified > timeOfLastDirectoryRead) {
-
 				Vector<File> newFiles = getNewFilesSinceChange();
 
 				// If new directories showed up, check if they are complete, or if we
@@ -117,9 +117,12 @@ public class DirectoryListener implements Runnable {
 						newFileQueue.add(f);
 
 					}
+                    // Important: only update last access timestamp idf there were genuine new files there. Otherwise,
+                    // buffered file that are in transit, and then renamed, cn areally mess up things.
 
+                    timeOfLastDirectoryRead = lastModified;
 				}
-				timeOfLastDirectoryRead = lastModified;
+
 
 			}
 
@@ -191,8 +194,10 @@ public class DirectoryListener implements Runnable {
 
 		File[] fArray = myDirectory.listFiles(FitsFileEntry.thefileFilter);
 
+
 		for (File f : fArray) {
-			if ((f.isDirectory() || !FitsFileEntry.ODIMode) && f.lastModified() > this.timeOfLastDirectoryRead) {
+
+			if ( f.isFile() && f.lastModified() > this.timeOfLastDirectoryRead) {
 
 				boolean alreadyInQueue = false;
 				boolean alreadyInList = false;
