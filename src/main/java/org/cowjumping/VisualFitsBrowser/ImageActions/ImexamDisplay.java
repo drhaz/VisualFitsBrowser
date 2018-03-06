@@ -96,7 +96,9 @@ public class ImexamDisplay extends ImageEvaluator {
         f.pack();
         f.setVisible(true);
         gaussImage gi = new gaussImage(50, 50);
-        gi.create(20, 20, 1000, 2, 2, 10, 100);
+        gi.create(20, 20, 1000, 5, 5, 10, 100);
+        gi.add   (20, 20, 20,   20, 20, 0, 0);
+
         Vector<ImageContainer> v = new Vector<ImageContainer>();
         v.add(gi);
         d.setImageContainer(v);
@@ -128,10 +130,12 @@ class ImageBufferStatusDisplay extends JTextArea {
         sb.append(String.format(" peak   x     % 6.2f [pix]   " , gs.getWindow_Offset_X() + gs.getPeakX() + 0.5    ));
         sb.append(String.format(" peak   y     % 6.2f [pix]\n" ,   gs.getWindow_Offset_Y() + gs.getPeakY() + 0.5   ));
         sb.append(String.format(" FWHM         % 6.2f [pix]\n\n", (gs.getFWHM_X() + gs.getFWHM_Y())/2.));
+
+        sb.append(String.format(" Peak         % 10.2f [ADU] above background\n", gs.getPeak() - gs.getBackground()));
+        sb.append(String.format(" Sky          % 6.2f \\pm % 4.2f [ADU]\n\n", gs.getBackground(), gs.getBackNoise()));
+
         sb.append(String.format(" Flux:      % 10.2f [ADU]\n", gs.getFlux()));
         sb.append(String.format(" Inst mag       % 5.2f [mag]\n\n", gs.getInstMag()));
-
-        sb.append(String.format(" Sky          % 6.2f \\pm % 4.2f [ADU]\n", gs.getBackground(), gs.getBackNoise()));
 
         System.out.println (sb);
         setText(sb.toString());
