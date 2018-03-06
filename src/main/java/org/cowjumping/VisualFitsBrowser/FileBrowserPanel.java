@@ -59,6 +59,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     String mRootDirectoryString = "/";
 
+    private final String binnedPrefix = "\u00B7";
+
+
     /** How long to wait before displaying a newly arrived file; aims to prevent ds0 load errors when laoding while system is still writing the file
      *
      */
@@ -424,6 +427,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     private class ImageIDRenderer extends DefaultTableCellRenderer {
 
+
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                                                        int row, int column) {
             JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
@@ -432,7 +436,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             Color c = Color.black;
 
             Font f = renderer.getFont().deriveFont(Font.PLAIN);
-            if (DisplayedImage != null && DisplayedImage.trim().equals(((String) value).trim())) {
+
+            String comparisonValue = ((String) value).trim();
+
+            // Table sees the binned prefix rendered file name, so take this into acount here.
+            if (comparisonValue.startsWith( binnedPrefix))
+                comparisonValue = comparisonValue.replace(binnedPrefix, "");
+
+            if (DisplayedImage != null && DisplayedImage.trim().equals(comparisonValue)) {
                 c = Color.MAGENTA;
                 f = f.deriveFont(Font.BOLD);
 
@@ -833,7 +844,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     String prefix;
                     prefix = " ";
                     if (entry.isBinned)
-                        prefix = "\u00B7";
+                        prefix = binnedPrefix;
                     return prefix + entry.FName;
                 }
 
