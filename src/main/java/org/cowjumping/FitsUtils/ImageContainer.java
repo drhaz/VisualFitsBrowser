@@ -167,6 +167,8 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         // Object Descriptors
         CENTER_X("CENTER_X", Float.class), // Centroid (X) of object
         CENTER_Y("CENTER_Y", Float.class), // Centroid (Y) of object
+        PEAK_X("PEAK_X", Float.class), // Centroid (X) of object
+        PEAK_Y("PEAK_Y", Float.class), // Centroid (Y) of object
         FWHM_X("FWHM_X", Float.class), // FWHM in X
         FWHM_X_sec("FWHM_X_sec", Float.class), // FWHM in X
         FWHM_Y("FWHM_Y", Float.class), // FWHM in X
@@ -712,6 +714,35 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
             return new Float(-1);
         return (Float) Header.CENTER_Y.myClass.cast(o);
     }
+
+
+
+
+    public void setPeakX(float x) {
+        MetaInfo.put(Header.PEAK_X.hash, x);
+    }
+
+    public Float getPeakX() {
+        Object o = MetaInfo.get(Header.PEAK_X.hash);
+        if (o == null)
+            return new Float(-1);
+        return (Float) Header.PEAK_X.myClass.cast(o);
+    }
+
+    public void setPeakY(float y) {
+        MetaInfo.put(Header.PEAK_Y.hash, y);
+    }
+
+    public Float getPeakY() {
+        Object o = MetaInfo.get(Header.PEAK_Y.hash);
+        if (o == null)
+            return new Float(-1);
+        return (Float) Header.PEAK_Y.myClass.cast(o);
+    }
+
+
+
+
 
     public void setBackground(float y) {
         MetaInfo.put(Header.BACKGROUND.hash, y);
