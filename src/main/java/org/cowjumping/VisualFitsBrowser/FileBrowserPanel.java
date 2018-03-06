@@ -59,6 +59,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     String mRootDirectoryString = "/";
 
+    private final String binnedPrefix = "\u00B7";
+
+
+    /**
+     * How long to wait before displaying a newly arrived file; aims to prevent ds0 load errors when laoding while system is still writing the file
+     */
+    private static int waitMilliSecondsBeforeDS9load = 1000;
+
     public File mRootDirectory = null;
 
     private DirectoryListener myDirectoryListener = null;
@@ -79,7 +87,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     private static String DisplayedImage = null;
 
 
-    private void maskButton (JButton b) {
+    private void maskButton(JButton b) {
         b.setPreferredSize(b.getMinimumSize());
         b.setOpaque(false);
         b.setFocusPainted(false);
@@ -134,10 +142,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             });
 
 
-            tomorrowLabel = new JButton (">");
+            tomorrowLabel = new JButton(">");
             tomorrowLabel.setToolTipText("Load equivalent directory for tomorrow's date");
             this.maskButton(tomorrowLabel);
-            yesterDayLabel = new JButton ("<");
+            yesterDayLabel = new JButton("<");
             yesterDayLabel.setToolTipText("Load equivalent directory for yesterday's date");
 
             this.maskButton(yesterDayLabel);
@@ -154,16 +162,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     if (c.equalsIgnoreCase(">"))
                         deltadays = +1;
 
-                   if (deltadays != 0)
-                       changeDirectoryDate (deltadays);
+                    if (deltadays != 0)
+                        changeDirectoryDate(deltadays);
 
                 }
 
 
             };
-            tomorrowLabel.addActionListener (l);
+            tomorrowLabel.addActionListener(l);
             yesterDayLabel.addActionListener(l);
-
 
 
             Box topBox = Box.createHorizontalBox();
@@ -172,8 +179,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             topBox.add(reloadButton);
             topBox.add(rootDirLabel);
             topBox.add(Box.createHorizontalGlue());
-            topBox.add (yesterDayLabel);
-            topBox.add (tomorrowLabel);
+            topBox.add(yesterDayLabel);
+            topBox.add(tomorrowLabel);
             add(topBox, BorderLayout.NORTH);
 
         }
@@ -282,6 +289,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
                                 SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
+                                setDisplayedImage(selectedFits.FName);
 
 
                             }
@@ -297,8 +305,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         readDirectory(mRootDirectory);
 
     }
-
-
 
 
     public void sendAllSelectedtods9() {
@@ -354,19 +360,19 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             if (d != null) {
                 Calendar c = Calendar.getInstance();
                 c.setTime(d);
-                c.add (Calendar.DATE, deltadays);
+                c.add(Calendar.DATE, deltadays);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 String olddate = sdf.format(d.getTime());
                 String newdate = sdf.format(c.getTime());
 
-                log.debug ("Input date: " + d + " transformed to " + c);
-                log.info ("other day exchange from " + olddate + " to " + newdate);
+                log.debug("Input date: " + d + " transformed to " + c);
+                log.info("other day exchange from " + olddate + " to " + newdate);
                 String newDirectory = mRootDirectoryString.replace(olddate, newdate);
-                File f = new File (newDirectory);
+                File f = new File(newDirectory);
                 if (f.exists() && f.isDirectory())
-                    readDirectory (f);
+                    readDirectory(f);
                 else
-                    log.warn ("other day directory " + newDirectory + " does not exist.");
+                    log.warn("other day directory " + newDirectory + " does not exist.");
 
             }
 
@@ -382,6 +388,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     synchronized void setDisplayedImage(final String fname) {
 
+
+        log.debug("Request to mark image " + fname + " as displayed image in table view.");
         if (!fname.equals("preimage")) {
             final int lastIndex;
             if (DisplayedImage != null)
@@ -389,16 +397,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             else
                 lastIndex = -1;
 
-            DisplayedImage = fname.trim();
+            DisplayedImage = fname;
 
             try {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
 
                         int index = FileBrowserPanel.this.getRowbyName(fname);
-
+                        log.debug("Displayed image at index " + index);
                         if (index >= 0)
                             mTableDataModel.fireTableRowsUpdated(index, index);
+                        else
+                            log.warn("Displayed Image " + fname + " does not appear in table index!");
                         if (lastIndex >= 0)
                             mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
                     }
@@ -413,6 +423,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     private class ImageIDRenderer extends DefaultTableCellRenderer {
 
+
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                                                        int row, int column) {
             JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
@@ -421,7 +432,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             Color c = Color.black;
 
             Font f = renderer.getFont().deriveFont(Font.PLAIN);
-            if (DisplayedImage != null && DisplayedImage.trim().equals(((String) value).trim())) {
+
+            String comparisonValue = ((String) value).trim();
+
+            // Table sees the binned prefix rendered file name, so take this into acount here.
+            if (comparisonValue.startsWith(binnedPrefix))
+                comparisonValue = comparisonValue.replace(binnedPrefix, "");
+
+            if (DisplayedImage != null && DisplayedImage.trim().equals(comparisonValue)) {
                 c = Color.MAGENTA;
                 f = f.deriveFont(Font.BOLD);
 
@@ -610,17 +628,34 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     public void run() {
 
                         mTableDataModel.fireTableRowsInserted(mImageList.size() - 1, mImageList.size() - 1);
+
+                        if (autoLoadImageToListener) {
+
+                            final String fname = newItem.getAbsolutePath();
+
+                            new Thread(new Runnable() {
+
+                                public void run() {
+
+                                    try {
+                                        Thread.sleep(waitMilliSecondsBeforeDS9load);
+                                    } catch (InterruptedException e1) {
+                                        e1.printStackTrace();
+                                    }
+
+                                    log.debug("Autoloading image: " + autoLoadImageToListener);
+                                    SAMPUtilities.loadMEFSaveDS9(fname, 1, false);
+                                    setDisplayedImage(newItem.getName());
+
+                                }
+                            }
+                            ).start();
+                        }
+
                     }
                 });
             } catch (Exception e1) {
                 log.error("Error while adding element to file table", e1);
-            } finally {
-                log.debug("Autoloading image: " + autoLoadImageToListener);
-                if (autoLoadImageToListener) {
-                    String fname = newItem.getAbsolutePath();
-                    SAMPUtilities.loadMosaicDS9(fname, 1);
-
-                }
             }
         }
 
@@ -725,7 +760,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         if (m.matches()) {
             try {
                 t = m.group(1);
-                log.debug ("Found date component: " + t);
+                log.debug("Found date component: " + t);
                 DateFormat df = new SimpleDateFormat("yyyyMMdd");
                 ret = df.parse(t);
 
@@ -733,7 +768,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 log.warn("Error while parsing date in directory name " + t, e);
             }
         } else {
-            log.info ("directory string " + name + " does not contain a date");
+            log.info("directory string " + name + " does not contain a date");
         }
 
         return ret;
@@ -810,7 +845,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     String prefix;
                     prefix = " ";
                     if (entry.isBinned)
-                        prefix = "\u00B7";
+                        prefix = binnedPrefix;
                     return prefix + entry.FName;
                 }
 

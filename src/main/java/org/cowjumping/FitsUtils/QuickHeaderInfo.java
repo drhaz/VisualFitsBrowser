@@ -129,10 +129,17 @@ public class QuickHeaderInfo {
         String fc = getStringValue(header, "DATE-OBS");
 
         if (fc != null) {
-            Calendar c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
-            if (c != null)
+            Calendar c = null;
+            try {
+                 c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
+            } catch (Exception e) {
+                myLogger.warn("While converting DATE-OBS: ", e);
+                c = null;
+            } finally {
+                if (c != null)
+                    return c.getTime();
 
-                return c.getTime();
+            }
         }
 
         return null;
