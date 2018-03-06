@@ -59,6 +59,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     String mRootDirectoryString = "/";
 
+    private final String binnedPrefix = "\u00B7";
+
+
     /** How long to wait before displaying a newly arrived file; aims to prevent ds0 load errors when laoding while system is still writing the file
      *
      */
@@ -287,6 +290,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
                                 SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
+                                setDisplayedImage(selectedFits.FName);
 
 
                             }
@@ -387,6 +391,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     synchronized void setDisplayedImage(final String fname) {
 
+
+
+        log.debug ("Request to mark image " + fname + " as displayed image in table view.");
         if (!fname.equals("preimage")) {
             final int lastIndex;
             if (DisplayedImage != null)
@@ -394,16 +401,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             else
                 lastIndex = -1;
 
-            DisplayedImage = fname.trim();
+            DisplayedImage = fname;
 
             try {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
 
                         int index = FileBrowserPanel.this.getRowbyName(fname);
-
+                        log.debug ("Displayed image at index " + index);
                         if (index >= 0)
                             mTableDataModel.fireTableRowsUpdated(index, index);
+                        else
+                            log.warn ("Displayed Image " + fname + " does not appear in table index!");
                         if (lastIndex >= 0)
                             mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
                     }
@@ -418,6 +427,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     private class ImageIDRenderer extends DefaultTableCellRenderer {
 
+
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                                                        int row, int column) {
             JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
@@ -426,7 +436,14 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             Color c = Color.black;
 
             Font f = renderer.getFont().deriveFont(Font.PLAIN);
-            if (DisplayedImage != null && DisplayedImage.trim().equals(((String) value).trim())) {
+
+            String comparisonValue = ((String) value).trim();
+
+            // Table sees the binned prefix rendered file name, so take this into acount here.
+            if (comparisonValue.startsWith( binnedPrefix))
+                comparisonValue = comparisonValue.replace(binnedPrefix, "");
+
+            if (DisplayedImage != null && DisplayedImage.trim().equals(comparisonValue)) {
                 c = Color.MAGENTA;
                 f = f.deriveFont(Font.BOLD);
 
@@ -633,6 +650,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                         if (autoLoadImageToListener) {
 
                             SAMPUtilities.loadMEFSaveDS9(fname, 1, false);
+                            setDisplayedImage(newItem.getName());
 
                         }
                     }
@@ -826,7 +844,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     String prefix;
                     prefix = " ";
                     if (entry.isBinned)
-                        prefix = "\u00B7";
+                        prefix = binnedPrefix;
                     return prefix + entry.FName;
                 }
 
