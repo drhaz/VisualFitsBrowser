@@ -28,8 +28,6 @@ public class FitsFileEntry {
 
 	private final static Logger myLogger = Logger.getLogger(FitsFileEntry.class);
 
-	public static boolean ODIMode = false;
-	public static boolean ArchiveMode = false;
 
 	public enum TRANSFERSTATUS {
 		INDEF, LOCAL, NOTIFIED_DTS, CONFIRMED_DTS, NOTIFIED_PPA, CONFIRMED_PPA, ERROR
@@ -72,7 +70,7 @@ public class FitsFileEntry {
 					(file.getName().matches(".*\\.fits$") || file.getName().matches(".*\\.fits\\.fz$"));
 
 			if (!good_file) {
-				myLogger.debug("Reject file " + file.getAbsolutePath());
+				//myLogger.debug("Reject file " + file.getAbsolutePath());
 			}
 			return good_file;
 		}
@@ -313,21 +311,21 @@ public class FitsFileEntry {
 
 	}
 
-	public static JMenuItem getArchiveModemenuItem() {
-		JMenuItem item = new JCheckBoxMenuItem("Local archive Mode");
-
-		item.setSelected(FitsFileEntry.ArchiveMode);
-
-		item.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent evt) {
-				FitsFileEntry.ArchiveMode = ((JCheckBoxMenuItem) evt.getSource()).getState();
-			}
-
-		});
-
-		return item;
-	}
+//	public static JMenuItem getArchiveModemenuItem() {
+//		JMenuItem item = new JCheckBoxMenuItem("Local archive Mode");
+//
+//		item.setSelected(FitsFileEntry.ArchiveMode);
+//
+//		item.addChangeListener(new ChangeListener() {
+//
+//			public void stateChanged(ChangeEvent evt) {
+//				FitsFileEntry.ArchiveMode = ((JCheckBoxMenuItem) evt.getSource()).getState();
+//			}
+//
+//		});
+//
+//		return item;
+//	}
 
 	public String getAsPTICommentXMLElement() {
 		String retVal = "<Exposure>\n" //
