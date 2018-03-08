@@ -557,6 +557,10 @@ public class VisualFitsBrowserApp extends JFrame {
                     Matcher matcher = pattern.matcher(result);
                     if (matcher.matches()) {
                         String fname = matcher.group(1);
+
+                        // get rid of the extension identifier - we do not support that yet!
+                        fname = fname.replaceAll("\\[.*\\]", "");
+
                         Double x = Double.parseDouble(matcher.group(2));
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));

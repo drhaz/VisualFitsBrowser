@@ -4,6 +4,9 @@ import javax.swing.*;
 import org.apache.log4j.Logger;
 import org.cowjumping.guiUtils.GUIConsts;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class DonutDisplayFrame extends JFrame implements DonutBridgeResultListener {
 
     private static final Logger log = Logger.getLogger(DonutDisplayFrame.class);
@@ -41,11 +44,25 @@ public class DonutDisplayFrame extends JFrame implements DonutBridgeResultListen
 
     }
 
+
+    private Image getScaledImage(Image srcImg, int h){
+
+        int w = srcImg.getWidth(null)* h / srcImg.getHeight(null);
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
     @Override
     public void notifyResult(pyDonutBridge result) {
 
         donutResults.setText(result.resultsString);
-        donutFitDisplay.setIcon(new ImageIcon(result.resultImage));
+        donutFitDisplay.setIcon(new ImageIcon(getScaledImage(result.resultImage, 400)));
         invalidate();
         pack();
 
