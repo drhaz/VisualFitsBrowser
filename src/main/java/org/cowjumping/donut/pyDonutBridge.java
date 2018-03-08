@@ -80,7 +80,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
             Runtime rt = Runtime.getRuntime();
             Process proc = null;
 
-            log.debug("Executing donut: " + g);
+            log.debug("Executing donut: " + g + " in directory "+ new File(donutExecutable).getParentFile());
 
             proc = rt.exec(g, null, new File(donutExecutable).getParentFile());
             if (proc == null)
@@ -110,6 +110,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
 
 
     private String generateExecString(File donut, boolean intra) {
+
 
 
         return this.donutExecutable +
