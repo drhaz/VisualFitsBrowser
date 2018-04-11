@@ -157,7 +157,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);
         pyDonutBridge d = new pyDonutBridge(new File("/mnt/data/daydirs/ef12/20171024/raw/bpl1m002-ef12-20171024-0003-x00.fits.fz"),
-                false,650,101,200);
+                false,650,101,250);
 
         d = d.call();
 
