@@ -238,9 +238,18 @@ public class SAMPUtilities {
 
     }
 
-    public static void getDS9ImageCutout (String callbackIdentifier, int width) {
-        log.debug ("SAMP: requesting iamge cutout from ds9");
-        sendCallbackDS9 (String.format("iexam key data %d %d", width, width), callbackIdentifier);
+    public static void getDS9ImageCutout (String callbackIdentifier, int centerx, int centery, int width) {
+        log.debug (String.format("SAMP: requesting iamge cutout from ds9 at coordinate %d %d, width %d",centerx,centery,width));
+        int llx = centerx - width/2;
+        int lly = centery - width/2;
+        sendCallbackDS9 (String.format("data image %d %d %d %d no", llx,lly, width, width), callbackIdentifier);
+
+    }
+
+
+    public static void getDS9imexam (String callbackIdentifier) {
+        log.debug ("SAMP: requesting imexam");
+        sendCallbackDS9 (String.format("iexam key coordinate image"), callbackIdentifier);
 
     }
 

@@ -59,22 +59,27 @@ public class ImexamDisplay extends ImageEvaluator {
             ImageContainer gs = imageContainers.elementAt(0);
 
             odiCentroidSupport.findSkyandPeak(gs, 2, 3);
+
             double peakX = gs.getCenterX();
             double peakY = gs.getCenterY();
+
             odiCentroidSupport.MomentAnalysis(gs, 2, gs.getImageDimX() - 2, 2, gs.getImageDimY() - 2);
-            double deltaX = Math.min(15, gs.getFWHM_X());
-            double deltaY = Math.min(15, gs.getFWHM_Y());
+
+            double deltaX = Math.min(5, 2*gs.getFWHM_X());
+            double deltaY = Math.min(5, 2*gs.getFWHM_Y());
             int minx = (int) (gs.getCenterX() - deltaX);
             int maxx = (int) (gs.getCenterX() + deltaX);
             int miny = (int) (gs.getCenterY() - deltaY);
             int maxy = (int) (gs.getCenterY() + deltaY);
+
             odiCentroidSupport.MomentAnalysis(gs,minx, maxx, miny, maxy);
             odiCentroidSupport.gaussianFitFWHM (gs);
             odiCentroidSupport.aperturePhotometry(gs);
+
             rp.updateData(gs);
-            gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX(), gs.getCenterY(), 0);
+            gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX()+0.5f, gs.getCenterY()+0.5f, 0);
             gd.setZScale(gs.getBackground() - 3 * gs.getBackNoise(), gs.getPeak());
-            gd.setMeanCenter((float)peakX, (float)peakY);
+            gd.setMeanCenter((float)(peakX+0.5), (float) (peakY+0.5));
 
             sd.update(gs);
         }
@@ -91,7 +96,9 @@ public class ImexamDisplay extends ImageEvaluator {
         f.pack();
         f.setVisible(true);
         gaussImage gi = new gaussImage(50, 50);
-        gi.create(20, 20, 1000, 4, 4, 10, 100);
+        gi.create(20, 20, 1000, 5, 5, 10, 100);
+        gi.add   (20, 20, 20,   20, 20, 0, 0);
+
         Vector<ImageContainer> v = new Vector<ImageContainer>();
         v.add(gi);
         d.setImageContainer(v);
@@ -118,13 +125,17 @@ class ImageBufferStatusDisplay extends JTextArea {
 
         StringBuilder sb = new StringBuilder();
         sb.append ("\n");
-        sb.append(String.format(" center x     % 6.2f [pix]   " , gs.getWindow_Offset_X() + gs.getCenterX() ));
-        sb.append(String.format(" center y     % 6.2f [pix]\n" ,   gs.getWindow_Offset_Y() + gs.getCenterY() ));
+        sb.append(String.format(" center x     % 6.2f [pix]   " , gs.getWindow_Offset_X() + gs.getCenterX() + 0.5  ));
+        sb.append(String.format(" center y     % 6.2f [pix]\n" ,   gs.getWindow_Offset_Y() + gs.getCenterY() + 0.5 ));
+        sb.append(String.format(" peak   x     % 6.2f [pix]   " , gs.getWindow_Offset_X() + gs.getPeakX() + 0.5    ));
+        sb.append(String.format(" peak   y     % 6.2f [pix]\n" ,   gs.getWindow_Offset_Y() + gs.getPeakY() + 0.5   ));
         sb.append(String.format(" FWHM         % 6.2f [pix]\n\n", (gs.getFWHM_X() + gs.getFWHM_Y())/2.));
+
+        sb.append(String.format(" Peak         % 10.2f [ADU] above background\n", gs.getPeak() - gs.getBackground()));
+        sb.append(String.format(" Sky          % 6.2f \\pm % 4.2f [ADU]\n\n", gs.getBackground(), gs.getBackNoise()));
+
         sb.append(String.format(" Flux:      % 10.2f [ADU]\n", gs.getFlux()));
         sb.append(String.format(" Inst mag       % 5.2f [mag]\n\n", gs.getInstMag()));
-
-        sb.append(String.format(" Sky          % 6.2f \\pm % 4.2f [ADU]\n", gs.getBackground(), gs.getBackNoise()));
 
         System.out.println (sb);
         setText(sb.toString());

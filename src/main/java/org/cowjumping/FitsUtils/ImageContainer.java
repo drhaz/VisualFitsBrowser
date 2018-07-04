@@ -1,12 +1,13 @@
 package org.cowjumping.FitsUtils;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.io.StringReader;
+import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -167,6 +168,8 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         // Object Descriptors
         CENTER_X("CENTER_X", Float.class), // Centroid (X) of object
         CENTER_Y("CENTER_Y", Float.class), // Centroid (Y) of object
+        PEAK_X("PEAK_X", Float.class), // Centroid (X) of object
+        PEAK_Y("PEAK_Y", Float.class), // Centroid (Y) of object
         FWHM_X("FWHM_X", Float.class), // FWHM in X
         FWHM_X_sec("FWHM_X_sec", Float.class), // FWHM in X
         FWHM_Y("FWHM_Y", Float.class), // FWHM in X
@@ -239,23 +242,39 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
     }
 
 
-    public ImageContainer (String listOfPixelValues) {
+    /** Load image container from a ds9 data .. call
+     *
+     * @param listOfPixelValues
+     */
+    public ImageContainer (BufferedReader listOfPixelValues) {
         this();
-        Vector<Float> db = new Vector<Float>();
-        StringTokenizer st = new StringTokenizer (listOfPixelValues);
-        while (st.hasMoreTokens()) {
-            try {
-                Float d = Float.parseFloat(st.nextToken());
-                db.add(d);
-            } catch (Exception e) {
-                log.error ("While parsing output from imexam: " + e.getMessage() + " Data were: " +listOfPixelValues);
-                break;
+        Vector<Float> pv = new Vector<Float>();
+        Vector<Float> xc = new Vector<Float>();
+        Vector<Float> yc = new Vector<Float>();
+        log.info ("Loading file");
+        try {
+
+            while (listOfPixelValues.ready()) {
+                String line = listOfPixelValues.readLine();
+                if (line.length() > 4) {
+                    StringTokenizer st = new StringTokenizer(line, "+=';, ");
+                    Float x = Float.parseFloat(st.nextToken());
+                    Float y = Float.parseFloat(st.nextToken());
+                    Float d = Float.parseFloat(st.nextToken());
+                   // System.out.println(x + " " + y + " " + d);
+                    pv.add(d);
+                    xc.add (x);
+                    yc.add (y);
+                }
             }
+
+        } catch (Exception e) {
+            log.error("While parsing output from imexam: " + e.getMessage() + " Data were: " + listOfPixelValues);
         }
 
-        double size = Math.sqrt(db.size());
-        if (size * size != db.size()) {
-            log.error ("Image dimension does not fit! " + size + " "  + db.size());
+        double size = Math.sqrt(pv.size());
+        if (size * size != pv.size()) {
+            log.error ("Image dimension does not fit! " + size + " "  + pv.size());
             return;
         }
 
@@ -263,13 +282,27 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         log.debug ("Got imexam image dimension " + size);
         this.imageDimX = (int) size;
         this.imageDimY = (int) size;
-        this.rawImageBuffer =  new float [db.size()];
-        for (int ii = 0; ii < db.size(); ii++) {
-            this.rawImageBuffer[ii] = db.elementAt(ii);
+
+        float minx = xc.parallelStream().min(Comparator.comparing(p -> ((Float) p))).get();
+        float miny = yc.parallelStream().min(Comparator.comparing(p -> ((Float) p))).get();
+        this.setWindow_Offset_X((short) minx);
+        this.setWindow_Offset_Y((short) miny);
+
+        log.debug("Found minimum x/y: " + minx + " " +miny);
+        this.rawImageBuffer =  new float [pv.size()];
+
+
+        for (int ii = 0; ii < pv.size(); ii++) {
+            int x = (int) xc.elementAt(ii).intValue();
+            int y = (int) yc.elementAt(ii).intValue();
+            x -= this.getWindow_Offset_X();
+            y -= this.getWindow_Offset_Y();
+            System.out.println (x + " / " + y);
+            this.rawImageBuffer[y * this.imageDimX + x] = pv.elementAt(ii);
         }
 
 
-        db.clear();
+        pv.clear();
 
     }
 
@@ -713,6 +746,35 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         return (Float) Header.CENTER_Y.myClass.cast(o);
     }
 
+
+
+
+    public void setPeakX(float x) {
+        MetaInfo.put(Header.PEAK_X.hash, x);
+    }
+
+    public Float getPeakX() {
+        Object o = MetaInfo.get(Header.PEAK_X.hash);
+        if (o == null)
+            return new Float(-1);
+        return (Float) Header.PEAK_X.myClass.cast(o);
+    }
+
+    public void setPeakY(float y) {
+        MetaInfo.put(Header.PEAK_Y.hash, y);
+    }
+
+    public Float getPeakY() {
+        Object o = MetaInfo.get(Header.PEAK_Y.hash);
+        if (o == null)
+            return new Float(-1);
+        return (Float) Header.PEAK_Y.myClass.cast(o);
+    }
+
+
+
+
+
     public void setBackground(float y) {
         MetaInfo.put(Header.BACKGROUND.hash, y);
     }
@@ -990,6 +1052,12 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         gs.addHashFromString("EXPTIME=0.020");
 
         System.out.println(gs.Hash2String());
+
+        try {
+            gs = new ImageContainer(new BufferedReader(new InputStreamReader(new URL("file://localhost//tmp/ds91530714074842228.samp.dat").openStream())));
+        } catch (Exception e) {
+            System.out.println (e);
+        }
 
     }
 

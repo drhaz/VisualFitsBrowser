@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +67,7 @@ public class VisualFitsBrowserApp extends JFrame {
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
     private static DonutDisplayFrame DonutFrame = null;
+    private static String lastimexamKey = null;
 
     private boolean showUtilities;
     private boolean showWavefront;
@@ -139,7 +141,7 @@ public class VisualFitsBrowserApp extends JFrame {
             Thread.sleep(20);
         } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
-            myLogger.error (e1);
+            myLogger.error(e1);
         }
 
         pack();
@@ -414,7 +416,7 @@ public class VisualFitsBrowserApp extends JFrame {
             menuItem.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
-                    SAMPUtilities.getDS9ImageCutout("imexam", 20);
+                    SAMPUtilities.getDS9imexam("imexam");
                 }
 
             });
@@ -557,11 +559,15 @@ public class VisualFitsBrowserApp extends JFrame {
                     Matcher matcher = pattern.matcher(result);
                     if (matcher.matches()) {
                         String fname = matcher.group(1);
+
+                        // get rid of the extension identifier - we do not support that yet!
+                        fname = fname.replaceAll("\\[.*\\]", "");
+
                         Double x = Double.parseDouble(matcher.group(2));
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(), 200);
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(), 250);
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
@@ -579,6 +585,10 @@ public class VisualFitsBrowserApp extends JFrame {
                     return true;
                 }
 
+                if (s.toLowerCase().contentEquals("imagecutout")) {
+                    return true;
+                }
+
                 return false;
             }
 
@@ -587,25 +597,45 @@ public class VisualFitsBrowserApp extends JFrame {
 
                 if (msg.isOK()) {
 
-                    String result = (String) msg.getResult().get("value");
-                    System.out.println("Message result has value: " + result);
+                    String result = (String) msg.getResult().toString();
+                    myLogger.info(String.format("Message has responderid %s, tag %s, result has value: %s", responderID, tag, result));
 
-                    try {
-                        StringTokenizer tok = new StringTokenizer(result);
-                        String key = tok.nextToken();
 
-                        ImageContainer im = new ImageContainer(tok.nextToken(""));
-                        Vector<ImageContainer> v = new Vector<ImageContainer>();
-                        v.add(im);
-                        if (!key.equalsIgnoreCase("Q")) {
-                            SAMPUtilities.getDS9ImageCutout("imexam", 50);
-                            mToolBoxPanel.pushImageBufferSelection(v);
+                    if (tag.equalsIgnoreCase("imexam"))
+                        try {
+                            String myresult = (String) msg.getResult().get("value");
+                            StringTokenizer tok = new StringTokenizer(myresult);
+                            String key = tok.nextToken();
+                            String x = tok.nextToken();
+                            String y = tok.nextToken();
+                            int xce = (int) Math.round(Double.parseDouble(x));
+                            int yce = (int) Math.round(Double.parseDouble(y));
+                            if (!key.equalsIgnoreCase("Q")) {
+                                SAMPUtilities.getDS9ImageCutout("imagecutout", xce, yce, 50);
+                                VisualFitsBrowserApp.lastimexamKey = key;
+                            }
+                        } catch (Exception e) {
+
+                            myLogger.error("While processing imexam request: ", e);
                         }
-                    } catch (Exception e) {
-                        myLogger.error ("Something wrong with response for iexam: cannot get all the tokens " + result, e);
-                    } finally {
 
-                    }
+                    if (tag.equalsIgnoreCase("imagecutout"))
+
+                        try {
+                            String url = (String) msg.getResult().get("url");
+                            BufferedReader reader = new BufferedReader( new InputStreamReader(new URL(url).openStream()));
+
+
+                            ImageContainer im = new ImageContainer(reader);
+                            Vector<ImageContainer> v = new Vector<ImageContainer>();
+                            v.add(im);
+
+                            mToolBoxPanel.pushImageBufferSelection(v);
+                        } catch (Exception e) {
+                            myLogger.error("Something wrong with response for iexam: cannot get all the tokens " + result, e);
+                        } finally {
+                            SAMPUtilities.getDS9imexam("imexam");
+                        }
 
 
                 }
