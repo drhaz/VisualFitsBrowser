@@ -4,7 +4,8 @@
 
     <groupId>org.cowjumping</groupId>
     <artifactId>VisualFitsBrowser</artifactId>
-    <version>1.7-devel</version>
+    <version>1.7-RC</version>
+
     <packaging>jar</packaging>
 
     <name>VisualFitsBrowser</name>
