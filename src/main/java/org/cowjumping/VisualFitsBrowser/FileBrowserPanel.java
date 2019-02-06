@@ -127,6 +127,26 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
             rootDirLabel.setToolTipText("This is the current directory");
 
+            rootDirLabel.addMouseListener(new MouseAdapter()
+            {
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (rootDirLabel == null)
+                        return;
+
+
+                    String dirname = rootDirLabel.getText();
+
+
+                    if (dirname.startsWith("/archive/engineering")) {
+                        // Do something about LCO mounts.
+                    }
+
+                }
+            });
+
+
+
             ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
             reloadButton = new JButton(reload);
