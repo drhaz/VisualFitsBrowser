@@ -38,6 +38,21 @@ public class gaussImage extends ImageContainer {
         return (x < low) ? low : ((x > high) ? high : x);
     }
 
+
+    public void add (float xce, float yce, float peak, float fwhmX,
+                     float fwhmY, float readnoise, float bias) {
+
+        gaussImage temp = new gaussImage(this.imageDimX, this.imageDimY);
+        temp.create(xce,yce,peak,fwhmX,fwhmY, readnoise, bias);
+
+        for  (int ii = 0; ii < rawImageBuffer.length; ii++) {
+            rawImageBuffer[ii] += temp.rawImageBuffer[ii];
+        }
+
+
+
+    }
+
     public void create(float xce, float yce, float peak, float fwhmX,
                        float fwhmY, float readnoise, float bias) {
 
@@ -57,7 +72,7 @@ public class gaussImage extends ImageContainer {
                 float n = (float) (myRandom.nextGaussian() * readnoise + bias);
                 float flux = peak * s;
                 flux = (float) (flux + myRandom.nextGaussian() * Math.sqrt(flux)) * getBinningX() * getBinningY();
-                float value = flux + n + 100;
+                float value = flux + n ;
 
 
                 rawImageBuffer[(int) (yy * this.getImageDimX() + xx)] = value;

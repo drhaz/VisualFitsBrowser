@@ -272,7 +272,7 @@ public class GuideStarDisplayComponent extends
 
 
 
-			int markerOuterDiameter = 20;
+			float markerOuterDiameter = 20;
 
 			if (DonutRadius > 0) {
 				Point2D calcPoint = forwardTransform.transform(
@@ -281,9 +281,9 @@ public class GuideStarDisplayComponent extends
 			}
 
 			g.drawOval(
-					(int) (centerOnScreen.getX() - markerOuterDiameter / 2 ),
-					(int) (centerOnScreen.getY() - markerOuterDiameter / 2 ),
-					markerOuterDiameter, markerOuterDiameter);
+					(int) (centerOnScreen.getX() - markerOuterDiameter / 2. ),
+					(int) (centerOnScreen.getY() - markerOuterDiameter / 2. ),
+					(int) (markerOuterDiameter+1), (int)(markerOuterDiameter+1));
 
 
 

@@ -579,6 +579,8 @@ public class odiCentroidSupport {
         gs.setPeak(max);
         gs.setCenterX((int) maxIndex % dimX);
         gs.setCenterY((int) maxIndex / dimX);
+        gs.setPeakX(gs.getCenterX());
+        gs.setPeakY(gs.getCenterY());
 
         // normalize the sky counts to the number of pixels invlved.
         for (int ii = 0; ii < 4; ii++) {

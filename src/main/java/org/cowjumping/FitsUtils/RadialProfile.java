@@ -157,14 +157,16 @@ public class RadialProfile {
 
   private void loadFromImage(ImageContainer gs, Rectangle boundary,
       double thres) {
-    if (getNElements() != boundary.height * boundary.width) {
 
-      this.radius = new float[boundary.width * boundary.height];
-      this.value = new float[boundary.width * boundary.height];
+      float[] mradius = new float[boundary.width * boundary.height];
+      float[] mvalue = new float[boundary.width * boundary.height];
 
-    }
+      int n = extractRadialProfile(gs, mradius, mvalue, boundary, thres);
+      this.radius = new float[n]; System.arraycopy(mradius, 0, this.radius,0, n);
+      this.value = new float[n];  System.arraycopy(mvalue , 0, this.value ,0, n);
 
-    extractRadialProfile(gs, radius, value, boundary, thres);
+
+
   }
 
   
