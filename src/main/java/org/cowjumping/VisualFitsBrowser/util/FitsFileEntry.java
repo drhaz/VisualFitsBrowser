@@ -120,7 +120,7 @@ public class FitsFileEntry {
 	public String ExtraKeyword;
 	public String RA_String;
 	public String Dec_String;
-	public TRANSFERSTATUS TransferStatus = TRANSFERSTATUS.INDEF;
+//	public TRANSFERSTATUS TransferStatus = TRANSFERSTATUS.INDEF;
 
 	public boolean xmlSaved = true;
 
@@ -156,15 +156,10 @@ public class FitsFileEntry {
 			if (fitsHeader != null && fitsHeader.size() > 0) {
 
 				expTime = QuickHeaderInfo.getExpTime(fitsHeader);
-
 				ObjName = QuickHeaderInfo.getObject(fitsHeader);
-
 				Filter = QuickHeaderInfo.getFilter(fitsHeader);
-
 				ponTime = QuickHeaderInfo.getPONTime(fitsHeader);
-
 				DateObs = QuickHeaderInfo.getDateObs(fitsHeader, true);
-
 
 			} else {
 				myLogger.error("Fitsheader for file " + f.getName() + " is empty.");
@@ -182,24 +177,16 @@ public class FitsFileEntry {
 			// Now fetching additional header information:
 
 			if (fitsHeader != null) {
+				myLogger.debug("Adding image: " + entry);
 				entry.RA_String = QuickHeaderInfo.getStringValue(fitsHeader, "RA");
 				entry.Dec_String = QuickHeaderInfo.getStringValue(fitsHeader, "DEC");
-
 				entry.RA_String = entry.RA_String != null ? entry.RA_String.trim() : "INDEF";
 				entry.Dec_String = entry.Dec_String != null ? entry.Dec_String.trim() : "INDEF";
-                myLogger.debug("Added image: " + entry.FName);
 				entry.Airmass = QuickHeaderInfo.getFloatValue(fitsHeader, "AIRMASS");
-
 				entry.Focus = QuickHeaderInfo.getFloatValue(fitsHeader, "TELFOCUS");
-
-				entry.PONTime = ponTime;
-
 				entry.isBinned = QuickHeaderInfo.isBinned(fitsHeader);
-
 				entry.mef = QuickHeaderInfo.getBooleanValue (fitsHeader, "EXTEND");
-				if (entry.mef) {
-					myLogger.debug ("MEF detected");
-				}
+				myLogger.debug("Added image: " + entry);
 			}
 
 
@@ -212,8 +199,6 @@ public class FitsFileEntry {
 			}
 
 			// fetch user comment
-
-
 			FitsFileEntry.theCommentInterface.readComment(entry);
 
 
@@ -221,6 +206,13 @@ public class FitsFileEntry {
 
 		return entry;
 
+	}
+
+	public String toString (){
+		StringBuilder sb = new StringBuilder();
+		sb.append ("FileName: %s".format (this.FName));
+
+		return sb.toString();
 	}
 
 	/**
@@ -327,11 +319,11 @@ public class FitsFileEntry {
 //		return item;
 //	}
 
-	public String getAsPTICommentXMLElement() {
-		String retVal = "<Exposure>\n" //
-				+ "<EXPOSUREID>" + this.FName + "</EXPOSUREID>\n" //
-				+ "<USERCOMMENT>" + StringEscapeUtils.escapeXml(this.UserComment) + "</USERCOMMENT>\n" //
-				+ "</Exposure>\n";
-		return retVal;
-	}
+//	public String getAsPTICommentXMLElement() {
+//		String retVal = "<Exposure>\n" //
+//				+ "<EXPOSUREID>" + this.FName + "</EXPOSUREID>\n" //
+//				+ "<USERCOMMENT>" + StringEscapeUtils.escapeXml(this.UserComment) + "</USERCOMMENT>\n" //
+//				+ "</Exposure>\n";
+//		return retVal;
+//	}
 }
