@@ -236,7 +236,6 @@ public class QuickHeaderInfo {
                     tobequeriedFits = dir.getAbsolutePath() + "/" + listFZ[0];
 
                 }
-
             }
 
             if (tobequeriedFits == null) {
@@ -384,14 +383,24 @@ public class QuickHeaderInfo {
     }
 
     public static boolean isBinned(Vector<String> fitsHeader) {
-
+        myLogger.debug ("Finding out if image is binned");
         String val = getStringValue(fitsHeader, "CCDSUM");
+
         if (val != null) {
 
-            StringTokenizer st = new StringTokenizer(val, "[]: \t");
-            int xbin = Integer.parseInt(st.nextToken());
-            int ybin = Integer.parseInt(st.nextToken());
-            return (xbin != 1) || (ybin != 1);
+            StringTokenizer st = new StringTokenizer(val, "\"[] ");
+            String xbin = st.nextToken();
+            String ybin = st.nextToken();
+            boolean retval = false;
+            try {
+                retval = (Integer.parseInt(xbin) > 1 ) & (Integer.parseInt(ybin) > 1);
+
+            } catch (Exception e) {
+                myLogger.debug("While trying to read CCD sum keyworkd " + val, e);
+                retval = false;
+            }
+
+            return retval;
         } else
             return false;
     }
