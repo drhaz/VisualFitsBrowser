@@ -55,4 +55,9 @@ public class FITSTextCommentImpl implements FitsCommentInterface {
 		}
 		return(true);
 	}
+
+	@Override
+	public void close() {
+
+	}
 }

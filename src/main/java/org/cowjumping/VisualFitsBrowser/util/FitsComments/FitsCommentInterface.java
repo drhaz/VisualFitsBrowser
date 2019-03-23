@@ -8,4 +8,5 @@ public interface FitsCommentInterface {
 
 	public boolean writeComment(FitsFileEntry e);
 
+	void close();
 }

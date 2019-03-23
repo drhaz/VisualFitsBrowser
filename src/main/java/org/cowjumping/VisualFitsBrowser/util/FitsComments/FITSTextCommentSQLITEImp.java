@@ -65,7 +65,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
         }
     }
 
-
+    @Override
     public void close() {
         if (this.conn != null) {
             try {
