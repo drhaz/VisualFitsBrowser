@@ -4,8 +4,8 @@ import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 public interface FitsCommentInterface {
 
-	public void readComment(FitsFileEntry entry);
+	public boolean readComment(FitsFileEntry entry);
 
-	public void writeComment(FitsFileEntry e);
+	public boolean writeComment(FitsFileEntry e);
 
 }

@@ -20,7 +20,7 @@ public class FITSTextCommentImpl implements FitsCommentInterface {
 			try {
 				myProps.load(new FileInputStream(ps));
 			} catch (Exception e) {
-				log.error("Error whle reading in comment file " + ps.getAbsolutePath(), e);
+				log.error("Error while reading in comment file " + ps.getAbsolutePath(), e);
 			}
 
 		}
@@ -29,18 +29,19 @@ public class FITSTextCommentImpl implements FitsCommentInterface {
 	}
 
 	
-	public void readComment(FitsFileEntry e) {
+	public boolean readComment(FitsFileEntry e) {
 
 		if (e == null)
-			return;
+			return false;
 		Properties prop = readProperties(e);
 		if (prop != null) {
 			e.UserComment = prop.getProperty(e.FName, "");
 		}
+		return true;
 
 	}
 
-	public void writeComment(FitsFileEntry entry) {
+	public boolean writeComment(FitsFileEntry entry) {
 
 		Properties myProps = readProperties(entry);
 		myProps.setProperty(entry.FName, entry.UserComment);
@@ -50,7 +51,8 @@ public class FITSTextCommentImpl implements FitsCommentInterface {
 			myProps.store(new FileOutputStream(ps), "FITS FILE COMMENTS BELOW");
 		} catch (Exception e) {
 			log.error("Error while writing fits comemnts: ", e);
+			return (false);
 		}
-
+		return(true);
 	}
 }

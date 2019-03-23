@@ -248,6 +248,17 @@ public class FitsFileEntry {
 
 	}
 
+	private FitsFileEntry(String fname, String comment) {
+		super();
+		this.FName = fname;
+		this.UserComment = comment;
+
+	}
+
+	public static FitsFileEntry createFromComment(String fname, String comment) {
+		return new FitsFileEntry(fname,comment);
+	}
+
 	public String getAbsolutePath() {
 		return RootPath + "/" + FName;
 	}
