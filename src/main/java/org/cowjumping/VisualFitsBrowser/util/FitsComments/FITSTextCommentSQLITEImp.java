@@ -45,7 +45,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
         this.dbURL = "jdbc:sqlite:" + Filename;
         this.connectToDB();
-
+        this.setBackgroundOperation(true);
     }
 
     public void setBackgroundOperation (boolean bgop) {
