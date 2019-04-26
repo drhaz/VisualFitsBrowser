@@ -31,10 +31,21 @@ public class FITSTextCommentSQLITEImpTest extends TestCase {
 
         e = FitsFileEntry.createFromComment("test2.fits","");
         assertTrue(db.readComment(e));
+        assertEquals("comment3", e.UserComment);
+
+
+        db.setBackgroundOperation(true);
+        assertTrue(db.writeComment(FitsFileEntry.createFromComment("test4.fits", "comment4")));
+        e = FitsFileEntry.createFromComment("test4.fits","");
+        assertTrue(db.readComment(e));
+        assertEquals("comment4", e.UserComment);
+
         db.close();
         assertFalse(db.isConnected());
         assertTrue(db.isConnected(true));
-        assertEquals("comment3", e.UserComment);
+
+
+
 
         db.close();
         assertFalse(db.isConnected());
