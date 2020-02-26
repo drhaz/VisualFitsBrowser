@@ -37,6 +37,7 @@ import org.astrogrid.samp.client.ResponseHandler;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
+import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.*;
@@ -516,6 +517,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
     private void onExit() {
         SAMPUtilities.onExit();
+        FitsFileEntry.onExit(); // this shuts down the user comment database
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
         Preferences.thePreferences.storeWindowLocation(this.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);

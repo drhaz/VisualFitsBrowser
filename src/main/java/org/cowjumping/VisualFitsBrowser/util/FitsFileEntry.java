@@ -14,6 +14,7 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentImpl;
+import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentSQLITEImp;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
 import org.cowjumping.FitsUtils.OBSTYPE;
 import org.cowjumping.FitsUtils.QuickHeaderInfo;
@@ -36,8 +37,16 @@ public class FitsFileEntry {
 
 	public boolean mef = false;
 
-	private static FitsCommentInterface theCommentInterface = new FITSTextCommentImpl();
+	private static String commentdbfilename = new String(System.getProperty("user.home",".") + "/."
+			+ "VisualFileBrowser.usercomments");
+	private static FitsCommentInterface theCommentInterface = new FITSTextCommentSQLITEImp(commentdbfilename);
 
+
+	public static void onExit () {
+		if (theCommentInterface != null)
+			theCommentInterface.close();
+
+	}
 	/**
 	 * A predefined filer for ODI fits directories
 	 */
@@ -246,6 +255,17 @@ public class FitsFileEntry {
 		this.Selected = selected;
 		this.Filter = Filter;
 
+	}
+
+	private FitsFileEntry(String fname, String comment) {
+		super();
+		this.FName = fname;
+		this.UserComment = comment;
+
+	}
+
+	public static FitsFileEntry createFromComment(String fname, String comment) {
+		return new FitsFileEntry(fname,comment);
 	}
 
 	public String getAbsolutePath() {
