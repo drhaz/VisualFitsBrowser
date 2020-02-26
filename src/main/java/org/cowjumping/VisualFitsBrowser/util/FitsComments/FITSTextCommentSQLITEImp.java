@@ -97,6 +97,8 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
                 if (rs.next()) {
                     entry.UserComment = rs.getString(2);
+                } else {
+                    log.debug("No entry found for file name " + entry.FName );
                 }
 
                 return true;
@@ -104,6 +106,8 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
             } catch (SQLException e) {
                 log.error(e);
             }
+        } else {
+            log.warn("Database is not connected, cannot read comment");
         }
         return false;
 
