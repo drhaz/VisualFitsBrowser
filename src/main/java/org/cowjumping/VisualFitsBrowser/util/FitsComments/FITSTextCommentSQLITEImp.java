@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 import java.sql.*;
+import java.util.concurrent.*;
 
 
 public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
@@ -14,14 +15,13 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
     private Connection conn = null;
     private String dbURL = null;
-
+    private boolean bgop = false;
     private String createstatement = "CREATE TABLE IF NOT EXISTS usercomments (" +
             "filename TEXT PRIMARY KEY, " +
             "comment text)";
 
 
-
-    private boolean connectToDB () {
+    private boolean connectToDB() {
         try {
             this.conn = DriverManager.getConnection(this.dbURL);
             if (this.conn != null) {
@@ -39,14 +39,18 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
     }
 
-    public FITSTextCommentSQLITEImp(String Filename) {
 
+
+    public FITSTextCommentSQLITEImp(String Filename) {
 
         this.dbURL = "jdbc:sqlite:" + Filename;
         this.connectToDB();
-
+        this.setBackgroundOperation(true);
     }
 
+    public void setBackgroundOperation (boolean bgop) {
+        this.bgop = bgop;
+    }
 
     public boolean isConnected() {
         return isConnected(false);
@@ -55,7 +59,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
     public boolean isConnected(boolean retry) {
         try {
 
-            boolean isOK =  (this.conn != null) && (this.conn.isValid(1000));
+            boolean isOK = (this.conn != null) && (this.conn.isValid(1000));
             if (!isOK & retry) {
                 return this.connectToDB();
             } else
@@ -69,9 +73,10 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
     public void close() {
         if (this.conn != null) {
             try {
+                this.executor.awaitTermination(5, TimeUnit.SECONDS);
                 this.conn.close();
-                this.conn=null;
-            } catch (SQLException e) {
+                this.conn = null;
+            } catch (Exception e) {
                 log.error(e);
             }
         }
@@ -88,10 +93,12 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
             try {
                 PreparedStatement stmt = this.conn.prepareStatement(sql);
                 stmt.setString(1, entry.FName);
-               ResultSet rs = stmt.executeQuery();
+                ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
                     entry.UserComment = rs.getString(2);
+                } else {
+                    log.debug("No entry found for file name " + entry.FName );
                 }
 
                 return true;
@@ -99,27 +106,55 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
             } catch (SQLException e) {
                 log.error(e);
             }
+        } else {
+            log.warn("Database is not connected, cannot read comment");
         }
         return false;
 
     }
 
+
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
+
+
+
     @Override
     public boolean writeComment(FitsFileEntry e) {
 
-        String sql = "INSERT OR REPLACE INTO usercomments(filename,comment) VALUES(?,?)";
+        Callable<Boolean> submisionTask = () -> {
 
-        if (this.isConnected()) {
-            try {
-                PreparedStatement pstmt = this.conn.prepareStatement(sql);
-                pstmt.setString(1, e.FName);
-                pstmt.setString(2, e.UserComment);
-                pstmt.executeUpdate();
-            } catch (SQLException err) {
-                log.error(err.getMessage());
-                return (false);
+
+            String sql = "INSERT OR REPLACE INTO usercomments(filename,comment) VALUES(?,?)";
+
+            if (this.isConnected()) {
+                try {
+                    PreparedStatement pstmt = this.conn.prepareStatement(sql);
+                    pstmt.setString(1, e.FName);
+                    pstmt.setString(2, e.UserComment);
+                    pstmt.executeUpdate();
+                } catch (SQLException err) {
+                    log.error(err.getMessage());
+                    return false;
+                }
+
             }
+            return true;
+
+        };
+        Future<Boolean> future = executor.submit(submisionTask);
+
+        if (!this.bgop) {
+            try {
+                boolean retStat = future.get();
+                return retStat;
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+                return false;
+            }
+
+        } else {
+            return true;
         }
-        return (true);
+
     }
 }
