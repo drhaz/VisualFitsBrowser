@@ -13,6 +13,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -26,9 +29,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.cli.*;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
@@ -46,7 +46,7 @@ import org.cowjumping.guiUtils.*;
 public class VisualFitsBrowserApp extends JFrame {
 
 
-    private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
+    private final static Logger myLogger = LogManager.getLogger();
 
     private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
             + ".WindowLocation";
@@ -481,7 +481,7 @@ public class VisualFitsBrowserApp extends JFrame {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
-                        myLogger.warn("Error in memory monitoring thread.", e);
+                        myLogger.warning("Error in memory monitoring thread.", e);
 
                     }
 
