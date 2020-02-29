@@ -452,8 +452,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             Color c = Color.black;
 
             Font f = renderer.getFont().deriveFont(Font.PLAIN);
-
-            String comparisonValue = ((String) value).trim();
+            String comparisonValue = "";
+            if (value != null) {
+                comparisonValue = ((String) value).trim();
+            }
 
             // Table sees the binned prefix rendered file name, so take this into acount here.
             if (comparisonValue.startsWith(binnedPrefix))
