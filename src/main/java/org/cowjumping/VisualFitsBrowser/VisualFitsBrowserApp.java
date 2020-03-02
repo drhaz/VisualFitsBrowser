@@ -4,8 +4,12 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
@@ -26,6 +30,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -650,7 +655,10 @@ public class VisualFitsBrowserApp extends JFrame {
 
             if (cmd.hasOption("debug")) {
 
-            // TODO: make this work again in log4j 2    Configurator.setRootLevel(Level.DEBUG);
+                LoggerContext context = (LoggerContext) LogManager.getContext(false);
+                Configuration config = context.getConfiguration();
+                LoggerConfig rootConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+                rootConfig.setLevel(Level.DEBUG);
             }
 
         } catch (Exception e) {
@@ -662,8 +670,12 @@ public class VisualFitsBrowserApp extends JFrame {
 
     public static void main(String[] args) {
 
-//        PropertyConfigurator.configure(
-//                VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        try {
+            context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader().getResource("resources/VisualFitsBrowser.log4j").toURI());
+        } catch (URISyntaxException e) {
+            myLogger.warn ("Error while configuring log4j 2", e);
+        }
 
         parseArgs(args);
 
