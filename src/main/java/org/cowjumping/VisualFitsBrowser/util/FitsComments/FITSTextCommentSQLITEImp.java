@@ -1,7 +1,7 @@
 package org.cowjumping.VisualFitsBrowser.util.FitsComments;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 import java.sql.*;
@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
 
-    private final static Logger log = Logger.getLogger(FITSTextCommentSQLITEImp.class);
+    private final static Logger log = LogManager.getLogger();
 
     private Connection conn = null;
     private String dbURL = null;
@@ -40,7 +40,6 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
     }
 
 
-
     public FITSTextCommentSQLITEImp(String Filename) {
 
         this.dbURL = "jdbc:sqlite:" + Filename;
@@ -48,7 +47,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
         this.setBackgroundOperation(true);
     }
 
-    public void setBackgroundOperation (boolean bgop) {
+    public void setBackgroundOperation(boolean bgop) {
         this.bgop = bgop;
     }
 
@@ -98,7 +97,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
                 if (rs.next()) {
                     entry.UserComment = rs.getString(2);
                 } else {
-                    log.debug("No entry found for file name " + entry.FName );
+                    log.debug("No entry found for file name " + entry.FName);
                 }
 
                 return true;
@@ -115,7 +114,6 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
 
     private ExecutorService executor = Executors.newFixedThreadPool(1);
-
 
 
     @Override

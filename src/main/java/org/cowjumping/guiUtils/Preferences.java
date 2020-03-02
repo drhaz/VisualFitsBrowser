@@ -1,14 +1,15 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Point;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import javax.swing.JFrame;
-
-import org.apache.log4j.Logger;
 
 /**
  * A wrapper class around the java Properties class for use in OTAListener
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
 
 public class Preferences {
 
-	final static private Logger myLogger = Logger.getLogger(Preferences.class);
+	final static private Logger myLogger = LogManager.getLogger();
 	private String FileName;
 
 	private Properties myProperties = null;

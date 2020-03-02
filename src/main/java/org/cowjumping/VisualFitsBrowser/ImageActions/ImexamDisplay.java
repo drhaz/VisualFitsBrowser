@@ -1,6 +1,5 @@
 package org.cowjumping.VisualFitsBrowser.ImageActions;
 
-import org.apache.log4j.BasicConfigurator;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.FitsUtils.gaussImage;
 import org.cowjumping.FitsUtils.odiCentroidSupport;
@@ -88,7 +87,6 @@ public class ImexamDisplay extends ImageEvaluator {
 
 
     public static void main(String args[]) {
-        BasicConfigurator.configure();
         JFrame f = new JFrame();
         ImexamDisplay d = new ImexamDisplay();
         f.getContentPane().add(d);

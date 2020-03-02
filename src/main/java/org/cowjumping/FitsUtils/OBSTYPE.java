@@ -1,11 +1,13 @@
 package org.cowjumping.FitsUtils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
-import org.apache.log4j.Logger;
 
 public enum OBSTYPE {
   INDEF, BIAS, DARK, DOMEFLAT, OBJECT, FOCUS, PREIMAGE;
-  final static Logger myLogger = Logger.getLogger(OBSTYPE.class);
+  final static Logger myLogger = LogManager.getLogger();
 
   public static OBSTYPE getObstypeForFile(File f) {
     OBSTYPE ot = OBSTYPE.INDEF;

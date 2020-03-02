@@ -1,26 +1,16 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 public class GUIConsts {
 
-	private static final Logger log = Logger.getLogger(GUIConsts.class);
+	private static final Logger log = LogManager.getLogger();
 	public static final Font LargeCountDownFont = new Font("Helvetica", Font.PLAIN, 48);
 	public static final Font TitleFont = new Font("Helvetica", Font.PLAIN, 24);
 	public static final Font LargeFont = new Font("Helvetica", Font.PLAIN, 20);
@@ -74,7 +64,7 @@ public class GUIConsts {
 
 			public void actionPerformed(ActionEvent e) {
 
-				Logger.getRootLogger().setLevel(Level.ERROR);
+				// Logger.getRootLogger().setLevel(Level.ERROR);
 			}
 
 		});
@@ -83,15 +73,15 @@ public class GUIConsts {
 		menu.add(item);
 		group.add(item);
 
-		if (Logger.getRootLogger().isInfoEnabled()) {
-			item.setSelected(true);
-		}
+//		if (Logger.getRootLogger().isInfoEnabled()) {
+//			item.setSelected(true);
+//		}
 
 		item.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
-				Logger.getRootLogger().setLevel(Level.INFO);
+			//	Logger.getRootLogger().setLevel(Level.INFO);
 			}
 
 		});
@@ -100,15 +90,15 @@ public class GUIConsts {
 		menu.add(item);
 		group.add(item);
 
-		if (Logger.getRootLogger().isDebugEnabled()) {
-			item.setSelected(true);
-		}
+//		if (Logger.getRootLogger().isDebugEnabled()) {
+//			item.setSelected(true);
+//		}
 
 		item.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
-				Logger.getRootLogger().setLevel(Level.ALL);
+				//Logger.getRootLogger().setLevel(Level.ALL);
 			}
 
 		});

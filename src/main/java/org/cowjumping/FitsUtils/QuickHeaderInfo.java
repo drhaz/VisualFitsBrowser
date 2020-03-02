@@ -1,25 +1,17 @@
 package org.cowjumping.FitsUtils;
 
-import java.awt.geom.Point2D;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
 import jsky.coords.DMS;
 import jsky.coords.HMS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.log4j.Logger;
+import java.awt.geom.Point2D;
+import java.io.*;
+import java.util.*;
 
 public class QuickHeaderInfo {
 
-    private static final Logger myLogger = Logger.getLogger(QuickHeaderInfo.class);
+    private static final Logger myLogger = LogManager.getLogger();
     final static int FITSBLOCKSIZE = 2880;
 
     /**

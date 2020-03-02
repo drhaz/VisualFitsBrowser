@@ -1,14 +1,13 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 
-import javax.swing.table.TableModel;
-
-import org.apache.log4j.Logger;
 
 public class ZebraJTable extends javax.swing.JTable {
-    private static final Logger myLogger = Logger.getLogger (ZebraJTable.class);
+    private static final Logger myLogger = LogManager.getLogger();
     private java.awt.Color rowColors[] = new java.awt.Color[2];
     private boolean drawStripes = false;
 

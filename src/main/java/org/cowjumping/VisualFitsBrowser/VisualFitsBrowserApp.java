@@ -1,34 +1,11 @@
 package org.cowjumping.VisualFitsBrowser;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.swing.Box;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JProgressBar;
-import javax.swing.JSeparator;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.cli.*;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
@@ -40,7 +17,22 @@ import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
-import org.cowjumping.guiUtils.*;
+import org.cowjumping.guiUtils.GUIConsts;
+import org.cowjumping.guiUtils.OSXAdapter;
+import org.cowjumping.guiUtils.Preferences;
+import org.cowjumping.guiUtils.SAMPUtilities;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.URL;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
@@ -481,7 +473,7 @@ public class VisualFitsBrowserApp extends JFrame {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
-                        myLogger.warning("Error in memory monitoring thread.", e);
+                        myLogger.warn("Error in memory monitoring thread.", e);
 
                     }
 
@@ -658,7 +650,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
             if (cmd.hasOption("debug")) {
 
-                Logger.getRootLogger().setLevel(Level.DEBUG);
+            // TODO: make this work again in log4j 2    Configurator.setRootLevel(Level.DEBUG);
             }
 
         } catch (Exception e) {
@@ -670,8 +662,8 @@ public class VisualFitsBrowserApp extends JFrame {
 
     public static void main(String[] args) {
 
-        PropertyConfigurator.configure(
-                VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
+//        PropertyConfigurator.configure(
+//                VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
 
         parseArgs(args);
 

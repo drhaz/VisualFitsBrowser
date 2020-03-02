@@ -38,7 +38,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryListener;
@@ -55,7 +56,7 @@ import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
 
-    private final static Logger log = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
+    private final static Logger log = LogManager.getLogger();
 
     String mRootDirectoryString = "/";
 

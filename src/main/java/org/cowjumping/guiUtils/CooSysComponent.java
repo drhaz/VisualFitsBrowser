@@ -1,20 +1,15 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.concurrent.Semaphore;
-
-import org.apache.log4j.Logger;
 
 /**
  * A class to support the usage of an internal coordinate system on a
@@ -30,8 +25,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
      *
      */
     private final static long serialVersionUID = 1L;
-    private final static Logger log = Logger
-            .getLogger(CooSysComponent.class);
+    private final static Logger log = LogManager.getLogger();
 
     /**
      * The size of this widget in x-pixels

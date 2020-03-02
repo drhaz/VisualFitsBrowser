@@ -1,10 +1,10 @@
 package org.cowjumping.donut;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.guiUtils.Preferences;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.BufferedReader;
@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 public class pyDonutBridge implements Callable<pyDonutBridge> {
 
 
-    private static final Logger log = Logger.getLogger(pyDonutBridge.class);
+    private static final Logger log = LogManager.getLogger();
     private final boolean intrafocus;
     private final int w;
     private final int x;
@@ -154,8 +154,7 @@ public class pyDonutBridge implements Callable<pyDonutBridge> {
 
     public static void main(String args[]) throws Exception {
 
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+
         pyDonutBridge d = new pyDonutBridge(new File("/mnt/data/daydirs/ef12/20171024/raw/bpl1m002-ef12-20171024-0003-x00.fits.fz"),
                 false,650,101,250);
 

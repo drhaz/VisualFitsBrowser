@@ -12,7 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
@@ -30,7 +31,7 @@ import org.cowjumping.guiUtils.VariableGridLayout;
  */
 
 public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
-	private static final Logger log = Logger.getLogger(ImageToolBoxPanel.class);
+	private static final Logger log = LogManager.getLogger();
 
 	/**
 	 * reference to file list

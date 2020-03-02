@@ -1,15 +1,16 @@
 package org.cowjumping.donut;
 
-import javax.swing.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.guiUtils.GUIConsts;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class DonutDisplayFrame extends JFrame implements DonutBridgeResultListener {
 
-    private static final Logger log = Logger.getLogger(DonutDisplayFrame.class);
+    private static final Logger log = LogManager.getLogger();
 
     private static DonutDisplayFrame singleInstance = null;
 

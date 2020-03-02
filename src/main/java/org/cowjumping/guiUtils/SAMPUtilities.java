@@ -1,15 +1,11 @@
 package org.cowjumping.guiUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.swing.JOptionPane;
-
+import nom.tam.fits.BasicHDU;
+import nom.tam.fits.Fits;
+import nom.tam.fits.ImageHDU;
 import nom.tam.image.compression.hdu.CompressedImageHDU;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
 import org.astrogrid.samp.client.CallableClient;
@@ -19,8 +15,13 @@ import org.astrogrid.samp.client.SampException;
 import org.astrogrid.samp.hub.Hub;
 import org.astrogrid.samp.hub.HubServiceMode;
 import org.astrogrid.samp.xmlrpc.StandardClientProfile;
-import nom.tam.fits.*;
 import org.cowjumping.FitsUtils.funpackwrapper;
+
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -31,7 +32,7 @@ import org.cowjumping.FitsUtils.funpackwrapper;
  */
 
 public class SAMPUtilities {
-    private final static Logger log = Logger.getLogger(SAMPUtilities.class);
+    private final static Logger log = LogManager.getLogger();
     private static HubConnector sampHubConnector = null;
     private static Hub theHub = null;
 
@@ -404,8 +405,7 @@ public class SAMPUtilities {
     }
 
     public static void main(String args[]) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+
         System.out.println(isClientAvailable("DS9"));
         System.exit(0);
     }

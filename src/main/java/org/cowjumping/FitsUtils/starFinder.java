@@ -1,19 +1,16 @@
 package org.cowjumping.FitsUtils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.cowjumping.FitsUtils.ImageContainer;
-
 
 public class starFinder implements Callable<starFinder> {
 
-	private final static Logger myLogger = Logger.getLogger(starFinder.class
-			.getCanonicalName());
+	private final static Logger myLogger = LogManager.getLogger();
 
 	/** The bias (overscan) level of the image */
 	double biasLevel = 0;
@@ -434,8 +431,7 @@ public class starFinder implements Callable<starFinder> {
 	}
 
 	public static void main(String[] args) throws Exception {
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.DEBUG);
+
 
 //		catalogFromOTA c = new catalogFromOTA(
 //				"/Volumes/odifile/archive/podi/test/2012.08.13/o20120813T231626.0",

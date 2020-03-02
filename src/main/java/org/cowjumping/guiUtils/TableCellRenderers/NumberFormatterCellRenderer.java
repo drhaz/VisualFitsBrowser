@@ -3,14 +3,15 @@ package org.cowjumping.guiUtils.TableCellRenderers;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class NumberFormatterCellRenderer extends DefaultTableCellRenderer {
 
   private final String formatText;
   private final String smallText;
-  private final Logger myLogger = Logger.getLogger(NumberFormatterCellRenderer.class);
+  private final Logger myLogger = LogManager.getLogger();
 
   public NumberFormatterCellRenderer(String decimalFormat) {
     this (decimalFormat, null);
