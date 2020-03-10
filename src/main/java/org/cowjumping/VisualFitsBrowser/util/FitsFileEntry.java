@@ -1,23 +1,17 @@
 package org.cowjumping.VisualFitsBrowser.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cowjumping.FitsUtils.OBSTYPE;
+import org.cowjumping.FitsUtils.QuickHeaderInfo;
+import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentSQLITEImp;
+import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Date;
 import java.util.Vector;
-
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
-import javax.swing.ProgressMonitor;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.log4j.Logger;
-import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentImpl;
-import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentSQLITEImp;
-import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
-import org.cowjumping.FitsUtils.OBSTYPE;
-import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 /**
  * Data holding class for an ODI Image.
@@ -27,7 +21,7 @@ import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 public class FitsFileEntry {
 
-	private final static Logger myLogger = Logger.getLogger(FitsFileEntry.class);
+	private final static Logger myLogger = LogManager.getLogger();
 
 
 	public enum TRANSFERSTATUS {

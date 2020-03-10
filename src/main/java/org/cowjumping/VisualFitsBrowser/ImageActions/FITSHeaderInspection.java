@@ -10,7 +10,8 @@ import javax.swing.*;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.FitsUtils.QuickHeaderInfo;
@@ -32,7 +33,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
     private JScrollPane p = null;
     private JTextArea myTextArea = null;
     private JTextField searchInput = null;
-    private final static Logger log = Logger.getLogger(FITSHeaderInspection.class);
+    private final static Logger log = LogManager.getLogger();
 
     final static public int MODE_FITSHEADER = 0;
     final static public int MODE_LOGFILE = 1;

@@ -1,26 +1,21 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.Enumeration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.swing.JComponent;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import java.awt.*;
+import java.util.Enumeration;
 
-import org.apache.log4j.Logger;
 
 public class MultiSpanCellTable extends JTable {
 
-    private static final Logger myLogger = Logger
-	    .getLogger (MultiSpanCellTable.class.getCanonicalName ());
+    private static final Logger myLogger = LogManager.getLogger();
 
     public MultiSpanCellTable(TableModel model) {
 	super (model);

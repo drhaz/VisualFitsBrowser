@@ -1,20 +1,16 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-
-import javax.swing.JFrame;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
  * A JComponent that displays a strip chart. This class is designed to be a
@@ -35,8 +31,7 @@ public class StripChartComponent extends org.cowjumping.guiUtils.CooSysComponent
 	 */
 	protected boolean inExposure = false;
 
-	private final static Logger myLogger = Logger
-			.getLogger(StripChartComponent.class);
+	private final static Logger myLogger =LogManager.getLogger();
 
 	LinkedList<StripChartDataPoint> dataPoints = new LinkedList<StripChartDataPoint>();
 
@@ -444,8 +439,7 @@ public class StripChartComponent extends org.cowjumping.guiUtils.CooSysComponent
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.DEBUG);
+
 		JFrame myFrame = new JFrame("Stripchart test");
 		StripChartComponent myChart = new StripChartComponent("y-LABEL", 500,
 				128);
@@ -477,7 +471,7 @@ class LinearKalmanFilter {
 	double currentX = 0;
 	double currentVar = 0;
 
-	final static Logger myLogger = Logger.getLogger(LinearKalmanFilter.class);
+	final static Logger myLogger = LogManager.getLogger();
 
 	public LinearKalmanFilter() {
 

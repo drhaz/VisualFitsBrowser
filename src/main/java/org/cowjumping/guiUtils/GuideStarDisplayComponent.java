@@ -1,8 +1,12 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cowjumping.FitsUtils.ImageContainer;
+import org.cowjumping.FitsUtils.odiCentroidSupport;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
@@ -11,12 +15,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.util.Vector;
-
-import javax.swing.JToolTip;
-
-import org.apache.log4j.Logger;
-import org.cowjumping.FitsUtils.ImageContainer;
-import org.cowjumping.FitsUtils.odiCentroidSupport;
 
 /**
  * A component that is designed to draw guide star video data, with an overlay
@@ -37,8 +35,7 @@ public class GuideStarDisplayComponent extends
 		org.cowjumping.guiUtils.CooSysComponent implements MouseMotionListener,
 		zScaleListener {
 
-	private final static Logger myLogger = Logger
-			.getLogger(GuideStarDisplayComponent.class.getCanonicalName());
+	private final static Logger myLogger = LogManager.getLogger();
 
 	public ImageContainer gs = null;
 

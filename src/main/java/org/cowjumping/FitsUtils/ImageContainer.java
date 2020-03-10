@@ -1,16 +1,16 @@
 package org.cowjumping.FitsUtils;
 
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.Map.Entry;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
 /**
@@ -37,7 +37,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
     /**
      * Internal logging capability for this class
      */
-    private static final Logger log = Logger.getLogger(ImageContainer.class);
+    private static final Logger log = LogManager.getLogger();
 
 	/*
      * Image container
@@ -1045,7 +1045,6 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
         ImageContainer gs = new ImageContainer();
         gs.setCycle(10);
         gs.setImage(new float[10 * 10], 10, 10);
@@ -1060,8 +1059,6 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         }
 
     }
-
-
 
 
     public int compareTo(ImageContainer o) {

@@ -1,17 +1,15 @@
 package org.cowjumping.guiUtils;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.FitsUtils.RadialProfile;
 import org.cowjumping.FitsUtils.gaussImage;
 import org.cowjumping.FitsUtils.odiCentroidSupport;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Point2D;
 
 
 /**
@@ -24,8 +22,7 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent {
 
-    private final static Logger myLogger = Logger
-            .getLogger(RadialPlotComponent.class);
+    private final static Logger myLogger = LogManager.getLogger();
 
     RadialProfile myProfile = null;
 

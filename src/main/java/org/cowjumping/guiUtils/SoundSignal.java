@@ -1,17 +1,17 @@
 package org.cowjumping.guiUtils;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
-
-import org.apache.log4j.Logger;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SoundSignal implements Callable {
-  private static final Logger myLogger = Logger.getLogger(SoundSignal.class);
+  private static final Logger myLogger = LogManager.getLogger();
   private byte[] mBuffer;
 
   // final static boolean block = false;

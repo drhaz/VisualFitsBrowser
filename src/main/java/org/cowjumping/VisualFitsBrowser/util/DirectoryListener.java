@@ -8,7 +8,8 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.guiUtils.SoundSignal;
 
 /**
@@ -23,8 +24,7 @@ import org.cowjumping.guiUtils.SoundSignal;
 
 public class DirectoryListener implements Runnable {
 
-    final static private Logger myLogger = Logger
-            .getLogger(DirectoryListener.class);
+    final static private Logger myLogger = LogManager.getLogger();
 
     /**
      * The directory to Watch

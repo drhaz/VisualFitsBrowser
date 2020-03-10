@@ -1,33 +1,26 @@
 package org.cowjumping.VisualFitsBrowser.util;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
+import org.cowjumping.guiUtils.Preferences;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
-import org.cowjumping.guiUtils.Preferences;
-
-import javax.swing.*;
-
 public class Filelist2Latex {
 
-	private final static Logger myLogger = Logger.getLogger(Filelist2Latex.class);
+	private final static Logger myLogger = LogManager.getLogger();
 	private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
 			"HH:mm:ss");
 	private static FileBrowserPanel myFileBrowserPanel;
@@ -190,9 +183,7 @@ public class Filelist2Latex {
 	}
 
 	public static void main(String args[]) {
-		BasicConfigurator.configure();
 		Preferences.initPreferences("VisualFitsBrowserApp");
-		Logger.getRootLogger().setLevel(Level.INFO);
 		Vector<FitsFileEntry> fileList = new Vector<FitsFileEntry>();
 
 		fileList.add(new FitsFileEntry("", "filename", "Obj $ % & _ # ", null,
