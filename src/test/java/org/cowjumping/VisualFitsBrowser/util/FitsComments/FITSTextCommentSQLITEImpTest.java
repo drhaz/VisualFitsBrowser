@@ -1,10 +1,6 @@
 package org.cowjumping.VisualFitsBrowser.util.FitsComments;
 
 import junit.framework.TestCase;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 import java.io.File;
@@ -15,8 +11,7 @@ public class FITSTextCommentSQLITEImpTest extends TestCase {
 
     public void setUp() throws Exception {
         super.setUp();
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+
     }
 
     public void testClose() {

@@ -1,17 +1,15 @@
 package org.cowjumping.FitsUtils;
 
-import java.awt.Rectangle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.*;
 import java.util.Arrays;
-
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 
 public class odiCentroidSupport {
 
-    static Logger myLogger = Logger.getLogger(odiCentroidSupport.class);
+    static Logger myLogger = LogManager.getLogger();
 
     /**
      * Supporting function to translate x/y positions into array indices of a
@@ -879,8 +877,7 @@ public class odiCentroidSupport {
     // ///////////////////////////////////////
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+
         RadialProfile p = new RadialProfile();
         p.radius = new float[]{1f, 2f, 3f, 4f, 5f, 6f};
         p.value = new float[]{3f, 4f, 5f, 6.2f, 7.01f, 8f};

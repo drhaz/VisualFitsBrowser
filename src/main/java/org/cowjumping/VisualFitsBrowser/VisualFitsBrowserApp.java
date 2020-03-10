@@ -1,34 +1,15 @@
 package org.cowjumping.VisualFitsBrowser;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.Box;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JProgressBar;
-import javax.swing.JSeparator;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.cli.*;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Response;
 import org.astrogrid.samp.client.AbstractMessageHandler;
@@ -40,13 +21,29 @@ import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.donut.DonutDisplayFrame;
 import org.cowjumping.donut.pyDonutBridge;
-import org.cowjumping.guiUtils.*;
+import org.cowjumping.guiUtils.GUIConsts;
+import org.cowjumping.guiUtils.OSXAdapter;
+import org.cowjumping.guiUtils.Preferences;
+import org.cowjumping.guiUtils.SAMPUtilities;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
 
 
-    private final static Logger myLogger = Logger.getLogger(VisualFitsBrowserApp.class);
+    private final static Logger myLogger = LogManager.getLogger();
 
     private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
             + ".WindowLocation";
@@ -658,7 +655,10 @@ public class VisualFitsBrowserApp extends JFrame {
 
             if (cmd.hasOption("debug")) {
 
-                Logger.getRootLogger().setLevel(Level.DEBUG);
+                LoggerContext context = (LoggerContext) LogManager.getContext(false);
+                Configuration config = context.getConfiguration();
+                LoggerConfig rootConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+                rootConfig.setLevel(Level.DEBUG);
             }
 
         } catch (Exception e) {
@@ -670,8 +670,12 @@ public class VisualFitsBrowserApp extends JFrame {
 
     public static void main(String[] args) {
 
-        PropertyConfigurator.configure(
-                VisualFitsBrowserApp.class.getClassLoader().getResourceAsStream("resources/VisualFitsBrowser.log4j"));
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        try {
+            context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader().getResource("resources/VisualFitsBrowser.log4j").toURI());
+        } catch (URISyntaxException e) {
+            myLogger.warn ("Error while configuring log4j 2", e);
+        }
 
         parseArgs(args);
 

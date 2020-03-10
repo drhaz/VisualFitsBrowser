@@ -38,7 +38,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryListener;
@@ -55,7 +56,7 @@ import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
 
-    private final static Logger log = Logger.getLogger(FileBrowserPanel.class.getCanonicalName());
+    private final static Logger log = LogManager.getLogger();
 
     String mRootDirectoryString = "/";
 
@@ -452,8 +453,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             Color c = Color.black;
 
             Font f = renderer.getFont().deriveFont(Font.PLAIN);
-
-            String comparisonValue = ((String) value).trim();
+            String comparisonValue = "";
+            if (value != null) {
+                comparisonValue = ((String) value).trim();
+            }
 
             // Table sees the binned prefix rendered file name, so take this into acount here.
             if (comparisonValue.startsWith(binnedPrefix))
