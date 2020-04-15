@@ -263,7 +263,7 @@ public class SAMPUtilities {
         if (pathToBinary != null)
 
             try {
-                Runtime.getRuntime().exec(pathToBinary);
+                Runtime.getRuntime().exec(pathToBinary + " -samp connect");
             } catch (IOException e) {
                 log.error("While launching ds9: ", e);
             }
