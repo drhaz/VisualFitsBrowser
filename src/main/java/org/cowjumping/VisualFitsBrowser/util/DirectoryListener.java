@@ -10,6 +10,7 @@ import java.util.concurrent.Semaphore;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.SoundSignal;
 
 /**
@@ -99,7 +100,9 @@ public class DirectoryListener implements Runnable {
             long lastModified = myDirectory.lastModified();
 
             // Step 1: Check if directory has new files to look for in it
-            if (lastModified > timeOfLastDirectoryRead) {
+            boolean ignorelastModified = Boolean.parseBoolean(Preferences.thePreferences.getProperty("directorylistener.ignorediremodified","False"));
+
+            if ( (lastModified > timeOfLastDirectoryRead) || ignorelastModified) {
                 Vector<File> newFiles = getNewFilesSinceChange();
 
                 // If new directories showed up, check if they are complete, or if we
@@ -149,7 +152,9 @@ public class DirectoryListener implements Runnable {
             newFileQueue.clear();
 
             try {
-                Thread.sleep(700);
+                // If we read the entire directory every iteration we better throttle down the frequency, or this will
+                // get a bit CPU heavy.
+                Thread.sleep(ignorelastModified ? 2000 : 700);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
