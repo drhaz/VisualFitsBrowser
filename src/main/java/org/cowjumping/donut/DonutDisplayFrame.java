@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 
 public class DonutDisplayFrame extends JFrame implements DonutBridgeResultListener {
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(DonutDisplayFrame.class);
 
     private static DonutDisplayFrame singleInstance = null;
 

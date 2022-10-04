@@ -20,7 +20,7 @@ import java.util.Vector;
 
 public class Filelist2Latex {
 
-	private final static Logger myLogger = LogManager.getLogger();
+	private final static Logger myLogger = LogManager.getLogger(Filelist2Latex.class);
 	private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
 			"HH:mm:ss");
 	private static FileBrowserPanel myFileBrowserPanel;

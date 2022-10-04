@@ -33,7 +33,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
     private JScrollPane p = null;
     private JTextArea myTextArea = null;
     private JTextField searchInput = null;
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(FITSHeaderInspection.class);
 
     final static public int MODE_FITSHEADER = 0;
     final static public int MODE_LOGFILE = 1;

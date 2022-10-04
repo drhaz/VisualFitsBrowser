@@ -31,7 +31,7 @@ public class StripChartComponent extends org.cowjumping.guiUtils.CooSysComponent
 	 */
 	protected boolean inExposure = false;
 
-	private final static Logger myLogger =LogManager.getLogger();
+	private final static Logger myLogger =LogManager.getLogger(StripChartComponent.class);
 
 	LinkedList<StripChartDataPoint> dataPoints = new LinkedList<StripChartDataPoint>();
 
@@ -471,7 +471,7 @@ class LinearKalmanFilter {
 	double currentX = 0;
 	double currentVar = 0;
 
-	final static Logger myLogger = LogManager.getLogger();
+	final static Logger myLogger = LogManager.getLogger(LinearKalmanFilter.class);
 
 	public LinearKalmanFilter() {
 

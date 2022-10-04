@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
  */
 
 public class SAMPUtilities {
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(SAMPUtilities.class);
     private static HubConnector sampHubConnector = null;
     private static Hub theHub = null;
 

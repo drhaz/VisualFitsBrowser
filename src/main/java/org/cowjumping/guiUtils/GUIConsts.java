@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class GUIConsts {
 
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger(GUIConsts.class);
 	public static final Font LargeCountDownFont = new Font("Helvetica", Font.PLAIN, 48);
 	public static final Font TitleFont = new Font("Helvetica", Font.PLAIN, 24);
 	public static final Font LargeFont = new Font("Helvetica", Font.PLAIN, 20);
@@ -174,11 +174,7 @@ public class GUIConsts {
 
 	public static void setLookAndFeel() {
 
-		try {
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-			log.error ("While setting look & feel", e);
-		}
+
 
     }
 

@@ -11,7 +11,7 @@ import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
 public class FITSTextCommentImpl implements FitsCommentInterface {
 
-	private final static Logger log = LogManager.getLogger();
+	private final static Logger log = LogManager.getLogger(FITSTextCommentImpl.class);
 
 	private Properties readProperties(FitsFileEntry entry) {
 		Properties myProps = new Properties();

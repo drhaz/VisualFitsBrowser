@@ -31,7 +31,7 @@ import org.cowjumping.guiUtils.VariableGridLayout;
  */
 
 public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger(ImageToolBoxPanel.class);
 
 	/**
 	 * reference to file list

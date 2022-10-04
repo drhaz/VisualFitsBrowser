@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SoundSignal implements Callable {
-  private static final Logger myLogger = LogManager.getLogger();
+  private static final Logger myLogger = LogManager.getLogger(SoundSignal.class);
   private byte[] mBuffer;
 
   // final static boolean block = false;

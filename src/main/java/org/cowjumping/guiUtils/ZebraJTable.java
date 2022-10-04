@@ -4,10 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
+import java.util.Vector;
 
 
 public class ZebraJTable extends javax.swing.JTable {
-    private static final Logger myLogger = LogManager.getLogger();
+    private static final Logger myLogger = LogManager.getLogger(ZebraJTable.class);
     private java.awt.Color rowColors[] = new java.awt.Color[2];
     private boolean drawStripes = false;
 
@@ -43,7 +44,7 @@ public class ZebraJTable extends javax.swing.JTable {
 
     public ZebraJTable(java.util.Vector<?> rowData,
 	    java.util.Vector<?> columnNames) {
-	super (rowData, columnNames);
+	super ((Vector<? extends Vector>) rowData, (Vector<?>) columnNames);
     }
 
     /** Add stripes between cells and behind non-opaque cells. */

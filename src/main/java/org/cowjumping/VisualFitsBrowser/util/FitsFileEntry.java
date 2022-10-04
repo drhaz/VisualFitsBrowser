@@ -21,7 +21,7 @@ import java.util.Vector;
 
 public class FitsFileEntry {
 
-	private final static Logger myLogger = LogManager.getLogger();
+	private final static Logger myLogger = LogManager.getLogger(FitsFileEntry.class);
 
 
 	public enum TRANSFERSTATUS {

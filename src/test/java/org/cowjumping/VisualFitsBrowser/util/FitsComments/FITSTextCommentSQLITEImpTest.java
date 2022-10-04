@@ -18,9 +18,9 @@ public class FITSTextCommentSQLITEImpTest extends TestCase {
         try {
             FitsFileEntry e = null;
             FITSTextCommentSQLITEImp db = new FITSTextCommentSQLITEImp(TESTDATABASENAME);
-            db.setBackgroundOperation(false);
             assertTrue(db != null);
             assertTrue(db.isConnected());
+            db.setBackgroundOperation(false);
 
             assertTrue(db.writeComment(FitsFileEntry.createFromComment("test1.fits.fz", "comment1")));
 

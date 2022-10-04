@@ -26,7 +26,7 @@ import java.util.Properties;
 
 public class Preferences {
 
-	final static private Logger myLogger = LogManager.getLogger();
+	final static private Logger myLogger = LogManager.getLogger(Preferences.class);
 	private String FileName;
 
 	private Properties myProperties = null;

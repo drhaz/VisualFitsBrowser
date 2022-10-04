@@ -7,11 +7,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.geom.Point2D;
 import java.io.*;
+import java.time.Instant;
 import java.util.*;
 
 public class QuickHeaderInfo {
 
-    private static final Logger myLogger = LogManager.getLogger();
+    private static final Logger myLogger = LogManager.getLogger(QuickHeaderInfo.class);
     final static int FITSBLOCKSIZE = 2880;
 
     /**
@@ -123,7 +124,10 @@ public class QuickHeaderInfo {
         if (fc != null) {
             Calendar c = null;
             try {
-                 c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
+                java.util.Date date = Date.from( Instant.parse( fc ));
+                c = Calendar.getInstance();
+                c.setTime(date);
+                // c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
             } catch (Exception e) {
                 myLogger.warn("While converting DATE-OBS: ", e);
                 c = null;

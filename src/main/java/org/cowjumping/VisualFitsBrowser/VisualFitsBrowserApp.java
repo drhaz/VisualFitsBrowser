@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 public class VisualFitsBrowserApp extends JFrame {
 
 
-    private final static Logger myLogger = LogManager.getLogger();
+    private final static Logger myLogger = LogManager.getLogger(VisualFitsBrowserApp.class);
 
     private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
             + ".WindowLocation";
@@ -673,7 +673,7 @@ public class VisualFitsBrowserApp extends JFrame {
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
         try {
             context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader().getResource("resources/VisualFitsBrowser.log4j").toURI());
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             myLogger.warn ("Error while configuring log4j 2", e);
         }
 

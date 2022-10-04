@@ -11,7 +11,7 @@ public class NumberFormatterCellRenderer extends DefaultTableCellRenderer {
 
   private final String formatText;
   private final String smallText;
-  private final Logger myLogger = LogManager.getLogger();
+  private final Logger myLogger = LogManager.getLogger(NumberFormatterCellRenderer.class);
 
   public NumberFormatterCellRenderer(String decimalFormat) {
     this (decimalFormat, null);

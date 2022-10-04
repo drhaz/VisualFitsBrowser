@@ -15,7 +15,7 @@ import java.util.Enumeration;
 
 public class MultiSpanCellTable extends JTable {
 
-    private static final Logger myLogger = LogManager.getLogger();
+    private static final Logger myLogger = LogManager.getLogger(MultiSpanCellTable.class);
 
     public MultiSpanCellTable(TableModel model) {
 	super (model);

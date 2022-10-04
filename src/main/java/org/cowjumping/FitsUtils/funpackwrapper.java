@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 
 public class funpackwrapper {
 
-    private static Logger log = LogManager.getLogger();
+    private static Logger log = LogManager.getLogger(funpackwrapper.class);
 
     private static String execLocation = null;
     private static String tempDirectory = null;
