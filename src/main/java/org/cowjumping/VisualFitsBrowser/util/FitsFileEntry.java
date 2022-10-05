@@ -10,6 +10,7 @@ import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileFilter;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Vector;
 
@@ -112,7 +113,7 @@ public class FitsFileEntry {
 	public Float ExpTime;
 	public float Airmass;
 	public float Focus;
-	public Date DateObs;
+	public LocalDateTime DateObs;
 	public Boolean Selected;
 	public boolean isBinned = false;
 	public String FName;
@@ -140,18 +141,9 @@ public class FitsFileEntry {
 		Float expTime = Float.NaN;
 
 		String ObjName = "n/a";
-		Date DateObs = null;
+		LocalDateTime DateObs = null;
 		String Filter = "n/a";
 		int ponTime = 0;
-
-//		if (!(ArchiveMode || !ODIMode)) {
-//			if (!f.exists() || !new File(f.getAbsoluteFile() + "/temp/.finished").exists()) {
-//				myLogger.debug("rejecting pending file " + f.getAbsolutePath());
-//				return null;
-//			}
-//		} else {
-//			myLogger.debug("Accepting image unfinished image candidate since in archive | noODI mode");
-//		}
 
 		if (f.exists()) {
 
@@ -161,7 +153,6 @@ public class FitsFileEntry {
 				expTime = QuickHeaderInfo.getExpTime(fitsHeader);
 				ObjName = QuickHeaderInfo.getObject(fitsHeader);
 				Filter = QuickHeaderInfo.getFilter(fitsHeader);
-				ponTime = QuickHeaderInfo.getPONTime(fitsHeader);
 				DateObs = QuickHeaderInfo.getDateObs(fitsHeader, true);
 
 			} else {
@@ -173,7 +164,7 @@ public class FitsFileEntry {
 					f.getName(), ObjName, ot, //
 					expTime, //
 					Filter, //
-					DateObs != null ? DateObs : new Date(), //
+					DateObs != null ? DateObs : LocalDateTime.now(), //
 					false);
 
 			entry.DirectoryFile = f;
@@ -238,7 +229,7 @@ public class FitsFileEntry {
 	}
 
 	public FitsFileEntry(String rootPath, String fname, String ObjName, OBSTYPE obsType, Float expTime,
-						 String Filter, Date dateObs, boolean selected) {
+						 String Filter, LocalDateTime dateObs, boolean selected) {
 		super();
 		this.RootPath = rootPath;
 		this.FName = fname;

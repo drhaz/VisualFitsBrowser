@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -187,7 +188,7 @@ public class Filelist2Latex {
 		Vector<FitsFileEntry> fileList = new Vector<FitsFileEntry>();
 
 		fileList.add(new FitsFileEntry("", "filename", "Obj $ % & _ # ", null,
-				3.2f, "G\'", new Date(), false));
+				3.2f, "G\'", LocalDateTime.now(), false));
 
 		writeFileList2Latex("This is a title ", fileList, "/tmp/pODILogfile.tex");
 
@@ -359,7 +360,8 @@ class myComp implements Comparator<FitsFileEntry> {
 
 
 	public int compare(FitsFileEntry o1, FitsFileEntry o2) {
-		return (int) (o1.DateObs.getTime() - o2.DateObs.getTime());
+		return (int) (o1.DateObs.compareTo (o2.DateObs));
+
 	}
 
 }

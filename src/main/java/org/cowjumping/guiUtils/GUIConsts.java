@@ -174,7 +174,11 @@ public class GUIConsts {
 
 	public static void setLookAndFeel() {
 
-
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+			log.error ("While setting look & feel", e);
+		}
 
     }
 
