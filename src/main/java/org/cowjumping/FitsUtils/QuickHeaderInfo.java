@@ -7,11 +7,15 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.geom.Point2D;
 import java.io.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
 public class QuickHeaderInfo {
 
-    private static final Logger myLogger = LogManager.getLogger();
+    private static final Logger myLogger = LogManager.getLogger(QuickHeaderInfo.class);
     final static int FITSBLOCKSIZE = 2880;
 
     /**
@@ -117,19 +121,21 @@ public class QuickHeaderInfo {
         return retVal;
     }
 
-    public static Date getDateObs(Vector<String> header, boolean MST) {
+    public static LocalDateTime getDateObs(Vector<String> header, boolean MST) {
         String fc = getStringValue(header, "DATE-OBS");
-
+        System.out.println("Rading dateobs stage 1 " + fc);
         if (fc != null) {
-            Calendar c = null;
+            java.time.LocalDateTime ldt = null;
             try {
-                 c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
+                ldt = java.time.LocalDateTime.parse ( fc );
+                System.out.println("Rading dateobs stage 2 "  + fc + " " + ldt );
+
+                // c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
             } catch (Exception e) {
-                myLogger.warn("While converting DATE-OBS: ", e);
-                c = null;
+                myLogger.error("While converting DATE-OBS: ", e);
+                ldt = null;
             } finally {
-                if (c != null)
-                    return c.getTime();
+                return ldt;
 
             }
         }

@@ -37,7 +37,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
     /**
      * Internal logging capability for this class
      */
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(ImageContainer.class);
 
 	/*
      * Image container

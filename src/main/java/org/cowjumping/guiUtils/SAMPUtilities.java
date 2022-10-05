@@ -32,14 +32,14 @@ import java.util.concurrent.Executors;
  */
 
 public class SAMPUtilities {
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(SAMPUtilities.class);
     private static HubConnector sampHubConnector = null;
     private static Hub theHub = null;
 
     /* ds9 specific declarations */
     private static String ds9binary = null;
     private final static String[] ds9binarycandidates = {"/usr/local/bin/ds9",
-            "/usr/bin/ds9"};
+            "/usr/bin/ds9", "~/bin/ds9".replaceFirst("^~", System.getProperty("user.home"))};
 
 
     static ExecutorService ds9Pool = Executors.newSingleThreadExecutor();

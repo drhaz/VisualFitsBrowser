@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 public class pyDonutBridge implements Callable<pyDonutBridge> {
 
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(pyDonutBridge.class);
     private final boolean intrafocus;
     private final int w;
     private final int x;

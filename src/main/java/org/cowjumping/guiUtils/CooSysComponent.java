@@ -25,7 +25,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
      *
      */
     private final static long serialVersionUID = 1L;
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(CooSysComponent.class);
 
     /**
      * The size of this widget in x-pixels

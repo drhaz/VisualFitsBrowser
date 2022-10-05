@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class GUIConsts {
 
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger(GUIConsts.class);
 	public static final Font LargeCountDownFont = new Font("Helvetica", Font.PLAIN, 48);
 	public static final Font TitleFont = new Font("Helvetica", Font.PLAIN, 24);
 	public static final Font LargeFont = new Font("Helvetica", Font.PLAIN, 20);

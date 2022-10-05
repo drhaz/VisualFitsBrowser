@@ -69,7 +69,7 @@ public class ZScaleSelectorComponent extends JPanel implements ChangeListener,
 	 */
 	private Vector<zScaleListener> myClients = new Vector<zScaleListener>();
 
-	private static final Logger myLogger = LogManager.getLogger();
+	private static final Logger myLogger = LogManager.getLogger(ZScaleSelectorComponent.class);
 
 	public ZScaleSelectorComponent(zScaleListener client) {
 		this(client, 230, 50);

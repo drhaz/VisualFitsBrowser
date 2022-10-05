@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
 
 
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(FITSTextCommentSQLITEImp.class);
 
     private Connection conn = null;
     private String dbURL = null;

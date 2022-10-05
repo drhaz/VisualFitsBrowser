@@ -7,7 +7,7 @@ import java.io.File;
 
 public enum OBSTYPE {
   INDEF, BIAS, DARK, DOMEFLAT, OBJECT, FOCUS, PREIMAGE;
-  final static Logger myLogger = LogManager.getLogger();
+  final static Logger myLogger = LogManager.getLogger(OBSTYPE.class);
 
   public static OBSTYPE getObstypeForFile(File f) {
     OBSTYPE ot = OBSTYPE.INDEF;

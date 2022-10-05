@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class odiCentroidSupport {
 
-    static Logger myLogger = LogManager.getLogger();
+    static Logger myLogger = LogManager.getLogger(odiCentroidSupport.class);
 
     /**
      * Supporting function to translate x/y positions into array indices of a

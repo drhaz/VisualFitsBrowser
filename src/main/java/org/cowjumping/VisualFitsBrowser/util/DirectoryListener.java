@@ -25,7 +25,7 @@ import org.cowjumping.guiUtils.SoundSignal;
 
 public class DirectoryListener implements Runnable {
 
-    final static private Logger myLogger = LogManager.getLogger();
+    final static private Logger myLogger = LogManager.getLogger(DirectoryListener.class);
 
     /**
      * The directory to Watch

@@ -3,6 +3,8 @@ package org.cowjumping.guiUtils.TableCellRenderers;
 import java.awt.Color;
 import java.awt.Component;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.swing.JLabel;
@@ -14,12 +16,10 @@ import org.cowjumping.guiUtils.GUIConsts;
 @SuppressWarnings("serial")
 public class mDateRenderer extends DefaultTableCellRenderer {
 
-	private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
-			"HH:mm:ss");
-	private final static SimpleDateFormat mShortDateFormat = new SimpleDateFormat(
-			"HH:mm");
+	private final static DateTimeFormatter mDateFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
+	private final static DateTimeFormatter mShortDateFormat = DateTimeFormatter.ofPattern("HH:mm");
 	private long diffTime;
-	private final SimpleDateFormat DateFormat;
+	private final DateTimeFormatter DateFormat;
 
 	public mDateRenderer(long diffTime, boolean shortForm) {
 		super();
@@ -33,8 +33,7 @@ public class mDateRenderer extends DefaultTableCellRenderer {
 		Component comp = super.getTableCellRendererComponent(table, value,
 				isSelected, hasFocus, row, column);
 
-		((JLabel) comp).setText((value == null) ? "n/a" : DateFormat
-				.format(value));
+		((JLabel) comp).setText((value == null) ? "n/a" : ((LocalDateTime) (value)).format(DateFormat));
 		((JLabel) comp).setHorizontalAlignment(JLabel.RIGHT);
 
 		String text = ((JLabel) comp).getText();

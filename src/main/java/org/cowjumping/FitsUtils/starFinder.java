@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 
 public class starFinder implements Callable<starFinder> {
 
-	private final static Logger myLogger = LogManager.getLogger();
+	private final static Logger myLogger = LogManager.getLogger(starFinder.class);
 
 	/** The bias (overscan) level of the image */
 	double biasLevel = 0;

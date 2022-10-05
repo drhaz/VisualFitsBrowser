@@ -22,7 +22,7 @@ import java.awt.geom.Point2D;
 @SuppressWarnings("serial")
 public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent {
 
-    private final static Logger myLogger = LogManager.getLogger();
+    private final static Logger myLogger = LogManager.getLogger(RadialPlotComponent.class);
 
     RadialProfile myProfile = null;
 

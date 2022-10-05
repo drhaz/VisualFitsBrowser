@@ -35,7 +35,7 @@ public class GuideStarDisplayComponent extends
 		org.cowjumping.guiUtils.CooSysComponent implements MouseMotionListener,
 		zScaleListener {
 
-	private final static Logger myLogger = LogManager.getLogger();
+	private final static Logger myLogger = LogManager.getLogger(GuideStarDisplayComponent.class);
 
 	public ImageContainer gs = null;
 

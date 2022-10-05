@@ -56,7 +56,7 @@ import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 @SuppressWarnings("serial")
 public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver {
 
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(FileBrowserPanel.class);
 
     String mRootDirectoryString = "/";
 
