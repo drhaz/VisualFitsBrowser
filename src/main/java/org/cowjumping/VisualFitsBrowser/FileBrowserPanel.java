@@ -232,7 +232,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             mTable.setModel(mTableDataModel);
             mTable.setFillsViewportHeight(true);
             mTable.setRowSorter(new TableRowSorter<FitsViewerTableModel>(mTableDataModel));
-            // Start out with a sort order where the newest iamge is on top of
+            // Start out with a sort order where the newest image is on top of
             // the list.
             mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
             mTable.getRowSorter().toggleSortOrder(FitsViewerTableModel.DATEOBS_COL);
@@ -259,7 +259,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
 
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(400);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(200);
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(400);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FILTER_COL).setPreferredWidth(100);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
@@ -836,10 +836,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         final static int FILTER_COL = 3;
         final static int AIRMASS_COL = 4;
         final static int DATEOBS_COL = 5;
-        final static int USERCOMMENT_COL = 6;
+
+        final static int EXTRA_COL = 6;
+        final static int USERCOMMENT_COL = 7;
 
 
-        boolean displayExtra = false;
+        boolean displayExtra = true;
 
         FitsViewerTableModel() {
             super();
@@ -892,6 +894,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 if (col == AIRMASS_COL)
                     return entry.Airmass;
+
+                if (col == EXTRA_COL)
+                    return entry.ExtraKeyword;
 
 
             }

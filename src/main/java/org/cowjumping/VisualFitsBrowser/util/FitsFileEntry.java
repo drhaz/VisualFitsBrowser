@@ -71,7 +71,7 @@ public class FitsFileEntry {
 			boolean good_file = false;
 			good_file = file.exists() && //
 					// || //
-					(file.getName().matches(".*\\.fits$") || file.getName().matches(".*\\.fits\\.fz$"));
+					(file.getName().matches(".*\\.fits?$") || file.getName().matches(".*\\.fits\\.fz$"));
 
 			if (!good_file) {
 				//myLogger.debug("Reject file " + file.getAbsolutePath());
@@ -131,7 +131,7 @@ public class FitsFileEntry {
 	public boolean isValidReadout = true;
 
 	public static FitsFileEntry createFromFile(File f) {
-		return createFromFile(f, null);
+		return createFromFile(f, "CONFMODE");
 	}
 
 	public static FitsFileEntry createFromFile(File f, String extraKey) {

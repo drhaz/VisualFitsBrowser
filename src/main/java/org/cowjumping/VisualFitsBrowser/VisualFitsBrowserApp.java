@@ -472,7 +472,7 @@ public class VisualFitsBrowserApp extends JFrame {
                 // boolean heart = true;
                 while (true) {
 
-                    boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
+                    boolean ds9Status = SAMPUtilities.isClientAvailable(SAMPUtilities.DS9IDString);
                     ds9Label.setEnabled(ds9Status);
 
                     try {
