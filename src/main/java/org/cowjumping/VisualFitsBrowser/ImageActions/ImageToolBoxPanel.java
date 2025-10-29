@@ -57,7 +57,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 	private static final String INFOPANEL = "INFOVIEW";
 	private static final String IMEXAMPANEL = "IMEXAMVIEW";
-	private static final String DONUTPANEL = "DONUTVIEW";
+	//private static final String DONUTPANEL = "DONUTVIEW";
 
 	public ImageToolBoxPanel(FileBrowserPanel fbp) {
 
@@ -72,7 +72,6 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 		myMultiPanel = new MultiFlickPanel();
 		this.add(myMultiPanel, BorderLayout.EAST);
-
 
 		this.fillButtonPanel(ButtonPanel);
 		this.fillMultiPanelView();
@@ -109,21 +108,20 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		}
 	}
 
+	public void pushImageBufferSelection(Vector<ImageContainer> imageList) {
+		if (this.myMultiPanel.getTopComponent().equals(IMEXAMPANEL) && imageList != null && imageList.size() == 1) {
 
-	public void pushImageBufferSelection (Vector<ImageContainer> imageList) {
-	    if (this.myMultiPanel.getTopComponent().equals(IMEXAMPANEL) && imageList != null && imageList.size() == 1) {
-	        
 			if (VisualFitsBrowserApp.lastimexamKey.equalsIgnoreCase("r")) {
 				this.myImexamDisplay.setOneDPlotMode(OneDPlotModes.RADIAL);
 			} else if (VisualFitsBrowserApp.lastimexamKey.equalsIgnoreCase("x")) {
 				this.myImexamDisplay.setOneDPlotMode(OneDPlotModes.LINE_X);
-			}	
+			}
 
 			this.myImexamDisplay.setImageContainer(imageList);
-	        return;
-        }
+			return;
+		}
 
-    }
+	}
 
 	/**
 	 * Create the Button Panel context for VisualFitsBrowser use
@@ -155,7 +153,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		});
 
 		JButton imexamDS9 = new JButton("Imexam");
-        imexamDS9.addActionListener(new ActionListener() {
+		imexamDS9.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
 
@@ -165,7 +163,6 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 			}
 
 		});
-
 
 		GridLayout ButtonPanelLayout = new VariableGridLayout(12, 1);
 		ButtonPanelLayout.setColumns(1);
@@ -182,9 +179,9 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 		ButtonPanel.add(ImageTitleLabel);
 
 		ButtonPanel.add(generateHeader);
-        ButtonPanel.add(imexamDS9);
+		ButtonPanel.add(imexamDS9);
 
-		ButtonPanel.add (Box.createVerticalGlue ());
+		ButtonPanel.add(Box.createVerticalGlue());
 
 		ButtonPanel.setMaximumSize(ButtonPanel.getMinimumSize());
 

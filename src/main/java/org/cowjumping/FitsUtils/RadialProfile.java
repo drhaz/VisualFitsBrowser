@@ -1,11 +1,11 @@
 package org.cowjumping.FitsUtils;
 
 import java.awt.Rectangle;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cowjumping.guiUtils.RadialPlotComponent;
 import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
+
 
 public class RadialProfile {
 
@@ -62,10 +62,10 @@ public class RadialProfile {
 
     Rectangle boundary = null;
     if (plotMode == OneDPlotModes.RADIAL) {
-      boundary =new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2);
+      boundary = new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2);
     } else if (plotMode == OneDPlotModes.LINE_X) {
       int y = (int) Math.round(this.ycenter);
-      boundary =  new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5);
+      boundary = new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5);
     } else {
       myLogger.error("update: Unsupported plot mode: " + plotMode);
       return;
@@ -86,7 +86,7 @@ public class RadialProfile {
    */
   public void update(double xcenter, double ycenter, ImageContainer gs,
       Rectangle boundary) {
-    update (xcenter,ycenter, gs, boundary, Double.NEGATIVE_INFINITY, OneDPlotModes.RADIAL);
+    update(xcenter, ycenter, gs, boundary, Double.NEGATIVE_INFINITY, OneDPlotModes.RADIAL);
   }
 
   public void update(double xcenter, double ycenter, ImageContainer gs,
@@ -237,7 +237,7 @@ public class RadialProfile {
           double t2 = (yy - cY) * gs.getBinningY();
 
           if (plotMode == OneDPlotModes.LINE_X) {
-            
+
             radius[count] = (float) Math.abs(t1);
           } else if (plotMode == OneDPlotModes.RADIAL) {
             radius[count] = (float) Math.sqrt(t1 * t1 + t2 * t2);

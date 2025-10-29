@@ -94,7 +94,7 @@ public class zScaleTransformOp implements BufferedImageOp {
 	public BufferedImage filter(BufferedImage src, BufferedImage dst) {
 		int width = src.getWidth();
 		int height = src.getHeight();
-		int type = src.getType();
+		//int type = src.getType();
 		WritableRaster srcRaster = src.getRaster();
 
 		if (dst == null)

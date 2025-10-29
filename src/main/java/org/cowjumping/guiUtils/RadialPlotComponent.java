@@ -40,9 +40,9 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
     Color CooSys = Color.white;
     Color Point = Color.yellow;
 
-    private double fwhm;
-    private double peak;
-    private double sky;
+    private double fwhm = 0;
+    private double peak = 0;
+    private double sky = 0;
 
     private boolean plotRadialFit = true;
 

@@ -396,7 +396,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void setDATASEC_Y(int i) {
 
-        MetaInfo.put(Header.DATASEC_Y.hash, new Integer(i));
+        MetaInfo.put(Header.DATASEC_Y.hash, Integer.valueOf(i));
 
     }
 
@@ -415,7 +415,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void setDATASEC_X(int i) {
 
-        MetaInfo.put(Header.DATASEC_X.hash, new Integer(i));
+        MetaInfo.put(Header.DATASEC_X.hash, Integer.valueOf(i));
 
     }
 
@@ -438,7 +438,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void setWindow_Offset_X(short windowOffsetX) {
 
-        MetaInfo.put(Header.WINDOW_X.hash, new Short(windowOffsetX));
+        MetaInfo.put(Header.WINDOW_X.hash,  Short.valueOf(windowOffsetX));
 
     }
 
@@ -457,16 +457,16 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void setWindow_Offset_Y(short windowOffsetY) {
 
-        MetaInfo.put(Header.WINDOW_Y.hash, new Short(windowOffsetY));
+        MetaInfo.put(Header.WINDOW_Y.hash,  Short.valueOf(windowOffsetY));
 
     }
 
     public void setBinningX(short bX) {
-        MetaInfo.put(Header.BINNING_X.hash, new Short(bX));
+        MetaInfo.put(Header.BINNING_X.hash, Short.valueOf(bX));
     }
 
     public void setBinningY(short bY) {
-        MetaInfo.put(Header.BINNING_Y.hash, new Short(bY));
+        MetaInfo.put(Header.BINNING_Y.hash, Short.valueOf(bY));
     }
 
     public short getBinningX() {
@@ -505,15 +505,15 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
         if (o == null) {
 
-            return new Double(0);
+            return  Double.valueOf(0);
 
         }
 
-        return new Double(((Float) o).doubleValue());
+        return  Double.valueOf(((Float) o).doubleValue());
     }
 
     public void setRA(Double ra) {
-        Float f = new Float(ra);
+        Float f =  Float.valueOf( ra.floatValue());
         MetaInfo.put(Header.RA.hash, f);
 
     }
@@ -529,17 +529,17 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         }
 
 
-        return new Double( ((Float) o).doubleValue());
+        return Double.valueOf( ((Float) o).doubleValue());
     }
 
     public void setDec(Double dec) {
 
-        MetaInfo.put(Header.DEC.hash, new Float(dec));
+        MetaInfo.put(Header.DEC.hash,  Float.valueOf(dec.floatValue()));
 
     }
 
     public void setRotOffset(Float rot) {
-        MetaInfo.put(Header.ROTOFFSET.hash, new Float(rot));
+        MetaInfo.put(Header.ROTOFFSET.hash,  Float.valueOf(rot.floatValue()));
 
     }
 
@@ -571,7 +571,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
 
     public void setEquinox(Float eqnx) {
 
-        MetaInfo.put(Header.EQUINOX.hash, new Float(eqnx));
+        MetaInfo.put(Header.EQUINOX.hash, Float.valueOf(eqnx.floatValue()));
 
     }
 

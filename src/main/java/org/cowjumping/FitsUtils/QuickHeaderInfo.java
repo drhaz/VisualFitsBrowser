@@ -7,10 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.geom.Point2D;
 import java.io.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 
 public class QuickHeaderInfo {
@@ -188,7 +185,8 @@ public class QuickHeaderInfo {
                 myLogger.error("Error while reading in logfile: " + LogFile.getAbsolutePath(), e);
                 return retVal;
             } finally {
-                scanner.close();
+                if (scanner != null)
+                    scanner.close();
                 retVal = text.toString();
             }
 
