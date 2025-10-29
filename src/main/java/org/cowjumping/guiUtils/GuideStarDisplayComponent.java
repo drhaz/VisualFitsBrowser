@@ -90,7 +90,7 @@ public class GuideStarDisplayComponent extends
 	/** Color of the current position marker */
 	public final static Color MarkerColor_Good = Color.green;
 	public final static Color MarkerColor_Bad = Color.orange;
-	private BufferedImage lookupImage;
+	//private BufferedImage lookupImage;
 
 	public double DonutRadius = 0;
 
@@ -260,9 +260,9 @@ public class GuideStarDisplayComponent extends
 		if (forwardTransform == null)
 			return;
 
-		g.setColor(this.MarkerColor_Good);
+		g.setColor(GuideStarDisplayComponent.MarkerColor_Good);
 
-		g.setColor(this.MarkerColor_Good);
+		g.setColor(GuideStarDisplayComponent.MarkerColor_Good);
 		// draw the current center
 		if (currentCenter.getX() > 0 && currentCenter.getY() > 0) {
 			centerOnScreen = forwardTransform.transform(currentCenter, null);
@@ -483,12 +483,7 @@ public class GuideStarDisplayComponent extends
 			for (int ii = 0; ii < outData.length; ii++) {
 				outData[ii] = (short) Math.round(db.getElemFloat(ii));
 			}
-
-			if (outData == null) {
-				myLogger.warn("autoSetExtraZOffset: got a null pointer from RawImage data!");
-				return;
-			}
-
+			
 			ImageContainer tempgs = new ImageContainer();
 			tempgs.setImage(outData, RawImage.getWidth(), RawImage.getHeight());
 			odiCentroidSupport.findSkyandPeak(tempgs, 3, 1);

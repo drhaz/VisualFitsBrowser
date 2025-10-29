@@ -7,10 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.geom.Point2D;
 import java.io.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 
 public class QuickHeaderInfo {
@@ -123,9 +120,11 @@ public class QuickHeaderInfo {
 
     public static LocalDateTime getDateObs(Vector<String> header, boolean MST) {
         String fc = getStringValue(header, "DATE-OBS");
-        System.out.println("Rading dateobs stage 1 " + fc);
+        System.out.println("Reading dateobs stage 1 " + fc);
         if (fc != null) {
             java.time.LocalDateTime ldt = null;
+            if (fc.endsWith(" NOGPS"))
+                fc = fc.substring(0,fc.lastIndexOf(" NOGPS"));
             try {
                 ldt = java.time.LocalDateTime.parse ( fc );
                 System.out.println("Rading dateobs stage 2 "  + fc + " " + ldt );
@@ -186,7 +185,8 @@ public class QuickHeaderInfo {
                 myLogger.error("Error while reading in logfile: " + LogFile.getAbsolutePath(), e);
                 return retVal;
             } finally {
-                scanner.close();
+                if (scanner != null)
+                    scanner.close();
                 retVal = text.toString();
             }
 

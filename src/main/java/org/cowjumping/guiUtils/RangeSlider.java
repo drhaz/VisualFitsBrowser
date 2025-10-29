@@ -408,7 +408,7 @@ public class RangeSlider extends JComponent implements MouseListener,
     public void mouseDragged (MouseEvent e) {
 	int w = getSize ().width;
 	int x = e.getX ();
-	int y = e.getY ();
+	//int y = e.getY ();
 
 	// move entire range
 	if (minSlide && maxSlide) {

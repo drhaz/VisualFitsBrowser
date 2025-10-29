@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
+
+
 /**
  * Tools to use ds9 via SAMP. This is mostly concerning interaction with ds9, but can easilly be expanded to
  * collaborate with other SAMP clients.
@@ -32,6 +34,8 @@ import java.util.concurrent.Executors;
  */
 
 public class SAMPUtilities {
+
+    final public static String DS9IDString = "ds9";
     private final static Logger log = LogManager.getLogger(SAMPUtilities.class);
     private static HubConnector sampHubConnector = null;
     private static Hub theHub = null;
@@ -240,7 +244,7 @@ public class SAMPUtilities {
     }
 
     public static void getDS9ImageCutout (String callbackIdentifier, int centerx, int centery, int width) {
-        log.debug (String.format("SAMP: requesting iamge cutout from ds9 at coordinate %d %d, width %d",centerx,centery,width));
+        log.debug (String.format("SAMP: requesting image cutout from ds9 at coordinate %d %d, width %d",centerx,centery,width));
         int llx = centerx - width/2;
         int lly = centery - width/2;
         sendCallbackDS9 (String.format("data image %d %d %d %d no", llx,lly, width, width), callbackIdentifier);
@@ -303,13 +307,15 @@ public class SAMPUtilities {
                 for (String client : clients) {
 
                     String clientName = getHubConnector().getConnection().getMetadata(client).getName();
-
+                    log.info ("Client name: " + clientName);
                     if (clientName != null) {
 
                         if (clientName.contains(idContain))
                             retVal = true;
                     }
                 }
+            } else {
+                log.warn(idContain + " not available: No SAMP hub is available.");
             }
         } catch (SampException e) {
 
@@ -379,7 +385,7 @@ public class SAMPUtilities {
     public static void loadMosaicDS9(String fname, int fno) {
         log.debug("SAMP: Loading Mosiac image to ds9: " + fname);
 
-        if (!isClientAvailable("DS9")) {
+        if (!isClientAvailable(DS9IDString)) {
             JOptionPane.showMessageDialog(null,
                     "DS9 is not connected. DS9 conencts to SAMP only on startup, so if SAMP restarted, you need to restart ds9 as well.",
                     "SAMP Error", JOptionPane.ERROR_MESSAGE);
@@ -406,7 +412,7 @@ public class SAMPUtilities {
 
     public static void main(String args[]) {
 
-        System.out.println(isClientAvailable("DS9"));
+        System.out.println(isClientAvailable(DS9IDString));
         System.exit(0);
     }
 

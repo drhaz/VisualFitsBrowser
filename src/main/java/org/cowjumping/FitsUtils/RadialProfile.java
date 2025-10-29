@@ -1,9 +1,15 @@
 package org.cowjumping.FitsUtils;
 
 import java.awt.Rectangle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cowjumping.guiUtils.RadialPlotComponent;
+import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
+
 
 public class RadialProfile {
 
+  private final static Logger myLogger = LogManager.getLogger(RadialProfile.class);
   public float[] radius = null;
   public float[] value = null;
   public float[] error = null;
@@ -37,7 +43,7 @@ public class RadialProfile {
     this(0, 0);
   }
 
-  public RadialProfile( ImageContainer gs) {
+  public RadialProfile(ImageContainer gs) {
     this(0, 0);
     update(gs);
 
@@ -45,14 +51,29 @@ public class RadialProfile {
 
   /**
    * Generate a radial plot of an entire image
-
    */
-  public void update( ImageContainer gs) {
+  public void update(ImageContainer gs) {
+    this.update(gs, OneDPlotModes.RADIAL);
+  }
+
+  public void update(ImageContainer gs, OneDPlotModes plotMode) {
 
     updateCenter(gs.getCenterX(), gs.getCenterY());
-    loadFromImage(gs,
-        new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2),
-        Double.NEGATIVE_INFINITY);
+
+    Rectangle boundary = null;
+    if (plotMode == OneDPlotModes.RADIAL) {
+      boundary = new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2);
+    } else if (plotMode == OneDPlotModes.LINE_X) {
+      int y = (int) Math.round(this.ycenter);
+      boundary = new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5);
+    } else {
+      myLogger.error("update: Unsupported plot mode: " + plotMode);
+      return;
+    }
+
+    Rectangle imageFrame = new Rectangle(0, 0, gs.imageDimX, gs.imageDimY);
+    Rectangle safePixelArea = boundary.intersection(imageFrame);
+    loadFromImage(gs, safePixelArea, Double.NEGATIVE_INFINITY, plotMode);
   }
 
   /**
@@ -60,22 +81,19 @@ public class RadialProfile {
    * 
    * @param xcenter
    * @param ycenter
-
+   * 
    * @param boundary
    */
   public void update(double xcenter, double ycenter, ImageContainer gs,
       Rectangle boundary) {
-
-    updateCenter(xcenter, ycenter);
-    loadFromImage(gs, boundary, Double.NEGATIVE_INFINITY);
-
+    update(xcenter, ycenter, gs, boundary, Double.NEGATIVE_INFINITY, OneDPlotModes.RADIAL);
   }
 
   public void update(double xcenter, double ycenter, ImageContainer gs,
-      Rectangle boundary, double thres) {
+      Rectangle boundary, double thres, OneDPlotModes plotMode) {
 
     updateCenter(xcenter, ycenter);
-    loadFromImage(gs, boundary, thres);
+    loadFromImage(gs, boundary, thres, plotMode);
 
   }
 
@@ -157,44 +175,48 @@ public class RadialProfile {
 
   private void loadFromImage(ImageContainer gs, Rectangle boundary,
       double thres) {
-
-      float[] mradius = new float[boundary.width * boundary.height];
-      float[] mvalue = new float[boundary.width * boundary.height];
-
-      int n = extractRadialProfile(gs, mradius, mvalue, boundary, thres);
-      this.radius = new float[n]; System.arraycopy(mradius, 0, this.radius,0, n);
-      this.value = new float[n];  System.arraycopy(mvalue , 0, this.value ,0, n);
-
-
-
+    this.loadFromImage(gs, boundary, thres, OneDPlotModes.RADIAL);
   }
 
-  
+  private void loadFromImage(ImageContainer gs, Rectangle boundary,
+      double thres, OneDPlotModes plotMode) {
+
+    float[] mradius = new float[boundary.width * boundary.height];
+    float[] mvalue = new float[boundary.width * boundary.height];
+
+    int n = extractRadialProfile(gs, mradius, mvalue, boundary, thres, plotMode);
+    this.radius = new float[n];
+    System.arraycopy(mradius, 0, this.radius, 0, n);
+    this.value = new float[n];
+    System.arraycopy(mvalue, 0, this.value, 0, n);
+
+  }
 
   /**
    * From a given center in the image, extract the radial profile by calculating
    * distance from the center. The radius is extracted only for a window.
    * 
    *
-   *          center Y position
+   * center Y position
+   * 
    * @param radius
-   *          return value: array of radius
+   *                  return value: array of radius
    * @param value
-   *          return value: array of values
-
+   *                  return value: array of values
+   * 
    * @param threshold
-   *          minimum image value
+   *                  minimum image value
    * @return number of elements in the returned array.
    */
 
   private static int extractRadialProfile(ImageContainer gs, float[] radius, float[] value, Rectangle bounds,
-      double threshold) {
+      double threshold, OneDPlotModes plotMode) {
 
     int dimX = gs.getImageDimX();
     int dimY = gs.getImageDimY();
     double cX = gs.getCenterX();
     double cY = gs.getCenterY();
-    
+
     // Ensure boundaries are safe!
     while (bounds.width > 0 && bounds.x + bounds.width >= dimX)
       bounds.width--;
@@ -207,13 +229,20 @@ public class RadialProfile {
 
     for (int xx = bounds.x; xx < bounds.x + bounds.width; xx++) {
       for (int yy = bounds.y; yy < bounds.y + bounds.height; yy++) {
-        float v = gs.rawImageBuffer[yy * dimX + xx] ;
+        float v = gs.rawImageBuffer[yy * dimX + xx];
 
         if (v >= threshold) {
-          
+
           double t1 = (xx - cX) * gs.getBinningX();
           double t2 = (yy - cY) * gs.getBinningY();
-          radius[count] = (float) Math.sqrt(t1 * t1 + t2 * t2);
+
+          if (plotMode == OneDPlotModes.LINE_X) {
+
+            radius[count] = (float) Math.abs(t1);
+          } else if (plotMode == OneDPlotModes.RADIAL) {
+            radius[count] = (float) Math.sqrt(t1 * t1 + t2 * t2);
+          }
+
           value[count] = v;
           count++;
         }

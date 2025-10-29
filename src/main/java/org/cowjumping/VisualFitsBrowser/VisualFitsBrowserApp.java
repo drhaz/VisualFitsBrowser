@@ -65,7 +65,7 @@ public class VisualFitsBrowserApp extends JFrame {
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
     private static DonutDisplayFrame DonutFrame = null;
-    private static String lastimexamKey = null;
+    public static String lastimexamKey = null;
 
     private boolean showUtilities;
     private boolean showWavefront;
@@ -472,7 +472,7 @@ public class VisualFitsBrowserApp extends JFrame {
                 // boolean heart = true;
                 while (true) {
 
-                    boolean ds9Status = SAMPUtilities.isClientAvailable("DS9");
+                    boolean ds9Status = SAMPUtilities.isClientAvailable(SAMPUtilities.DS9IDString);
                     ds9Label.setEnabled(ds9Status);
 
                     try {
@@ -597,7 +597,7 @@ public class VisualFitsBrowserApp extends JFrame {
                 if (msg.isOK()) {
 
                     String result = (String) msg.getResult().toString();
-                    myLogger.info(String.format("Message has responderid %s, tag %s, result has value: %s", responderID, tag, result));
+                    myLogger.info(String.format("Message has responderid %s, tag %s", responderID, tag));
 
 
                     if (tag.equalsIgnoreCase("imexam"))
@@ -609,6 +609,7 @@ public class VisualFitsBrowserApp extends JFrame {
                             String y = tok.nextToken();
                             int xce = (int) Math.round(Double.parseDouble(x));
                             int yce = (int) Math.round(Double.parseDouble(y));
+                            myLogger.info(String.format("imexam response: key %s x %s y %s", key, x, y));
                             if (!key.equalsIgnoreCase("Q")) {
                                 SAMPUtilities.getDS9ImageCutout("imagecutout", xce, yce, 50);
                                 VisualFitsBrowserApp.lastimexamKey = key;
@@ -631,7 +632,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
                             mToolBoxPanel.pushImageBufferSelection(v);
                         } catch (Exception e) {
-                            myLogger.error("Something wrong with response for iexam: cannot get all the tokens " + result, e);
+                            myLogger.error("Something wrong with response for imexam: cannot get all the tokens " + result, e);
                         } finally {
                             SAMPUtilities.getDS9imexam("imexam");
                         }
@@ -653,7 +654,7 @@ public class VisualFitsBrowserApp extends JFrame {
         try {
             CommandLine cmd = parser.parse(options, args);
 
-            if (cmd.hasOption("debug")) {
+            if (cmd.hasOption("debug") || Boolean.TRUE) {
 
                 LoggerContext context = (LoggerContext) LogManager.getContext(false);
                 Configuration config = context.getConfiguration();
@@ -682,7 +683,7 @@ public class VisualFitsBrowserApp extends JFrame {
         GUIConsts.setLookAndFeel();
 
         System.out.println("VisualFitsBrowser Version " + getVersion());
-        System.out.println("(c) 2017 Daniel Harbeck, cowjumping.org");
+        System.out.println("(c) 2017-2025 Daniel Harbeck, cowjumping.org");
         System.out.println("Starting Samp Interface ...");
         initSampHub();
 
