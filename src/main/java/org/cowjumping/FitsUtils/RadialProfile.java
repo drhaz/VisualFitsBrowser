@@ -60,19 +60,20 @@ public class RadialProfile {
 
     updateCenter(gs.getCenterX(), gs.getCenterY());
 
+    Rectangle boundary = null;
     if (plotMode == OneDPlotModes.RADIAL) {
-      loadFromImage(gs,
-          new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2),
-          Double.NEGATIVE_INFINITY, plotMode);
-
+      boundary =new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2);
     } else if (plotMode == OneDPlotModes.LINE_X) {
-
       int y = (int) Math.round(this.ycenter);
-      loadFromImage(gs,
-          new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5), Double.NEGATIVE_INFINITY, plotMode);
-
+      boundary =  new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5);
+    } else {
+      myLogger.error("update: Unsupported plot mode: " + plotMode);
+      return;
     }
 
+    Rectangle imageFrame = new Rectangle(0, 0, gs.imageDimX, gs.imageDimY);
+    Rectangle safePixelArea = boundary.intersection(imageFrame);
+    loadFromImage(gs, safePixelArea, Double.NEGATIVE_INFINITY, plotMode);
   }
 
   /**
@@ -85,17 +86,14 @@ public class RadialProfile {
    */
   public void update(double xcenter, double ycenter, ImageContainer gs,
       Rectangle boundary) {
-
-    updateCenter(xcenter, ycenter);
-    loadFromImage(gs, boundary, Double.NEGATIVE_INFINITY, OneDPlotModes.RADIAL);
-
+    update (xcenter,ycenter, gs, boundary, Double.NEGATIVE_INFINITY, OneDPlotModes.RADIAL);
   }
 
   public void update(double xcenter, double ycenter, ImageContainer gs,
-      Rectangle boundary, double thres) {
+      Rectangle boundary, double thres, OneDPlotModes plotMode) {
 
     updateCenter(xcenter, ycenter);
-    loadFromImage(gs, boundary, thres);
+    loadFromImage(gs, boundary, thres, plotMode);
 
   }
 

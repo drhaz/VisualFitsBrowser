@@ -2,10 +2,10 @@ package org.cowjumping.FitsUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
 
 import java.awt.*;
 import java.util.Arrays;
-
 
 public class odiCentroidSupport {
 
@@ -103,6 +103,10 @@ public class odiCentroidSupport {
      */
 
     public static void gaussianFitFWHM(ImageContainer gs) {
+        gaussianFitFWHM(gs, OneDPlotModes.RADIAL);
+    }
+
+    public static void gaussianFitFWHM(ImageContainer gs, OneDPlotModes plotMode) {
 
         int dimX = gs.getImageDimX();
         int dimY = gs.getImageDimY();
@@ -113,20 +117,29 @@ public class odiCentroidSupport {
         float fwhm = (gs.getFWHM_X() + gs.getFWHM_Y()) / 2f;
 
         double fitRangeSigma = 0.9;
-
+        Rectangle window = null;
         // Only data in a box with side length of 1 fwhm will be used, since
         // everything else will be sky anyway.
-        Rectangle window = new Rectangle((int) (xce - fitRangeSigma * fwhm), (int) (yce - fitRangeSigma * fwhm), (int) (2 * fitRangeSigma * fwhm) + 1,
-                (int) (2 * fitRangeSigma * fwhm) + 1);
-
-        // Check boundary conditions
+        if (plotMode == OneDPlotModes.RADIAL) {
+            window = new Rectangle((int) (xce - fitRangeSigma * fwhm), (int) (yce - fitRangeSigma * fwhm),
+                    (int) (2 * fitRangeSigma * fwhm) + 1,
+                    (int) (2 * fitRangeSigma * fwhm) + 1);
+        } else if (plotMode == OneDPlotModes.LINE_X) {
+            window = new Rectangle((int) (xce - fitRangeSigma * gs.getFWHM_X()), (int) (yce - 2),
+                    (int) (2 * fitRangeSigma * gs.getFWHM_X()) + 1,
+                    5);
+        } else {
+            myLogger.error("gaussianFitFWHM: Unsupported plot mode: " + plotMode);
+            return;
+        }
+        // Chek boundary conditions
         Rectangle imageFrame = new Rectangle(0, 0, dimX, dimY);
         Rectangle safePixelArea = window.intersection(imageFrame);
 
         if (safePixelArea.width > 0 && safePixelArea.height > 0) {
             // Extract the radial profile
             RadialProfile myProfile = new RadialProfile();
-            myProfile.update(xce, yce, gs, safePixelArea, gs.getBackground() + gs.getBackNoise() * 3);
+            myProfile.update(xce, yce, gs, safePixelArea, gs.getBackground() + gs.getBackNoise() * 3, plotMode);
 
             if (myLogger.isDebugEnabled())
                 myLogger.debug("gaussianFitFWHM: getting radialprofile from window: " + safePixelArea + "containing "
@@ -241,7 +254,7 @@ public class odiCentroidSupport {
 
     private static double[] linearFitRej(RadialProfile myProfile, int nIter, double rej) {
 
-        double[] retVal = new double[]{0, 0, 0, 0};
+        double[] retVal = new double[] { 0, 0, 0, 0 };
         int maxGood = myProfile.getNElements();
 
         for (int ii = 0; ii < nIter; ii++) {
@@ -512,9 +525,9 @@ public class odiCentroidSupport {
         if (skydelta + skyband > dimX)
             myLogger.warn("findSkyandPeak: out of bounds: " + (skydelta + skyband) + " is larger than image X " + dimX);
 
-        double[] sums = {0, 0, 0, 0}; // will hold the sky values in the
+        double[] sums = { 0, 0, 0, 0 }; // will hold the sky values in the
         // corners
-        long[] nSums = {0, 0, 0, 0};
+        long[] nSums = { 0, 0, 0, 0 };
 
         float min = image[skydelta + skyband];
         float max = min;
@@ -737,7 +750,7 @@ public class odiCentroidSupport {
             }
         }
 
-        //ovValue = (starFinder.selectKth(ovBuffer, (n - 1) / 2, n - 1, true));
+        // ovValue = (starFinder.selectKth(ovBuffer, (n - 1) / 2, n - 1, true));
         return 0;
     }
 
@@ -787,7 +800,6 @@ public class odiCentroidSupport {
 
                     double val = gs.rawImageBuffer[yy * NAXIS1 + xx];
 
-
                     sum += val;
                     n++;
 
@@ -801,7 +813,7 @@ public class odiCentroidSupport {
     }
 
     public static double findStdDev(ImageContainer gs, double mean, int minx, int maxx, int miny, int maxy,
-                                    double sigmarejection) {
+            double sigmarejection) {
 
         double stddev = 0;
 
@@ -820,7 +832,6 @@ public class odiCentroidSupport {
             for (int xx = minx; xx < maxx; xx++) {
 
                 int imgval = ((int) (gs.rawImageBuffer[yy * dimX + xx]) & 0xffff);
-
 
                 double delta = mean - (imgval - ovValue);
 
@@ -854,14 +865,12 @@ public class odiCentroidSupport {
 
                     float imgval = gs.rawImageBuffer[yy * dimX + xx];
 
-
                     double delta = mean - (imgval - ovValue);
 
                     if (Math.abs(delta / stddev) < sigmarejection) {
                         newstddev += delta * delta;
                         n++;
                     }
-
 
                 }
             stddev = Math.sqrt(newstddev / n);
@@ -879,9 +888,9 @@ public class odiCentroidSupport {
     public static void main(String[] args) {
 
         RadialProfile p = new RadialProfile();
-        p.radius = new float[]{1f, 2f, 3f, 4f, 5f, 6f};
-        p.value = new float[]{3f, 4f, 5f, 6.2f, 7.01f, 8f};
-        p.error = new float[]{0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+        p.radius = new float[] { 1f, 2f, 3f, 4f, 5f, 6f };
+        p.value = new float[] { 3f, 4f, 5f, 6.2f, 7.01f, 8f };
+        p.error = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
 
         double res[] = odiCentroidSupport.linearFit(p);
 
@@ -890,29 +899,31 @@ public class odiCentroidSupport {
 
         res = odiCentroidSupport.linearFitRej(p, 3, 0.2);
 
-//		System.err.println("Linear Fit Test:");
-//		System.err.println("f(x) = a + b*x -> a=" + res[0] + "  b=" + res[1] + " X2=" + res[2] + "  N=" + res[3]);
-//
-//		gaussImage gi = new gaussImage(24);
-//		gi.create(12, 12, 120, 4, 4, 5, 0);
-//		odiGaussFitCentroider.centroid(gi);
-//		System.out.println(gi);
-//
-//		OTAReader.correctOV = false;
-//
-//		Vector<GuideStarContainer> otaCells = OTAReader.readDetectorMEFFile(
-//				"/Volumes/odifile/archive/podi/TEST-12B-2101/2012.08.20/b20120820T210352.3", 0, 0, 1, 1);
-//		GuideStarContainer gs = otaCells.firstElement();
-//
-//		double lastd = 0;
-//		for (int ii = 0; ii < 1; ii++) {
-//
-//			double m = odiCentroidSupport.findMean(gs, 150, 250, 150, 250, 0);
-//			double s = odiCentroidSupport.findStdDev(gs, m, 150, 250, 150, 250, 0);
-//			System.out.println(" Noise in image: " + m + "  " + s);
-//
-//		}
-//		System.exit(1);
+        // System.err.println("Linear Fit Test:");
+        // System.err.println("f(x) = a + b*x -> a=" + res[0] + " b=" + res[1] + " X2="
+        // + res[2] + " N=" + res[3]);
+        //
+        // gaussImage gi = new gaussImage(24);
+        // gi.create(12, 12, 120, 4, 4, 5, 0);
+        // odiGaussFitCentroider.centroid(gi);
+        // System.out.println(gi);
+        //
+        // OTAReader.correctOV = false;
+        //
+        // Vector<GuideStarContainer> otaCells = OTAReader.readDetectorMEFFile(
+        // "/Volumes/odifile/archive/podi/TEST-12B-2101/2012.08.20/b20120820T210352.3",
+        // 0, 0, 1, 1);
+        // GuideStarContainer gs = otaCells.firstElement();
+        //
+        // double lastd = 0;
+        // for (int ii = 0; ii < 1; ii++) {
+        //
+        // double m = odiCentroidSupport.findMean(gs, 150, 250, 150, 250, 0);
+        // double s = odiCentroidSupport.findStdDev(gs, m, 150, 250, 150, 250, 0);
+        // System.out.println(" Noise in image: " + m + " " + s);
+        //
+        // }
+        // System.exit(1);
 
     }
 

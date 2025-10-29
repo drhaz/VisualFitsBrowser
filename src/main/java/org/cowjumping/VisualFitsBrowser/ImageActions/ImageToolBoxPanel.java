@@ -16,11 +16,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
+import org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.MultiFlickPanel;
 import org.cowjumping.guiUtils.SAMPUtilities;
 import org.cowjumping.guiUtils.VariableGridLayout;
+import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
 
 /**
  * 
@@ -110,7 +112,15 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 
 	public void pushImageBufferSelection (Vector<ImageContainer> imageList) {
 	    if (this.myMultiPanel.getTopComponent().equals(IMEXAMPANEL) && imageList != null && imageList.size() == 1) {
-	        this.myImexamDisplay.setImageContainer(imageList);
+	        
+			if (VisualFitsBrowserApp.lastimexamKey.equalsIgnoreCase("r")) {
+				this.myImexamDisplay.setOneDPlotMode(OneDPlotModes.RADIAL);
+			} else if (VisualFitsBrowserApp.lastimexamKey.equalsIgnoreCase("x")) {
+				this.myImexamDisplay.setOneDPlotMode(OneDPlotModes.LINE_X);
+			}	
+
+			this.myImexamDisplay.setImageContainer(imageList);
+	        return;
         }
 
     }

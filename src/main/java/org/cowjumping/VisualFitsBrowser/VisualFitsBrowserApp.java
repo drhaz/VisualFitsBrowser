@@ -65,7 +65,7 @@ public class VisualFitsBrowserApp extends JFrame {
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
     private static DonutDisplayFrame DonutFrame = null;
-    private static String lastimexamKey = null;
+    public static String lastimexamKey = null;
 
     private boolean showUtilities;
     private boolean showWavefront;
@@ -632,7 +632,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
                             mToolBoxPanel.pushImageBufferSelection(v);
                         } catch (Exception e) {
-                            myLogger.error("Something wrong with response for iexam: cannot get all the tokens " + result, e);
+                            myLogger.error("Something wrong with response for imexam: cannot get all the tokens " + result, e);
                         } finally {
                             SAMPUtilities.getDS9imexam("imexam");
                         }
