@@ -1,7 +1,7 @@
 # VisualFitsBrowser
 
 VisualFitsBrowser is a small utility program to help organizing astronomical images in the FITS format, and
-his meant to assist a workflow of inspecting images in saoimage ds9 in an observatory or lab environment.
+is meant to assist a workflow of inspecting images in saoimage ds9 in an observatory or lab environment.
 
 The center of the application is a list view of all fits images in a directory, sortable by some selected
 fits header keywords (OBJECT, DATE-OBS, FILTER). Double-clicking on one file will send the image for display
