@@ -297,7 +297,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
             int y = (int) yc.elementAt(ii).intValue();
             x -= this.getWindow_Offset_X();
             y -= this.getWindow_Offset_Y();
-            System.out.println (x + " / " + y);
+            //System.out.println (x + " / " + y);
             this.rawImageBuffer[y * this.imageDimX + x] = pv.elementAt(ii);
         }
 

@@ -244,7 +244,7 @@ public class SAMPUtilities {
     }
 
     public static void getDS9ImageCutout (String callbackIdentifier, int centerx, int centery, int width) {
-        log.debug (String.format("SAMP: requesting iamge cutout from ds9 at coordinate %d %d, width %d",centerx,centery,width));
+        log.debug (String.format("SAMP: requesting image cutout from ds9 at coordinate %d %d, width %d",centerx,centery,width));
         int llx = centerx - width/2;
         int lly = centery - width/2;
         sendCallbackDS9 (String.format("data image %d %d %d %d no", llx,lly, width, width), callbackIdentifier);

@@ -22,7 +22,7 @@ public class ImexamDisplay extends ImageEvaluator {
     
     
 
-    private OneDPlotModes  OneDPlotMode = OneDPlotModes.RADIAL; // radial: radial plot"
+    private OneDPlotModes  OneDPlotMode = OneDPlotModes.LINE_X; // radial: radial plot"
 
     public OneDPlotModes getOneDPlotMode() {
         return OneDPlotMode;

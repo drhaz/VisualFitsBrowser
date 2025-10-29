@@ -2,10 +2,14 @@ package org.cowjumping.FitsUtils;
 
 import java.awt.Rectangle;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cowjumping.guiUtils.RadialPlotComponent;
 import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
 
 public class RadialProfile {
 
+  private final static Logger myLogger = LogManager.getLogger(RadialProfile.class);
   public float[] radius = null;
   public float[] value = null;
   public float[] error = null;
@@ -59,13 +63,13 @@ public class RadialProfile {
     if (plotMode == OneDPlotModes.RADIAL) {
       loadFromImage(gs,
           new Rectangle(1, 1, gs.getImageDimX() - 2, gs.getImageDimY() - 2),
-          Double.NEGATIVE_INFINITY);
+          Double.NEGATIVE_INFINITY, plotMode);
 
     } else if (plotMode == OneDPlotModes.LINE_X) {
+
       int y = (int) Math.round(this.ycenter);
       loadFromImage(gs,
-          new Rectangle(1, y - gs.getImageDimY() / 8, gs.getImageDimX() - 2, y + gs.getImageDimY() / 4),
-          Double.NEGATIVE_INFINITY);
+          new Rectangle(1, y - 2, gs.getImageDimX() - 2, 5), Double.NEGATIVE_INFINITY, plotMode);
 
     }
 
@@ -235,6 +239,7 @@ public class RadialProfile {
           double t2 = (yy - cY) * gs.getBinningY();
 
           if (plotMode == OneDPlotModes.LINE_X) {
+            
             radius[count] = (float) Math.abs(t1);
           } else if (plotMode == OneDPlotModes.RADIAL) {
             radius[count] = (float) Math.sqrt(t1 * t1 + t2 * t2);

@@ -597,7 +597,7 @@ public class VisualFitsBrowserApp extends JFrame {
                 if (msg.isOK()) {
 
                     String result = (String) msg.getResult().toString();
-                    myLogger.info(String.format("Message has responderid %s, tag %s, result has value: %s", responderID, tag, result));
+                    myLogger.info(String.format("Message has responderid %s, tag %s", responderID, tag));
 
 
                     if (tag.equalsIgnoreCase("imexam"))
@@ -609,6 +609,7 @@ public class VisualFitsBrowserApp extends JFrame {
                             String y = tok.nextToken();
                             int xce = (int) Math.round(Double.parseDouble(x));
                             int yce = (int) Math.round(Double.parseDouble(y));
+                            myLogger.info(String.format("imexam response: key %s x %s y %s", key, x, y));
                             if (!key.equalsIgnoreCase("Q")) {
                                 SAMPUtilities.getDS9ImageCutout("imagecutout", xce, yce, 50);
                                 VisualFitsBrowserApp.lastimexamKey = key;
@@ -653,7 +654,7 @@ public class VisualFitsBrowserApp extends JFrame {
         try {
             CommandLine cmd = parser.parse(options, args);
 
-            if (cmd.hasOption("debug")) {
+            if (cmd.hasOption("debug") || Boolean.TRUE) {
 
                 LoggerContext context = (LoggerContext) LogManager.getContext(false);
                 Configuration config = context.getConfiguration();
@@ -682,7 +683,7 @@ public class VisualFitsBrowserApp extends JFrame {
         GUIConsts.setLookAndFeel();
 
         System.out.println("VisualFitsBrowser Version " + getVersion());
-        System.out.println("(c) 2017 Daniel Harbeck, cowjumping.org");
+        System.out.println("(c) 2017-2025 Daniel Harbeck, cowjumping.org");
         System.out.println("Starting Samp Interface ...");
         initSampHub();
 
