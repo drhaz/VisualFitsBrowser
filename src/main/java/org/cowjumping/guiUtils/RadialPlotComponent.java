@@ -19,12 +19,19 @@ import java.awt.geom.Point2D;
  * @author harbeck
  */
 
+
+
 @SuppressWarnings("serial")
 public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent {
 
     private final static Logger myLogger = LogManager.getLogger(RadialPlotComponent.class);
 
     RadialProfile myProfile = null;
+
+    public static enum OneDPlotModes {
+        RADIAL,
+        LINE_X
+    }
 
     int dimX = 0;
     int dimY = 0;
@@ -54,7 +61,12 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
 //  public void updateData(Object newImage, int dimX, int dimY, double cX,
 //      double cY, double fwhm, double peak, double sky) {
 
-    public void updateData(ImageContainer gs) {
+    public void updateData(ImageContainer gs ) {
+        
+        updateData(gs, OneDPlotModes.RADIAL);
+    }
+
+    public void updateData(ImageContainer gs, OneDPlotModes plotMode) {
 
         initBuffers(gs.getImageDimX(), gs.getImageDimY());
 
@@ -76,7 +88,7 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
         if (this.myProfile == null)
             myProfile = new RadialProfile();
 
-        myProfile.update(gs);
+        myProfile.update(gs, plotMode);
 
         odiCentroidSupport.scaleAndBiasImage(myProfile.value, (float) (peak - sky),
                 (float) sky);

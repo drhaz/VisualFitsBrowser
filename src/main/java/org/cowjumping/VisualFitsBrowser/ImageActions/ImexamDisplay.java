@@ -6,6 +6,7 @@ import org.cowjumping.FitsUtils.odiCentroidSupport;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.GuideStarDisplayComponent;
 import org.cowjumping.guiUtils.RadialPlotComponent;
+import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
 import org.cowjumping.guiUtils.ZScaleSelectorComponent;
 
 import javax.swing.*;
@@ -18,6 +19,19 @@ public class ImexamDisplay extends ImageEvaluator {
     private RadialPlotComponent rp;
     private GuideStarDisplayComponent gd;
     private ImageBufferStatusDisplay sd;
+    
+    
+
+    private OneDPlotModes  OneDPlotMode = OneDPlotModes.RADIAL; // radial: radial plot"
+
+    public OneDPlotModes getOneDPlotMode() {
+        return OneDPlotMode;
+    }
+
+    public void setOneDPlotMode(OneDPlotModes oneDPlotMode) {
+        OneDPlotMode = oneDPlotMode;
+    }
+
     public ImexamDisplay() {
         super();
         setLayout(new BorderLayout());
@@ -75,7 +89,7 @@ public class ImexamDisplay extends ImageEvaluator {
             odiCentroidSupport.gaussianFitFWHM (gs);
             odiCentroidSupport.aperturePhotometry(gs);
 
-            rp.updateData(gs);
+            rp.updateData(gs, this.getOneDPlotMode());
             gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX()+0.5f, gs.getCenterY()+0.5f, 0);
             gd.setZScale(gs.getBackground() - 3 * gs.getBackNoise(), gs.getPeak());
             gd.setMeanCenter((float)(peakX+0.5), (float) (peakY+0.5));
