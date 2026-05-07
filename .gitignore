@@ -2,4 +2,5 @@
 VisualFitsBrowser.iml
 Releases/temp
 target
-
+.vscode
+nohup.out

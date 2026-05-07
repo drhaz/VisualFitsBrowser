@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
 
-
     private final static Logger myLogger = LogManager.getLogger(VisualFitsBrowserApp.class);
 
     private final static String PROP_WINDOWLOCATION_ROOT = VisualFitsBrowserApp.class.getCanonicalName()
@@ -57,7 +56,6 @@ public class VisualFitsBrowserApp extends JFrame {
     private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
     private final static String PROP_DS9EXEC = VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
 
-
     /**
      * Class to Manage & Display image directory
      */
@@ -69,7 +67,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
     private boolean showUtilities;
     private boolean showWavefront;
-
 
     static long IRAF_MSGID = 0;
 
@@ -155,7 +152,7 @@ public class VisualFitsBrowserApp extends JFrame {
             public void run() {
                 try {
                     Thread.sleep(1000);
-                    //setResizable(false);
+                    // setResizable(false);
                     OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
                 } catch (Exception e) {
                     myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
@@ -195,7 +192,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
     }
 
-
     private void setShowWavefront(boolean show) {
 
         Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
@@ -216,7 +212,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
         menu.getAccessibleContext().setAccessibleDescription("File Menu");
         theMenu.add(menu);
-
 
         {
             menuItem = new JMenuItem("Change Directory ...", KeyEvent.VK_L);
@@ -245,7 +240,6 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
-
         {
             menuItem = new JMenuItem("Send all selected to ds9", KeyEvent.VK_A);
             menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
@@ -260,10 +254,10 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
-
         {
             menuItem = new JMenuItem("Send all selected to clipboard", KeyEvent.VK_A);
-            menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK));
+            menuItem.setAccelerator(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK));
             menu.add(menuItem);// Possible error source: generate thumbnail
             // after closure
             // finished.);
@@ -274,7 +268,6 @@ public class VisualFitsBrowserApp extends JFrame {
                 }
             });
         }
-
 
         menu.add(new JSeparator());
 
@@ -295,19 +288,18 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
-
         {
             menuItem = Filelist2Latex.getPDFLogFileMenuItem(this.mBrowserPanel);
             menu.add(menuItem);
         }
 
-
         {
             menuItem = new JCheckBoxMenuItem("Auto display new image in ds9");
-            menuItem.setSelected(Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false")));
+            menuItem.setSelected(
+                    Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false")));
             if (this.getmBrowserPanel() != null)
-                getmBrowserPanel().autoLoadImageToListener =
-                        Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
+                getmBrowserPanel().autoLoadImageToListener = Boolean
+                        .parseBoolean(Preferences.thePreferences.getProperty(PROP_AUTODISPLAY, "false"));
 
             menuItem.addItemListener(new ItemListener() {
 
@@ -322,7 +314,6 @@ public class VisualFitsBrowserApp extends JFrame {
             });
             menu.add(menuItem);
         }
-
 
         menu.add(new JSeparator());
 
@@ -369,10 +360,8 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
-
         menu = new JMenu("Wavefront");
         theMenu.add(menu);
-
 
         {
             menuItem = new JCheckBoxMenuItem("Show Wavefront Frame");
@@ -405,7 +394,6 @@ public class VisualFitsBrowserApp extends JFrame {
             menu.add(menuItem);
 
         }
-
 
         {
 
@@ -440,7 +428,8 @@ public class VisualFitsBrowserApp extends JFrame {
                         System.out.println("DS9 label double clicked");
 
                         ds9Label.setEnabled(true);
-                        SAMPUtilities.launchds9(Preferences.thePreferences.getProperty(PROP_DS9EXEC, SAMPUtilities.searchds9Binary()));
+                        SAMPUtilities.launchds9(
+                                Preferences.thePreferences.getProperty(PROP_DS9EXEC, SAMPUtilities.searchds9Binary()));
                     }
                 }
             }
@@ -547,7 +536,8 @@ public class VisualFitsBrowserApp extends JFrame {
             }
 
             @Override
-            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
+            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg)
+                    throws Exception {
 
                 System.out.println("Received donut response: " + msg);
                 if (msg.isOK()) {
@@ -566,7 +556,8 @@ public class VisualFitsBrowserApp extends JFrame {
                         Double y = Double.parseDouble(matcher.group(3));
                         String ext = (matcher.group(4));
                         System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(), 250);
+                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(),
+                                250);
                         newtask.setResultListener(DonutFrame);
                         pyDonutBridge.submitTask(newtask);
                     }
@@ -574,7 +565,6 @@ public class VisualFitsBrowserApp extends JFrame {
 
             }
         });
-
 
         // imexam
         SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
@@ -592,13 +582,13 @@ public class VisualFitsBrowserApp extends JFrame {
             }
 
             @Override
-            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg) throws Exception {
+            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg)
+                    throws Exception {
 
                 if (msg.isOK()) {
 
                     String result = (String) msg.getResult().toString();
                     myLogger.info(String.format("Message has responderid %s, tag %s", responderID, tag));
-
 
                     if (tag.equalsIgnoreCase("imexam"))
                         try {
@@ -623,8 +613,8 @@ public class VisualFitsBrowserApp extends JFrame {
 
                         try {
                             String url = (String) msg.getResult().get("url");
-                            BufferedReader reader = new BufferedReader( new InputStreamReader(new URL(url).openStream()));
-
+                            BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(new URL(url).openStream()));
 
                             ImageContainer im = new ImageContainer(reader);
                             Vector<ImageContainer> v = new Vector<ImageContainer>();
@@ -632,11 +622,11 @@ public class VisualFitsBrowserApp extends JFrame {
 
                             mToolBoxPanel.pushImageBufferSelection(v);
                         } catch (Exception e) {
-                            myLogger.error("Something wrong with response for imexam: cannot get all the tokens " + result, e);
+                            myLogger.error(
+                                    "Something wrong with response for imexam: cannot get all the tokens " + result, e);
                         } finally {
                             SAMPUtilities.getDS9imexam("imexam");
                         }
-
 
                 }
 
@@ -673,9 +663,10 @@ public class VisualFitsBrowserApp extends JFrame {
 
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
         try {
-            context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader().getResource("resources/VisualFitsBrowser.log4j").toURI());
+            context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader()
+                    .getResource("resources/VisualFitsBrowser.log4j").toURI());
         } catch (Exception e) {
-            myLogger.warn ("Error while configuring log4j 2", e);
+            myLogger.warn("Error while configuring log4j 2", e);
         }
 
         parseArgs(args);
@@ -711,13 +702,11 @@ public class VisualFitsBrowserApp extends JFrame {
             }
         });
 
-
         SAMPUtilities.getHubConnector().declareSubscriptions(SAMPUtilities.getHubConnector().computeSubscriptions());
 
         System.out.println("File Browser is up and running.");
 
     }
-
 
     public static FileBrowserPanel getmBrowserPanel() {
         return mBrowserPanel;
