@@ -59,7 +59,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
         try {
 
             boolean isOK = (this.conn != null) && (this.conn.isValid(1000));
-            if (!isOK & retry) {
+            if (!isOK && retry) {
                 return this.connectToDB();
             } else
                 return isOK;
@@ -72,6 +72,7 @@ public class FITSTextCommentSQLITEImp implements FitsCommentInterface {
     public void close() {
         if (this.conn != null) {
             try {
+                executor.shutdown();
                 this.executor.awaitTermination(5, TimeUnit.SECONDS);
                 this.conn.close();
                 this.conn = null;
