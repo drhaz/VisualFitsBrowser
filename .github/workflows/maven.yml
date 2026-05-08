@@ -32,10 +32,13 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-    - name: Upload JAR with dependencies
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: jar-with-dependencies
-        path: target/*-jar-with-dependencies.jar
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        files: target/*-jar-with-dependencies.jar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   
