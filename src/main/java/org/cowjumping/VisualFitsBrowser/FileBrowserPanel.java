@@ -62,9 +62,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     private final String binnedPrefix = "\u00B7";
 
-
     /**
-     * How long to wait before displaying a newly arrived file; aims to prevent ds0 load errors when laoding while system is still writing the file
+     * How long to wait before displaying a newly arrived file; aims to prevent ds0
+     * load errors when laoding while system is still writing the file
      */
     private static int waitMilliSecondsBeforeDS9load = 1000;
 
@@ -86,7 +86,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     boolean autoLoadImageToListener = false;
     private static String DisplayedImage = null;
-
 
     private void maskButton(JButton b) {
         b.setPreferredSize(b.getMinimumSize());
@@ -128,16 +127,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
             rootDirLabel.setToolTipText("This is the current directory");
 
-            rootDirLabel.addMouseListener(new MouseAdapter()
-            {
-                public void mouseClicked(MouseEvent e)
-                {
+            rootDirLabel.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
                     if (rootDirLabel == null)
                         return;
 
-
                     String dirname = rootDirLabel.getText();
-
 
                     if (dirname.startsWith("/archive/engineering")) {
                         // Do something about LCO mounts.
@@ -145,8 +140,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 }
             });
-
-
 
             ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
@@ -161,7 +154,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 }
 
             });
-
 
             tomorrowLabel = new JButton(">");
             tomorrowLabel.setToolTipText("Load equivalent directory for tomorrow's date");
@@ -188,11 +180,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 }
 
-
             };
             tomorrowLabel.addActionListener(l);
             yesterDayLabel.addActionListener(l);
-
 
             Box topBox = Box.createHorizontalBox();
             topBox.setOpaque(true);
@@ -209,20 +199,33 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         {
             mTable = new ZebraJTable(mTableDataModel) {
                 public String getToolTipText(MouseEvent e) {
-                    String tip;
+
+                    String tip = "";
                     java.awt.Point p = e.getPoint();
                     int rowIndex = rowAtPoint(p);
                     int colIndex = columnAtPoint(p);
                     int realColumnIndex = convertColumnIndexToModel(colIndex);
 
-                    if ((rowIndex >= 0) && (colIndex >= 0)
-                            && ((realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL)
-                            || (realColumnIndex == FitsViewerTableModel.OBJECT_COL)
-                            || (realColumnIndex == FitsViewerTableModel.FNAME_COL))) {
-                        Object o = getValueAt(rowIndex, colIndex);
-                        tip = o != null ? (String) o : "";
+                    if ((rowIndex >= 0) && (colIndex >= 0)) {
 
-                    } else tip = super.getToolTipText(e);
+                        if ((realColumnIndex == FitsViewerTableModel.USERCOMMENT_COL)
+                                || (realColumnIndex == FitsViewerTableModel.OBJECT_COL)
+                                || (realColumnIndex == FitsViewerTableModel.FNAME_COL)
+                                || (realColumnIndex == FitsViewerTableModel.EXTRA_COL)
+                                || (realColumnIndex == FitsViewerTableModel.FILTER_COL)) {
+
+                            Object o = getValueAt(rowIndex, colIndex);
+                            tip = o != null ? (String) o : "";
+                        }
+                        if ((realColumnIndex == FitsViewerTableModel.DATEOBS_COL)) {
+
+                            Object o = getValueAt(rowIndex, colIndex);
+                            tip = o == null ? "" : ((java.time.LocalDateTime) o).toString();
+                        }
+
+                    } else {
+                        tip = super.getToolTipText(e);
+                    }
 
                     return tip;
                 }
@@ -246,7 +249,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL)
                     .setCellRenderer(new NumberFormatterCellRenderer("%2.1f"));
 
-
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
 
             mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -257,7 +259,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             JScrollPane scrollPane = new JScrollPane(mTable);
             scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(400);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(400);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
@@ -265,7 +266,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL).setPreferredWidth(100);
             mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
-
 
             for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
                 TableColumn tc = mTable.getColumnModel().getColumn(ii);
@@ -305,19 +305,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                             if (selectedFits != null) {
                                 String fname = selectedFits.getAbsolutePath();
 
-
                                 boolean funpack = ((e.getModifiersEx() & SHIFT_DOWN_MASK) == SHIFT_DOWN_MASK);
-
 
                                 SAMPUtilities.loadMEFSaveDS9(fname, frame, funpack);
                                 setDisplayedImage(selectedFits.FName);
-
 
                             }
                         }
 
                     }
-
 
                 }
             });
@@ -326,7 +322,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         readDirectory(mRootDirectory);
 
     }
-
 
     public void sendAllSelectedtods9() {
 
@@ -353,7 +348,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
     }
 
-
     public void sendAllSelectedToClipBoard() {
         StringBuilder sb = new StringBuilder();
         int rows[] = mTable.getSelectedRows();
@@ -372,7 +366,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
 
     }
-
 
     public void changeDirectoryDate(int deltadays) {
         if (this.mRootDirectoryString != null) {
@@ -400,7 +393,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
     }
 
-
     private void hideColumn(JTable table, int c) {
         table.getColumnModel().getColumn(c).setMinWidth(0);
         table.getColumnModel().getColumn(c).setMaxWidth(0);
@@ -408,7 +400,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     }
 
     synchronized void setDisplayedImage(final String fname) {
-
 
         log.debug("Request to mark image " + fname + " as displayed image in table view.");
         if (!fname.equals("preimage")) {
@@ -441,12 +432,10 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
     }
 
-
     private class ImageIDRenderer extends DefaultTableCellRenderer {
 
-
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                                                       int row, int column) {
+                int row, int column) {
             JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
                     column);
 
@@ -458,7 +447,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 comparisonValue = ((String) value).trim();
             }
 
-            // Table sees the binned prefix rendered file name, so take this into acount here.
+            // Table sees the binned prefix rendered file name, so take this into acount
+            // here.
             if (comparisonValue.startsWith(binnedPrefix))
                 comparisonValue = comparisonValue.replace(binnedPrefix, "");
 
@@ -474,7 +464,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
 
     }
-
 
     public void packColumns(JTable table, int margin) {
         for (int c = 0; c < table.getColumnCount(); c++) {
@@ -596,7 +585,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         return (Vector<FitsFileEntry>) mImageList.clone();
     }
 
-
     /**
      * Finds an image entry by name and returns the row of the underlying table
      * model
@@ -671,8 +659,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                                     setDisplayedImage(newItem.getName());
 
                                 }
-                            }
-                            ).start();
+                            }).start();
                         }
 
                     }
@@ -772,7 +759,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }.execute();
     }
 
-
     private Date getDateComponentofDirectory(String name) {
 
         Date ret = null;
@@ -797,7 +783,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         return ret;
 
     }
-
 
     private class SelectionListener implements ListSelectionListener {
 
@@ -829,7 +814,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     private class FitsViewerTableModel extends AbstractTableModel {
 
-
         final static int FNAME_COL = 0;
         final static int OBJECT_COL = 1;
         final static int TEXP_COL = 2;
@@ -839,7 +823,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         final static int EXTRA_COL = 6;
         final static int USERCOMMENT_COL = 7;
-
 
         boolean displayExtra = true;
 
@@ -865,7 +848,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             if (mImageList != null && mImageList.size() > row) {
                 FitsFileEntry entry = mImageList.elementAt(row);
 
-
                 if (col == FNAME_COL) {
                     String prefix;
                     prefix = " ";
@@ -883,21 +865,17 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 if (col == TEXP_COL)
                     return entry.ExpTime;
 
-
                 if (col == DATEOBS_COL)
                     return entry.DateObs;
 
-
                 if (col == USERCOMMENT_COL)
                     return entry.UserComment;
-
 
                 if (col == AIRMASS_COL)
                     return entry.Airmass;
 
                 if (col == EXTRA_COL)
                     return entry.ExtraKeyword;
-
 
             }
 
@@ -911,14 +889,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 FitsFileEntry entry = null;
                 switch (col) {
 
-
                     case USERCOMMENT_COL:
 
                         entry = mImageList.elementAt(row);
                         entry.UserComment = (String) Value;
                         entry.writeBackMetaInformation();
                         break;
-
 
                     default:
                         log.warn("SetValueAt request for non-editable field");
@@ -931,7 +907,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
 
         public String getColumnName(int col) {
-
 
             if (col == FNAME_COL)
                 return "Filename";
@@ -946,7 +921,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             if (col == DATEOBS_COL)
                 return "DATE_OBS";
 
-
             if (col == AIRMASS_COL)
                 return "X";
 
@@ -958,7 +932,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         public boolean isCellEditable(int row, int col) {
 
-
             if (col == USERCOMMENT_COL) {
                 return true;
             }
@@ -969,7 +942,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {
-
 
             if (columnIndex == TEXP_COL)
                 return Float.class;
@@ -996,4 +968,3 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     }
 
 }
-
