@@ -30,6 +30,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
@@ -56,6 +57,9 @@ public class VisualFitsBrowserApp extends JFrame {
     private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
     private final static String PROP_DS9EXEC = VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
     private final static String PROP_BEEPONNEWIMAGE = VisualFitsBrowserApp.class.getCanonicalName() + ".BEEPONNEWIMAGE";
+
+    /** Where the user documentation (built from docs/ in the repository) is published. */
+    final static String DOCUMENTATION_URL = "https://drhaz.github.io/VisualFitsBrowser/";
 
     /**
      * Class to Manage & Display image directory
@@ -406,6 +410,34 @@ public class VisualFitsBrowserApp extends JFrame {
 
         }
 
+        menu = new JMenu("Help");
+        menu.getAccessibleContext().setAccessibleDescription("Help Menu");
+        theMenu.add(menu);
+
+        {
+            menuItem = new JMenuItem("Documentation");
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    openDocumentation();
+                }
+            });
+            menu.add(menuItem);
+        }
+
+        {
+            menuItem = new JMenuItem("About VisualFitsBrowser");
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(VisualFitsBrowserApp.this,
+                            "VisualFitsBrowser " + getVersion() + "\n" +
+                                    "(c) 2017-2025 Daniel Harbeck, cowjumping.org\n\n" +
+                                    "Documentation: " + DOCUMENTATION_URL,
+                            "About VisualFitsBrowser", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+            menu.add(menuItem);
+        }
+
         // JMenu debugMenu = GUIConsts.getDebugMenu();
         // theMenu.add(debugMenu);
 
@@ -490,6 +522,25 @@ public class VisualFitsBrowserApp extends JFrame {
 
         return theMenu;
 
+    }
+
+    /**
+     * Open the online documentation in the system web browser. If no browser can be launched (e.g., on some
+     * Linux desktops), show the URL so the user can copy it.
+     */
+    private void openDocumentation() {
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(DOCUMENTATION_URL));
+                return;
+            }
+        } catch (Exception e) {
+            myLogger.warn("Could not open web browser for documentation", e);
+        }
+        JTextField urlField = new JTextField(DOCUMENTATION_URL);
+        urlField.setEditable(false);
+        JOptionPane.showMessageDialog(this, new Object[]{"The documentation is available at:", urlField},
+                "Documentation", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void onExit() {

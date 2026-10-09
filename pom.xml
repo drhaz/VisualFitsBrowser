@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>VisualFitsBrowser</name>
-    <url>http://maven.apache.org</url>
+    <url>https://drhaz.github.io/VisualFitsBrowser/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,10 +36,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <!-- Build with JDK 11+ (as in CI), but produce a jar that runs on Java 8. -->
+                    <release>8</release>
+                </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <release>8</release>
+                    <doclint>none</doclint>
+                    <quiet>true</quiet>
+                    <doctitle>VisualFitsBrowser ${project.version} API</doctitle>
+                    <windowtitle>VisualFitsBrowser ${project.version} API</windowtitle>
                 </configuration>
             </plugin>
 
