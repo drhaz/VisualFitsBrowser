@@ -8,11 +8,7 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
-### Removed
-- The experimental **Wavefront** menu (DONUT wavefront analysis). Imexam remains
-  available from the Toolbox.
-
-## [1.10.4]
+## [1.10.4] - 2026-10-09
 
 ### Added
 - **Help** menu with links to the online documentation and an About dialog.
@@ -24,9 +20,12 @@ Entries before 1.10.4 were reconstructed from the git history.
 - Compiled with `--release 8`, so the jar is guaranteed to run on Java 8 even when
   built with a newer JDK.
 - Release notes are taken from this changelog.
+- Tests use JUnit 4.13.2 (JUnit 3 is no longer supported by current Maven Surefire).
 - Updated table tooltips.
 
 ### Removed
+- The experimental **Wavefront** menu (DONUT wavefront analysis). Imexam remains
+  available from the Toolbox.
 - Audible signal when a new image arrives.
 - Binary jar of version 1.6 from the source repository; use GitHub Releases.
 
