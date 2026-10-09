@@ -1,7 +1,7 @@
 package org.cowjumping.VisualFitsBrowser.util;
 
 import java.io.File;
-import java.io.FilenameFilter;
+//import java.io.FilenameFilter;
 import java.util.Date;
 import java.util.Queue;
 import java.util.Vector;
@@ -54,13 +54,18 @@ public class DirectoryListener implements Runnable {
     /**
      * Flag whether to beep when a new file has arrived.
      */
-    public boolean beepOnNew = true;
+    private boolean beepOnNew = false;
 
 
     /**
      * The kind of files we are looking for
      */
-    private FilenameFilter mFileNameFilter;
+    //private FilenameFilter mFileNameFilter;
+
+
+    public void setBeepOnNew(boolean beepOnNew) {
+        this.beepOnNew = beepOnNew;
+    }
 
     /**
      * The image directory that was the most recent one
@@ -93,10 +98,8 @@ public class DirectoryListener implements Runnable {
     public void run() {
         myLogger.info("Starting new Directory Listener Thread for: "
                 + myDirectory.getAbsolutePath());
+
         while (!abort) {
-
-
-
             long lastModified = myDirectory.lastModified();
 
             // Step 1: Check if directory has new files to look for in it
@@ -130,11 +133,9 @@ public class DirectoryListener implements Runnable {
 
             for (File f : newFileQueue) {
 
-
                 long length = f.length();
-
                 if (!f.isDirectory() && (length < 2880)) {
-                    // Sanity check: fits file to be valid has to ahve a t least one full fits block length.
+                    // Sanity check: fits file to be valid has to have at least one full fits block length.
                     continue;
                 }
 
@@ -142,11 +143,9 @@ public class DirectoryListener implements Runnable {
                 if (beepOnNew)
                     SoundSignal.notifyNewImage();
 
-
-                // Important: only update last access timestamp idf there were genuine new files there. Otherwise,
-                // buffered file that are in transit, and then renamed, cn areally mess up things.
+                // Important: only update last access timestamp if there were genuine new files there. Otherwise,
+                // buffered file that are in transit, and are then renamed, can really mess up things.
                 timeOfLastDirectoryRead = lastModified;
-
 
             }
             newFileQueue.clear();
@@ -157,11 +156,11 @@ public class DirectoryListener implements Runnable {
                 Thread.sleep(ignorelastModified ? 2000 : 700);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                myLogger.error("Interrupted while sleeping.", e);
             }
 
         }
-        myLogger.info("Exiting Listener Thread for Directory "
+        myLogger.debug("Exiting Listener Thread for Directory "
                 + myDirectory.getAbsolutePath());
         newFileQueue.clear();
         abortWait.release();
@@ -169,7 +168,7 @@ public class DirectoryListener implements Runnable {
 
     public void waitToabort() {
         this.abort = true;
-        myLogger.info("Waiting for Directorylistener to quit.");
+        myLogger.debug("Waiting for Directorylistener to quit.");
         try {
             this.abortWait.acquire();
         } catch (InterruptedException e) {

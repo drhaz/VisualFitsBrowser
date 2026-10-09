@@ -120,14 +120,14 @@ public class QuickHeaderInfo {
 
     public static LocalDateTime getDateObs(Vector<String> header, boolean MST) {
         String fc = getStringValue(header, "DATE-OBS");
-        System.out.println("Reading dateobs stage 1 " + fc);
+        myLogger.debug("Reading dateobs stage 1 " + fc);
         if (fc != null) {
             java.time.LocalDateTime ldt = null;
             if (fc.endsWith(" NOGPS"))
                 fc = fc.substring(0,fc.lastIndexOf(" NOGPS"));
             try {
                 ldt = java.time.LocalDateTime.parse ( fc );
-                System.out.println("Rading dateobs stage 2 "  + fc + " " + ldt );
+                myLogger.debug("Reading dateobs stage 2 "  + fc + " " + ldt );
 
                 // c = javax.xml.bind.DatatypeConverter.parseDateTime(fc);
             } catch (Exception e) {

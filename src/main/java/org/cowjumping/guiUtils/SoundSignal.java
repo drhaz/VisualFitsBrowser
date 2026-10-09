@@ -129,7 +129,7 @@ public class SoundSignal implements Callable {
         sdl.close();
       }
     } catch (Exception e) {
-      myLogger.error("Error while trying to play sound: ", e);
+      myLogger.debug("Error while trying to play sound: ", e);
     }
     return null;
   }

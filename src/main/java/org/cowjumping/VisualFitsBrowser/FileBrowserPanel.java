@@ -91,7 +91,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         b.setPreferredSize(b.getMinimumSize());
         b.setOpaque(false);
         b.setFocusPainted(false);
-        // reloadButton.setRolloverEnabled(false);
         b.setContentAreaFilled(false);
         b.setBorderPainted(false);
         b.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -126,20 +125,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             rootDirLabel.setOpaque(true);
             rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
             rootDirLabel.setToolTipText("This is the current directory");
-
-            rootDirLabel.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    if (rootDirLabel == null)
-                        return;
-
-                    String dirname = rootDirLabel.getText();
-
-                    if (dirname.startsWith("/archive/engineering")) {
-                        // Do something about LCO mounts.
-                    }
-
-                }
-            });
 
             ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
@@ -325,7 +310,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     public void sendAllSelectedtods9() {
 
-        StringBuilder sb = new StringBuilder();
         int rows[] = mTable.getSelectedRows();
 
         if ((rows != null) && (rows.length > 0)) {
@@ -393,11 +377,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         }
     }
 
-    private void hideColumn(JTable table, int c) {
-        table.getColumnModel().getColumn(c).setMinWidth(0);
-        table.getColumnModel().getColumn(c).setMaxWidth(0);
-        table.getColumnModel().getColumn(c).setWidth(0);
-    }
+    // private void hideColumn(JTable table, int c) {
+    //     table.getColumnModel().getColumn(c).setMinWidth(0);
+    //     table.getColumnModel().getColumn(c).setMaxWidth(0);
+    //     table.getColumnModel().getColumn(c).setWidth(0);
+    // }
 
     synchronized void setDisplayedImage(final String fname) {
 
@@ -685,21 +669,28 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             myDirectoryListener = null;
         }
 
+
         if (mImageList != null) {
             mImageList.clear();
-            try {
+           
+        } else {
+             log.warn("Imagelist did not exist. that is strange; fixed it now");
+             mImageList = new Vector<FitsFileEntry>();
+        }
+
+        try {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         mTableDataModel.fireTableDataChanged();
                     }
                 });
             } catch (Exception e) {
-                log.error("Error whle notifying table about table clean");
-            }
+                log.error("Error while notifying table about table clean");
         }
 
-        log.info("Reading  directory  in " + RootDirectory);
 
+
+        log.info("Reading directory " + RootDirectory);
         this.mRootDirectory = RootDirectory.getAbsoluteFile();
         this.rootDirLabel.setText(RootDirectory.getAbsolutePath());
         this.mRootDirectoryString = RootDirectory.getAbsolutePath();
@@ -713,12 +704,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         new SwingWorker<String, String>() {
 
             public String doInBackground() {
-
-                // Reset internal image list
-                if (mImageList == null) {
-                    log.warn("Imagelist did not exist. that is strange; fixed it now");
-                    mImageList = new Vector<FitsFileEntry>();
-                }
+               
 
                 // load images in the new directory
                 Vector<FitsFileEntry> newList = FitsFileEntry.getImagesInDirectory(RootDirectory,
@@ -748,7 +734,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     yesterDayLabel.setVisible(false);
                 }
 
-                // Now that the directory is fully read in, instsnciate a new
+                // Now that the directory is fully read in, instanciate a new
                 // DirectoryListener.
 
                 myDirectoryListener = new DirectoryListener(RootDirectory, FileBrowserPanel.this);

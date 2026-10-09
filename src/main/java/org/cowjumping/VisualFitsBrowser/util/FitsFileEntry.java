@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -143,7 +142,6 @@ public class FitsFileEntry {
 		String ObjName = "n/a";
 		LocalDateTime DateObs = null;
 		String Filter = "n/a";
-		int ponTime = 0;
 
 		if (f.exists()) {
 
@@ -204,7 +202,7 @@ public class FitsFileEntry {
 
 	public String toString (){
 		StringBuilder sb = new StringBuilder();
-		sb.append ("FileName: %s".format (this.FName));
+		sb.append ("Filename: " + this.FName);
 
 		return sb.toString();
 	}

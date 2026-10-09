@@ -55,6 +55,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
     private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
     private final static String PROP_DS9EXEC = VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
+    private final static String PROP_BEEPONNEWIMAGE = VisualFitsBrowserApp.class.getCanonicalName() + ".BEEPONNEWIMAGE";
 
     /**
      * Class to Manage & Display image directory
@@ -65,15 +66,15 @@ public class VisualFitsBrowserApp extends JFrame {
     private static DonutDisplayFrame DonutFrame = null;
     public static String lastimexamKey = null;
 
-    private boolean showUtilities;
-    private boolean showWavefront;
-
     static long IRAF_MSGID = 0;
 
     /**
      * A singleton file browser application
      */
     public static VisualFitsBrowserApp theFileBrowserApp = null;
+
+    private static boolean showUtilities = true;
+    private static boolean showWavefront = false;
 
     private VisualFitsBrowserApp() {
 
@@ -89,17 +90,16 @@ public class VisualFitsBrowserApp extends JFrame {
         BorderLayout mBorderLayout = new BorderLayout();
         this.setLayout(mBorderLayout);
 
-        this.mToolBoxPanel = new ImageToolBoxPanel(null);
-        FileBrowserPanel fbp = new FileBrowserPanel(this.mToolBoxPanel);
+        VisualFitsBrowserApp.mToolBoxPanel = new ImageToolBoxPanel(null);
+        
+        FileBrowserPanel fbp = new FileBrowserPanel(VisualFitsBrowserApp.mToolBoxPanel);
+        VisualFitsBrowserApp.setmBrowserPanel(fbp);
 
-        this.setmBrowserPanel(fbp);
         this.add(getmBrowserPanel(), BorderLayout.CENTER);
-        this.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
-
-        this.ToolBoxFrame = new JFrame("Fits ToolBox");
-
-        ToolBoxFrame.getContentPane().add(mToolBoxPanel);
-        ToolBoxFrame.pack();
+        VisualFitsBrowserApp.mToolBoxPanel.setmBrowserPanel(mBrowserPanel);
+        VisualFitsBrowserApp.ToolBoxFrame = new JFrame("Fits ToolBox");
+        VisualFitsBrowserApp.ToolBoxFrame.getContentPane().add(VisualFitsBrowserApp.mToolBoxPanel);
+        VisualFitsBrowserApp.ToolBoxFrame.pack();
 
         /*
          * Wavefront analysis
@@ -135,7 +135,6 @@ public class VisualFitsBrowserApp extends JFrame {
         try {
             Thread.sleep(20);
         } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
             myLogger.error(e1);
         }
 
@@ -184,21 +183,26 @@ public class VisualFitsBrowserApp extends JFrame {
     private void setShowUtiltiies(boolean show) {
 
         Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
-        this.showUtilities = show;
-        if (this.ToolBoxFrame != null) {
+        VisualFitsBrowserApp.showUtilities = show;
+        if (VisualFitsBrowserApp.ToolBoxFrame != null) {
 
-            this.ToolBoxFrame.setVisible(show);
+            VisualFitsBrowserApp.ToolBoxFrame.setVisible(show);
         }
 
     }
 
+    private void setBeepOnNewImage (boolean beepOn) {
+        Preferences.thePreferences.setProperty(PROP_BEEPONNEWIMAGE, beepOn + "");
+        // TODO: Implement the functionality to enable or disable beep on new image.
+    }
+
     private void setShowWavefront(boolean show) {
 
-        Preferences.thePreferences.setProperty(PROP_SHOWUTILITIES, show + "");
-        this.showWavefront = show;
-        if (this.DonutFrame != null) {
+        Preferences.thePreferences.setProperty(PROP_SHOWWAVEFRONT, show + "");
+        VisualFitsBrowserApp.showWavefront = show;
+        if (VisualFitsBrowserApp.DonutFrame != null) {
 
-            this.DonutFrame.setVisible(show);
+            VisualFitsBrowserApp.DonutFrame.setVisible(show);
         }
 
     }
@@ -229,9 +233,7 @@ public class VisualFitsBrowserApp extends JFrame {
         {
             menuItem = new JMenuItem("Reload Directory", KeyEvent.VK_R);
             menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
-            menu.add(menuItem);// Possible error source: generate thumbnail
-            // after closure
-            // finished.);
+            menu.add(menuItem);
             menuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (getmBrowserPanel() != null)
@@ -243,9 +245,7 @@ public class VisualFitsBrowserApp extends JFrame {
         {
             menuItem = new JMenuItem("Send all selected to ds9", KeyEvent.VK_A);
             menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
-            menu.add(menuItem);// Possible error source: generate thumbnail
-            // after closure
-            // finished.);
+            menu.add(menuItem);
             menuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (getmBrowserPanel() != null)
@@ -258,9 +258,7 @@ public class VisualFitsBrowserApp extends JFrame {
             menuItem = new JMenuItem("Send all selected to clipboard", KeyEvent.VK_A);
             menuItem.setAccelerator(
                     KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK));
-            menu.add(menuItem);// Possible error source: generate thumbnail
-            // after closure
-            // finished.);
+            menu.add(menuItem);
             menuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (getmBrowserPanel() != null)
@@ -332,8 +330,6 @@ public class VisualFitsBrowserApp extends JFrame {
         menu = new JMenu("LogSheets");
         menu.getAccessibleContext().setAccessibleDescription("Logsheets Menu");
 
-        if (false)
-            theMenu.add(menu);
 
         {
             menuItem = new JMenuItem("Create Logsheets", KeyEvent.VK_P);
@@ -410,8 +406,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
         }
 
-        JMenu debugMenu = GUIConsts.getDebugMenu();
-
+        // JMenu debugMenu = GUIConsts.getDebugMenu();
         // theMenu.add(debugMenu);
 
         theMenu.add(Box.createHorizontalGlue());
@@ -435,14 +430,10 @@ public class VisualFitsBrowserApp extends JFrame {
             }
         });
 
-        final JLabel fileWatch = new JLabel("Files watched: " + 0);
+        // final JLabel fileWatch = new JLabel("Files watched: " + 0);
         // theMenu.add(fileWatch);
 
-        final JLabel memorylabel = new JLabel("  "); // "RAM: " +
-        // Runtime.getRuntime().totalMemory()
-        // / 1024 / 1024 + "
-        // MB");
-
+        final JLabel memorylabel = new JLabel("  "); 
         theMenu.add(memorylabel);
 
         final JProgressBar mProgressBar = new JProgressBar(0, 1000);
@@ -455,7 +446,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
             public void run() {
 
-                final Runtime rt = Runtime.getRuntime();
+                //final Runtime rt = Runtime.getRuntime();
                 double free = 0;
                 double total = 1;
                 // boolean heart = true;
@@ -505,15 +496,14 @@ public class VisualFitsBrowserApp extends JFrame {
         SAMPUtilities.onExit();
         FitsFileEntry.onExit(); // this shuts down the user comment database
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
-        Preferences.thePreferences.storeWindowLocation(this.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
-        Preferences.thePreferences.storeWindowLocation(this.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);
+        Preferences.thePreferences.storeWindowLocation(VisualFitsBrowserApp.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
+        Preferences.thePreferences.storeWindowLocation(VisualFitsBrowserApp.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);
         Preferences.thePreferences.save();
     }
 
     private static void initSampHub() {
 
         SAMPUtilities.initHubConnector("ODI File Browser", "ODI File Browser & Image Analysis tool.", true);
-
         SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.otalistener.displayedImage") {
             public Map processCall(HubConnection c, String senderId, Message msg) {
                 myLogger.debug("SAMP message handler");
