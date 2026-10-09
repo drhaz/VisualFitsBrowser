@@ -28,8 +28,7 @@ An interactive star and line profile tool that works together with ds9, similar 
 IRAF's `imexam`.
 
 1. Display an image in ds9.
-2. Click **Imexam** in the Toolbox (or choose **Wavefront → ds9 Imexam**). ds9
-   now waits for a key press.
+2. Click **Imexam** in the Toolbox. ds9 now waits for a key press.
 3. Point at a star or feature in the ds9 window and press a key:
     - **`r`** — radial profile: plots pixel value against distance from the
       centroid, with a Gaussian fit.

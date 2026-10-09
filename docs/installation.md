@@ -5,7 +5,7 @@
 | Component | Required? | Notes |
 |---|---|---|
 | Java runtime 8 or newer | yes | Any vendor (e.g. [Eclipse Temurin](https://adoptium.net/)). |
-| [SAOImage ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9) | recommended | Needed to display images and for the imexam / wavefront tools. Version 8.6 or newer is recommended; with older versions the ds9 status indicator may stay greyed out even though display works. |
+| [SAOImage ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9) | recommended | Needed to display images and for the imexam tool. Version 8.6 or newer is recommended; with older versions the ds9 status indicator may stay greyed out even though display works. |
 | `pdflatex` (TeX Live, MacTeX, ...) | optional | Only needed for [PDF log sheets](user-guide/logsheets.md). |
 | `funpack` (CFITSIO) | optional | Only needed to uncompress `.fits.fz` files before display (shift + double-click). |
 

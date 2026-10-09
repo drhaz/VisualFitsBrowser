@@ -22,8 +22,6 @@ lets you attach notes to individual images, and sends images to
   LaTeX installation. See [Log sheets](user-guide/logsheets.md).
 - **The Toolbox** for quick inspection: a searchable FITS header viewer and an
   imexam-style star/line profile analysis. See [The Toolbox](user-guide/toolbox.md).
-- **Wavefront analysis** (experimental) through an external DONUT fitter.
-  See [Wavefront analysis](user-guide/wavefront.md).
 
 ## Getting started
 

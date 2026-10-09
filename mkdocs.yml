@@ -43,7 +43,6 @@ nav:
       - Comments: user-guide/comments.md
       - Log sheets: user-guide/logsheets.md
       - The Toolbox: user-guide/toolbox.md
-      - Wavefront analysis: user-guide/wavefront.md
   - Configuration: configuration.md
   - Developer guide:
       - Building from source: developer/building.md

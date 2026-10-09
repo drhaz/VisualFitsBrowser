@@ -19,8 +19,6 @@ import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
-import org.cowjumping.donut.DonutDisplayFrame;
-import org.cowjumping.donut.pyDonutBridge;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.OSXAdapter;
 import org.cowjumping.guiUtils.Preferences;
@@ -37,8 +35,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class VisualFitsBrowserApp extends JFrame {
@@ -49,10 +45,7 @@ public class VisualFitsBrowserApp extends JFrame {
             + ".WindowLocation";
     private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
             + ".ToolsBoxWindowLocation";
-    private final static String PROP_WINDOWLOCATION_WAVEFRONT = VisualFitsBrowserApp.class.getCanonicalName()
-            + ".WavefrontWindowLocation";
     private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
-    private final static String PROP_SHOWWAVEFRONT = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWWAVEFRONT";
 
     private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
     private final static String PROP_DS9EXEC = VisualFitsBrowserApp.class.getCanonicalName() + ".DS9EXEC";
@@ -67,7 +60,6 @@ public class VisualFitsBrowserApp extends JFrame {
     private static FileBrowserPanel mBrowserPanel;
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
-    private static DonutDisplayFrame DonutFrame = null;
     public static String lastimexamKey = null;
 
     static long IRAF_MSGID = 0;
@@ -78,7 +70,6 @@ public class VisualFitsBrowserApp extends JFrame {
     public static VisualFitsBrowserApp theFileBrowserApp = null;
 
     private static boolean showUtilities = true;
-    private static boolean showWavefront = false;
 
     private VisualFitsBrowserApp() {
 
@@ -106,12 +97,6 @@ public class VisualFitsBrowserApp extends JFrame {
         VisualFitsBrowserApp.ToolBoxFrame.pack();
 
         /*
-         * Wavefront analysis
-         */
-
-        DonutFrame = DonutDisplayFrame.getInstance();
-
-        /*
          * Define the MenuBar
          */
 
@@ -133,7 +118,6 @@ public class VisualFitsBrowserApp extends JFrame {
          */
         Preferences.thePreferences.restoreWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.restoreWindowLocation(this.ToolBoxFrame, this.PROP_WINDOWLOCATION_TOOLBOX);
-        Preferences.thePreferences.restoreWindowLocation(this.DonutFrame, this.PROP_WINDOWLOCATION_WAVEFRONT);
 
         getContentPane().setBackground(new java.awt.Color(198, 206, 217));
         try {
@@ -198,17 +182,6 @@ public class VisualFitsBrowserApp extends JFrame {
     private void setBeepOnNewImage (boolean beepOn) {
         Preferences.thePreferences.setProperty(PROP_BEEPONNEWIMAGE, beepOn + "");
         // TODO: Implement the functionality to enable or disable beep on new image.
-    }
-
-    private void setShowWavefront(boolean show) {
-
-        Preferences.thePreferences.setProperty(PROP_SHOWWAVEFRONT, show + "");
-        VisualFitsBrowserApp.showWavefront = show;
-        if (VisualFitsBrowserApp.DonutFrame != null) {
-
-            VisualFitsBrowserApp.DonutFrame.setVisible(show);
-        }
-
     }
 
     private JMenuBar createTheMenu() {
@@ -360,56 +333,6 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
-        menu = new JMenu("Wavefront");
-        theMenu.add(menu);
-
-        {
-            menuItem = new JCheckBoxMenuItem("Show Wavefront Frame");
-            menuItem.setSelected(
-                    Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWWAVEFRONT, "false")));
-
-            menu.add(menuItem);
-            menuItem.addItemListener(new ItemListener() {
-
-                public void itemStateChanged(ItemEvent e) {
-                    boolean show = ((JCheckBoxMenuItem) e.getSource()).getState();
-                    setShowWavefront(show);
-
-                }
-
-            });
-        }
-
-        {
-
-            menuItem = new JMenuItem("DONUT from ds9 pick");
-
-            menuItem.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    SAMPUtilities.getDS9Cursor("donut");
-                }
-
-            });
-            menu.add(menuItem);
-
-        }
-
-        {
-
-            menuItem = new JMenuItem("ds9 Imexam");
-
-            menuItem.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    SAMPUtilities.getDS9imexam("imexam");
-                }
-
-            });
-            menu.add(menuItem);
-
-        }
-
         menu = new JMenu("Help");
         menu.getAccessibleContext().setAccessibleDescription("Help Menu");
         theMenu.add(menu);
@@ -548,7 +471,6 @@ public class VisualFitsBrowserApp extends JFrame {
         FitsFileEntry.onExit(); // this shuts down the user comment database
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
         Preferences.thePreferences.storeWindowLocation(VisualFitsBrowserApp.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
-        Preferences.thePreferences.storeWindowLocation(VisualFitsBrowserApp.DonutFrame, PROP_WINDOWLOCATION_WAVEFRONT);
         Preferences.thePreferences.save();
     }
 
@@ -563,47 +485,6 @@ public class VisualFitsBrowserApp extends JFrame {
                 }
 
                 return null;
-            }
-        });
-
-        SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
-            @Override
-            public boolean ownsTag(String s) {
-                if (s.toLowerCase().contentEquals("donut")) {
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            public void receiveResponse(HubConnection hubConnection, String responderID, String tag, Response msg)
-                    throws Exception {
-
-                System.out.println("Received donut response: " + msg);
-                if (msg.isOK()) {
-
-                    String result = (String) msg.getResult().get("value");
-                    System.out.println("Message result has value: " + result);
-                    Pattern pattern = Pattern.compile("\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.+)\\}\\s+\\{(.*)\\}");
-                    Matcher matcher = pattern.matcher(result);
-                    if (matcher.matches()) {
-                        String fname = matcher.group(1);
-
-                        // get rid of the extension identifier - we do not support that yet!
-                        fname = fname.replaceAll("\\[.*\\]", "");
-
-                        Double x = Double.parseDouble(matcher.group(2));
-                        Double y = Double.parseDouble(matcher.group(3));
-                        String ext = (matcher.group(4));
-                        System.out.println(String.format("Fname %s x %f y %f  ext %s", fname, x, y, ext));
-                        pyDonutBridge newtask = new pyDonutBridge(new File(fname), false, x.intValue(), y.intValue(),
-                                250);
-                        newtask.setResultListener(DonutFrame);
-                        pyDonutBridge.submitTask(newtask);
-                    }
-                }
-
             }
         });
 
