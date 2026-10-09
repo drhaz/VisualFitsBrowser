@@ -8,6 +8,10 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Removed
+- The experimental **Wavefront** menu (DONUT wavefront analysis). Imexam remains
+  available from the Toolbox.
+
 ## [1.10.4]
 
 ### Added

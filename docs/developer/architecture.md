@@ -13,7 +13,6 @@ under `src/main/java/org/cowjumping/`.
 | `VisualFitsBrowser.ImageActions` | The Toolbox: `ImageToolBoxPanel` and the tools derived from `ImageEvaluator` (`FITSHeaderInspection`, `ImexamDisplay`). |
 | `FitsUtils` | FITS helpers: fast header reading (`QuickHeaderInfo`), image buffers (`ImageContainer`), centroiding and photometry (`odiCentroidSupport`, `RadialProfile`), `funpack` wrapper. |
 | `guiUtils` | Reusable Swing components (plots, z-scale selector, tables), `Preferences` (settings file) and `SAMPUtilities` (all communication with ds9). |
-| `donut` | Bridge to the external wavefront fitter and its result window. |
 
 Several class names (`ODI…`, `OTA…`) date from the program's origin as a tool for
 the WIYN One Degree Imager.
@@ -33,8 +32,8 @@ calls back `FileBrowserPanel.addSingleNewItem` for each new file.
 
 **Displaying in ds9.** All ds9 commands go through `SAMPUtilities`, which sends
 `ds9.set` notifications (`file fits …`, `frame …`, `lock …`) to every connected
-client. Calls that need an answer (`ds9.get`, e.g. imexam or cursor picks) are
-sent with a tag such as `imexam`, `imagecutout` or `donut`; the response handlers
+client. Calls that need an answer (`ds9.get`, e.g. imexam) are
+sent with a tag such as `imexam` or `imagecutout`; the response handlers
 registered in `VisualFitsBrowserApp.initSampHub` dispatch on that tag.
 
 **Comments.** Editing the comment cell calls `FitsFileEntry.writeBackMetaInformation`,

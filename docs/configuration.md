@@ -42,7 +42,6 @@ external program paths that you set only in this file.
 | `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.LASTDIRECTORY` | `/` | File → Change Directory | Directory opened at start-up |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.AUTODISPLAY` | `false` | File → Auto display new image in ds9 | Send new images to ds9 automatically |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.SHOWUTILITIES` | `false` | File → Show ToolBox | Toolbox window visible |
-| `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.SHOWWAVEFRONT` | `false` | Wavefront → Show Wavefront Frame | Wavefront window visible |
 | `directorylistener.ignorediremodified` | `False` | — | `true` rescans the directory every 2 s even if its modification time did not change. Use this on network file systems where new files do not show up. |
 
 ### Window positions
@@ -54,13 +53,6 @@ lines to reset a window that ended up off-screen.
 |---|---|
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.WindowLocation` | Main window |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.ToolsBoxWindowLocation` | Toolbox |
-| `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.WavefrontWindowLocation` | Donut display |
-
-### Experimental / not currently used
-
-| Key | Notes |
-|---|---|
-| `donutbridge.executable`, `donutbridge.donutconfig`, `donutbridge.tmpdir` | Defined for the [wavefront tool](user-guide/wavefront.md) but not read by the current menu action. |
 
 ## Example
 
