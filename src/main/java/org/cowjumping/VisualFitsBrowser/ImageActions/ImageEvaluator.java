@@ -10,17 +10,20 @@ import javax.swing.JPanel;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 
-@SuppressWarnings("serial")
 /**
- * 
- * A JPanel class that accepts a list of ODIFitsEntry files as input, does
- * something with those images, and finaly displays the result in an appropaite
- * manner.
- * 
- * 
- * @author harbeck
+ * Base class for a tool shown in the Toolbox ({@link ImageToolBoxPanel}).
+ * <p>
+ * A tool is a panel that receives either a list of files selected in the file
+ * browser ({@link #setImageList(Vector)}) or pixel data, e.g. a cutout fetched
+ * from ds9 ({@link #setImageContainer(Vector)}), and displays a result. Subclasses
+ * override the input method(s) they support. Heavy computations should be submitted
+ * to {@link #myThreadPool} rather than run on the Swing event thread.
+ * <p>
+ * See docs/developer/adding-a-tool.md for how to register a new tool.
  *
+ * @author harbeck
  */
+@SuppressWarnings("serial")
 public abstract class ImageEvaluator extends JPanel {
 
 	/** A central treadpool that al iamge operation scan utilize to do
@@ -35,7 +38,13 @@ public abstract class ImageEvaluator extends JPanel {
 
 	}
 
-	 public int setImageList(Vector<FitsFileEntry> imagelist) {
+	/**
+	 * Provide the files to evaluate. The default implementation does nothing.
+	 *
+	 * @param imagelist files selected in the file browser; may be null.
+	 * @return number of images accepted, or -1 if the input was null.
+	 */
+	public int setImageList(Vector<FitsFileEntry> imagelist) {
 
 		if (imagelist != null)
 			return imagelist.size();
@@ -44,6 +53,13 @@ public abstract class ImageEvaluator extends JPanel {
 	}
 
 
+	/**
+	 * Provide pixel data to evaluate, e.g. an image cutout received from ds9. The
+	 * default implementation does nothing.
+	 *
+	 * @param imageContainers image buffers; may be null.
+	 * @return number of buffers accepted, or -1 if the input was null.
+	 */
 	public int setImageContainer (Vector<ImageContainer> imageContainers) {
 
 	        if (imageContainers != null)

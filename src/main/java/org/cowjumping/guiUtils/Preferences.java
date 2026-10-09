@@ -12,16 +12,16 @@ import java.util.Properties;
 
 
 /**
- * A wrapper class around the java Properties class for use in OTAListener
+ * Application-wide settings, stored as a Java properties file in the user's home
+ * directory.
  * <p>
- * This class internally keeps a Property list to store properties. If the class
- * is initialized without a filename the properties are loaded from
- * ~/.OTALIsterner.rc. Upon termination of this class (e.g., when the program is
- * finished), the properties will be written back to the file they were read
- * from.
+ * {@link #initPreferences(String)} must be called once; afterwards the settings are
+ * available through the singleton {@link #thePreferences}. VisualFitsBrowser uses
+ * the file ~/.VisualFitsBrowserApp. {@link #getProperty(String, String)} stores the
+ * default value when a key is missing, so the saved file lists every key in use.
+ * The file is written by {@link #save()} when the application exits.
  * <p>
- * A possible extension of this class is to provide a user interface to
- * interactively change properties, or to reload them at run time.
+ * When adding a new key, document it in docs/configuration.md.
  */
 
 public class Preferences {

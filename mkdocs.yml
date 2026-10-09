@@ -1,0 +1,54 @@
+site_name: VisualFitsBrowser
+site_description: Browse, comment and display astronomical FITS images with ds9.
+site_url: https://drhaz.github.io/VisualFitsBrowser/
+repo_url: https://github.com/drhaz/VisualFitsBrowser
+repo_name: drhaz/VisualFitsBrowser
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+exclude_docs: |
+  requirements.txt
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - User guide:
+      - File browser: user-guide/file-browser.md
+      - Comments: user-guide/comments.md
+      - Log sheets: user-guide/logsheets.md
+      - The Toolbox: user-guide/toolbox.md
+      - Wavefront analysis: user-guide/wavefront.md
+  - Configuration: configuration.md
+  - Developer guide:
+      - Building from source: developer/building.md
+      - Architecture: developer/architecture.md
+      - Adding a Toolbox tool: developer/adding-a-tool.md
+      - Releasing: developer/releasing.md
+  - API reference (Javadoc): https://drhaz.github.io/VisualFitsBrowser/api/
+  - Changelog: https://github.com/drhaz/VisualFitsBrowser/blob/master/CHANGELOG.md

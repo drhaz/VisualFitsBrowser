@@ -32,11 +32,25 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Extract release notes from CHANGELOG.md
+      env:
+        TAG: ${{ github.ref_name }}
+      run: |
+        awk -v v="$TAG" '
+          index($0, "## [" v "]") == 1 { found = 1; next }
+          found && /^## \[/ { exit }
+          found { print }
+        ' CHANGELOG.md > release_notes.md
+        if [ ! -s release_notes.md ]; then
+          echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md)." > release_notes.md
+        fi
+        cat release_notes.md
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
+        body_path: release_notes.md
         files: target/*-jar-with-dependencies.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
