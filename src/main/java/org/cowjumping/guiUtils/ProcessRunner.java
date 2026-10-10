@@ -39,6 +39,68 @@ public class ProcessRunner {
     }
 
     /**
+     * Find an executable program, preferring the configured one.
+     * <p>
+     * The configured value may be an absolute path or a bare program name, optionally followed by options. If it
+     * does not point to an executable, the program {@code name} is searched in the directories of the
+     * {@code PATH} environment variable and then in {@code fallbackDirs}.
+     *
+     * @param configured   configured program (may be null or empty).
+     * @param name         program file name to search for, e.g. {@code pdflatex}.
+     * @param fallbackDirs additional directories to search after {@code PATH}, in order.
+     * @return the configured value if usable, otherwise the absolute path of the program found, or null.
+     */
+    public static String findExecutable(String configured, String name, List<File> fallbackDirs) {
+        return findExecutable(configured, name, pathDirectories(System.getenv("PATH")), fallbackDirs);
+    }
+
+    static String findExecutable(String configured, String name, List<File> pathDirs, List<File> fallbackDirs) {
+        if (configured != null && !configured.trim().isEmpty()) {
+            String trimmed = configured.trim();
+            String[] parts = trimmed.split("\\s+", 2);
+            String program = parts[0];
+            String options = parts.length > 1 ? " " + parts[1] : "";
+
+            if (program.contains(File.separator)) {
+                if (isExecutable(new File(program)))
+                    return trimmed;
+            } else {
+                File found = search(program, pathDirs);
+                if (found != null)
+                    return found.getAbsolutePath() + options;
+            }
+        }
+
+        File found = search(name, pathDirs);
+        if (found == null)
+            found = search(name, fallbackDirs);
+        return found != null ? found.getAbsolutePath() : null;
+    }
+
+    static List<File> pathDirectories(String path) {
+        List<File> dirs = new ArrayList<File>();
+        if (path != null)
+            for (String entry : path.split(File.pathSeparator))
+                if (!entry.isEmpty())
+                    dirs.add(new File(entry));
+        return dirs;
+    }
+
+    private static File search(String name, List<File> dirs) {
+        if (dirs != null)
+            for (File dir : dirs) {
+                File candidate = new File(dir, name);
+                if (isExecutable(candidate))
+                    return candidate;
+            }
+        return null;
+    }
+
+    private static boolean isExecutable(File f) {
+        return f.isFile() && f.canExecute();
+    }
+
+    /**
      * Run a command, log its output at debug level, and wait for it to finish.
      *
      * @param command    program and arguments, see {@link #command(String, String...)}.

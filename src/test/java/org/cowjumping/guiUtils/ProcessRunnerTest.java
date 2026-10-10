@@ -5,7 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ProcessRunnerTest extends TestCase {
 
@@ -62,5 +65,106 @@ public class ProcessRunnerTest extends TestCase {
             new File(dir, "marker").delete();
             dir.delete();
         }
+    }
+
+    // --- findExecutable ----------------------------------------------------------------------------------------
+
+    private File tmpDir(String name) {
+        File d = new File(System.getProperty("java.io.tmpdir"), "pr-test-" + name + "-" + System.nanoTime());
+        assertTrue(d.mkdirs());
+        return d;
+    }
+
+    private static File executable(File dir, String name) throws IOException {
+        File f = new File(dir, name);
+        assertTrue(f.createNewFile());
+        assertTrue(f.setExecutable(true));
+        return f;
+    }
+
+    private static void delete(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null)
+            for (File f : files)
+                f.delete();
+        dir.delete();
+    }
+
+    public void testConfiguredExecutableIsKept() throws Exception {
+        if (!isUnix())
+            return;
+        File conf = tmpDir("conf");
+        File fallback = tmpDir("fallback");
+        try {
+            File configured = executable(conf, "pdflatex");
+            executable(fallback, "pdflatex");
+            List<File> none = Collections.emptyList();
+            assertEquals(configured.getAbsolutePath(), ProcessRunner.findExecutable(configured.getAbsolutePath(),
+                    "pdflatex", none, Arrays.asList(fallback)));
+            // Options after the program are preserved.
+            assertEquals(configured.getAbsolutePath() + " -draftmode", ProcessRunner.findExecutable(
+                    configured.getAbsolutePath() + " -draftmode", "pdflatex", none, Arrays.asList(fallback)));
+        } finally {
+            delete(conf);
+            delete(fallback);
+        }
+    }
+
+    public void testMissingConfiguredExecutableFallsBackToPathThenFallbackDirs() throws Exception {
+        if (!isUnix())
+            return;
+        File path = tmpDir("path");
+        File fallback = tmpDir("fallback");
+        try {
+            File inFallback = executable(fallback, "pdflatex");
+            assertEquals(inFallback.getAbsolutePath(), ProcessRunner.findExecutable("/usr/bin/does-not-exist",
+                    "pdflatex", Arrays.asList(path), Arrays.asList(fallback)));
+
+            File inPath = executable(path, "pdflatex");
+            assertEquals("PATH is searched before the fallback directories", inPath.getAbsolutePath(),
+                    ProcessRunner.findExecutable("/usr/bin/does-not-exist", "pdflatex", Arrays.asList(path),
+                            Arrays.asList(fallback)));
+        } finally {
+            delete(path);
+            delete(fallback);
+        }
+    }
+
+    public void testBareProgramNameIsResolvedOnPath() throws Exception {
+        if (!isUnix())
+            return;
+        File path = tmpDir("path");
+        try {
+            File f = executable(path, "xelatex");
+            List<File> none = Collections.emptyList();
+            assertEquals(f.getAbsolutePath() + " -foo",
+                    ProcessRunner.findExecutable("xelatex -foo", "pdflatex", Arrays.asList(path), none));
+        } finally {
+            delete(path);
+        }
+    }
+
+    public void testNonExecutableFileIsSkipped() throws Exception {
+        if (!isUnix())
+            return;
+        File dir = tmpDir("noexec");
+        try {
+            assertTrue(new File(dir, "pdflatex").createNewFile()); // not executable
+            List<File> none = Collections.emptyList();
+            assertNull(ProcessRunner.findExecutable(null, "pdflatex", none, Arrays.asList(dir)));
+        } finally {
+            delete(dir);
+        }
+    }
+
+    public void testNothingFoundReturnsNull() {
+        List<File> none = Collections.emptyList();
+        assertNull(ProcessRunner.findExecutable("/usr/bin/does-not-exist", "no-such-program-xyz", none, none));
+    }
+
+    public void testPathDirectories() {
+        assertEquals(Arrays.asList(new File("/a"), new File("/b")),
+                ProcessRunner.pathDirectories("/a" + File.pathSeparator + File.pathSeparator + "/b"));
+        assertTrue(ProcessRunner.pathDirectories(null).isEmpty());
     }
 }
