@@ -71,7 +71,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     public File mRootDirectory = null;
 
     private DirectoryListener myDirectoryListener = null;
-    public Vector<FitsFileEntry> mImageList;
+
+    /**
+     * Incremented for every directory read, so that a background read that finishes after a newer one was started
+     * can be recognised and discarded. Only accessed on the Swing event thread.
+     */
+    private int directoryGeneration = 0;
+
+    /**
+     * The image entries shown in the table. Modified only on the Swing event thread; other threads must hold
+     * the Vector's lock while iterating (see {@link #getListedFiles()}).
+     */
+    public final Vector<FitsFileEntry> mImageList = new Vector<FitsFileEntry>(50);
 
     private JTable mTable;
     private FitsViewerTableModel mTableDataModel = null;
@@ -112,8 +123,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         mRootDirectoryString = Preferences.thePreferences.getProperty(PROP_LASTDIRECTORY, mRootDirectoryString);
 
         mRootDirectory = new File(this.mRootDirectoryString);
-
-        mImageList = new Vector<FitsFileEntry>(50);
 
         this.setLayout(new BorderLayout());
 
@@ -383,37 +392,39 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     //     table.getColumnModel().getColumn(c).setWidth(0);
     // }
 
-    synchronized void setDisplayedImage(final String fname) {
+    /**
+     * Mark an image as the one currently shown in ds9. May be called from any thread (e.g. SAMP handlers); the
+     * table is updated on the Swing event thread.
+     */
+    void setDisplayedImage(final String fname) {
 
         log.debug("Request to mark image " + fname + " as displayed image in table view.");
-        if (!fname.equals("preimage")) {
-            final int lastIndex;
-            if (DisplayedImage != null)
-                lastIndex = getRowbyName(DisplayedImage);
-            else
-                lastIndex = -1;
+        if (fname == null || fname.equals("preimage"))
+            return;
 
-            DisplayedImage = fname;
+        onEDT(new Runnable() {
+            public void run() {
+                int lastIndex = DisplayedImage != null ? getRowbyName(DisplayedImage) : -1;
+                DisplayedImage = fname;
 
-            try {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-
-                        int index = FileBrowserPanel.this.getRowbyName(fname);
-                        log.debug("Displayed image at index " + index);
-                        if (index >= 0)
-                            mTableDataModel.fireTableRowsUpdated(index, index);
-                        else
-                            log.warn("Displayed Image " + fname + " does not appear in table index!");
-                        if (lastIndex >= 0)
-                            mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
-                    }
-                });
-            } catch (Exception e) {
-                log.error("Error while updating table upon displayed image notification");
+                int index = getRowbyName(fname);
+                log.debug("Displayed image at index " + index);
+                if (index >= 0)
+                    mTableDataModel.fireTableRowsUpdated(index, index);
+                else
+                    log.warn("Displayed Image " + fname + " does not appear in table index!");
+                if (lastIndex >= 0)
+                    mTableDataModel.fireTableRowsUpdated(lastIndex, lastIndex);
             }
+        });
+    }
 
-        }
+    /** Run on the Swing event thread: immediately if already there, otherwise later. */
+    private static void onEDT(Runnable r) {
+        if (SwingUtilities.isEventDispatchThread())
+            r.run();
+        else
+            SwingUtilities.invokeLater(r);
     }
 
     private class ImageIDRenderer extends DefaultTableCellRenderer {
@@ -592,103 +603,96 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         return retVal;
     }
 
-    public void addSingleNewItem(File newItem) {
+    /**
+     * Add a newly arrived file to the table. Called from the directory listener thread: the FITS header is read
+     * in that thread, while the list and table are only changed on the Swing event thread.
+     */
+    public void addSingleNewItem(final File newItem) {
 
-        // Issue at hand is that java only handles last modification date.
-        synchronized (mImageList) {
-            for (FitsFileEntry test : mImageList) {
-
-                if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
-
-                    log.warn("new Item " + newItem.getAbsolutePath()
-                            + " was already in the file list. Rejecting as duplicate.");
-                    return;
-                }
-
-            }
-        }
         final FitsFileEntry e = FitsFileEntry.createFromFile(newItem);
 
         log.debug("Reacting to addSingleNewItem event for file: " + newItem.getAbsoluteFile()
                 + " \n This file converts to entry: " + e);
 
-        if (e != null) {
-            try {
-                synchronized (mImageList) {
-                    mImageList.add(e);
+        if (e == null)
+            return;
+
+        onEDT(new Runnable() {
+            public void run() {
+
+                // The listener of a previous directory may still have queued a file before it was stopped.
+                File parent = newItem.getAbsoluteFile().getParentFile();
+                if (mRootDirectory == null || !mRootDirectory.getAbsoluteFile().equals(parent)) {
+                    log.debug("Ignoring new file " + newItem + " from a directory that is no longer displayed.");
+                    return;
                 }
 
-                // Swing Thread-unsafeness safety wrapper here
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-
-                        mTableDataModel.fireTableRowsInserted(mImageList.size() - 1, mImageList.size() - 1);
-
-                        if (autoLoadImageToListener) {
-
-                            final String fname = newItem.getAbsolutePath();
-
-                            new Thread(new Runnable() {
-
-                                public void run() {
-
-                                    try {
-                                        Thread.sleep(waitMilliSecondsBeforeDS9load);
-                                    } catch (InterruptedException e1) {
-                                        e1.printStackTrace();
-                                    }
-
-                                    log.debug("Autoloading image: " + autoLoadImageToListener);
-                                    SAMPUtilities.loadMEFSaveDS9(fname, 1, false);
-                                    setDisplayedImage(newItem.getName());
-
-                                }
-                            }).start();
-                        }
-
+                for (FitsFileEntry test : mImageList) {
+                    if (test.getAbsolutePath().equals(newItem.getAbsolutePath())) {
+                        log.warn("new Item " + newItem.getAbsolutePath()
+                                + " was already in the file list. Rejecting as duplicate.");
+                        return;
                     }
-                });
-            } catch (Exception e1) {
-                log.error("Error while adding element to file table", e1);
+                }
+
+                mImageList.add(e);
+                int row = mImageList.size() - 1;
+                mTableDataModel.fireTableRowsInserted(row, row);
+
+                if (autoLoadImageToListener) {
+
+                    final String fname = newItem.getAbsolutePath();
+
+                    new Thread(new Runnable() {
+
+                        public void run() {
+
+                            try {
+                                Thread.sleep(waitMilliSecondsBeforeDS9load);
+                            } catch (InterruptedException e1) {
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
+
+                            log.debug("Autoloading image: " + fname);
+                            SAMPUtilities.loadMEFSaveDS9(fname, 1, false);
+                            setDisplayedImage(newItem.getName());
+
+                        }
+                    }, "Auto display").start();
+                }
             }
-        }
+        });
 
     }
 
     /**
-     * Read an entire directory in from scratch
+     * Read an entire directory in from scratch.
+     * <p>
+     * The FITS headers are read by a background worker; the image list and the table are only changed on the
+     * Swing event thread. If another directory is requested before the worker finishes, its result is discarded.
+     * May be called from any thread.
      *
-     * @param RootDirectory
+     * @param RootDirectory directory to display
      */
     private void readDirectory(final File RootDirectory) {
 
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    readDirectory(RootDirectory);
+                }
+            });
+            return;
+        }
+
         // stop the directory listener.
-        if (myDirectoryListener != null) {
-            log.debug("Stopping directory listener");
-            myDirectoryListener.waitToabort();
-            myDirectoryListener = null;
-        }
+        stopWatching();
 
+        final int generation = ++directoryGeneration;
 
-        if (mImageList != null) {
-            mImageList.clear();
-           
-        } else {
-             log.warn("Imagelist did not exist. that is strange; fixed it now");
-             mImageList = new Vector<FitsFileEntry>();
-        }
-
-        try {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        mTableDataModel.fireTableDataChanged();
-                    }
-                });
-            } catch (Exception e) {
-                log.error("Error while notifying table about table clean");
-        }
-
-
+        mImageList.clear();
+        mTableDataModel.fireTableDataChanged();
 
         log.info("Reading directory " + RootDirectory);
         this.mRootDirectory = RootDirectory.getAbsoluteFile();
@@ -701,22 +705,35 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 50);
         mProgressMonitor.setMillisToDecideToPopup(200);
 
-        new SwingWorker<String, String>() {
+        new SwingWorker<Vector<FitsFileEntry>, Void>() {
 
-            public String doInBackground() {
-               
+            @Override
+            public Vector<FitsFileEntry> doInBackground() {
+                return FitsFileEntry.getImagesInDirectory(RootDirectory, mProgressMonitor);
+            }
 
-                // load images in the new directory
-                Vector<FitsFileEntry> newList = FitsFileEntry.getImagesInDirectory(RootDirectory,
-                        mProgressMonitor);
+            @Override
+            protected void done() {
+                mProgressMonitor.close();
+
+                if (generation != directoryGeneration) {
+                    log.debug("Discarding stale listing of " + RootDirectory);
+                    return;
+                }
+
+                Vector<FitsFileEntry> newList;
+                try {
+                    newList = get();
+                } catch (Exception e) {
+                    log.error("Error while reading directory " + RootDirectory, e);
+                    newList = null;
+                }
 
                 if (newList != null && newList.size() > 0) {
                     mImageList.addAll(newList);
                 }
 
                 log.debug("done with reading the directory, notifying table");
-                // This should be safe without wrapper since invoked from
-                // Swingworker:
                 mTableDataModel.fireTableDataChanged();
 
                 packColumn(mTable, 0, 1);
@@ -724,25 +741,26 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 packColumn(mTable, 2, 2);
                 packColumn(mTable, 3, 1);
 
-                mProgressMonitor.close();
+                boolean hasDate = getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null;
+                tomorrowLabel.setVisible(hasDate);
+                yesterDayLabel.setVisible(hasDate);
 
-                if (getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null) {
-                    tomorrowLabel.setVisible(true);
-                    yesterDayLabel.setVisible(true);
-                } else {
-                    tomorrowLabel.setVisible(false);
-                    yesterDayLabel.setVisible(false);
-                }
-
-                // Now that the directory is fully read in, instanciate a new
-                // DirectoryListener.
-
+                // Now that the directory is fully read in, instantiate a new DirectoryListener.
                 myDirectoryListener = new DirectoryListener(RootDirectory, FileBrowserPanel.this);
-
-                new Thread(myDirectoryListener).start();
-                return null;
+                Thread t = new Thread(myDirectoryListener, "Directory listener");
+                t.setDaemon(true);
+                t.start();
             }
         }.execute();
+    }
+
+    /** Stop watching the current directory for new files. Blocks until the listener thread has finished. */
+    void stopWatching() {
+        if (myDirectoryListener != null) {
+            log.debug("Stopping directory listener");
+            myDirectoryListener.waitToabort();
+            myDirectoryListener = null;
+        }
     }
 
     private Date getDateComponentofDirectory(String name) {
@@ -937,6 +955,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             return super.getColumnClass(columnIndex);
         }
 
+    }
+
+    /** The table model, for tests. */
+    javax.swing.table.TableModel getTableModel() {
+        return mTableDataModel;
     }
 
     public Vector<File> getListedFiles() {
