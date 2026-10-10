@@ -3,6 +3,7 @@ package org.cowjumping.VisualFitsBrowser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -560,22 +561,30 @@ public class VisualFitsBrowserApp extends JFrame {
     private static void parseArgs(String[] args) {
         Options options = new Options();
 
-        options.addOption("debug", false, "Debug");
+        options.addOption("debug", false, "write debug messages to the console");
         options.addOption("h", false, "show help");
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine cmd = parser.parse(options, args);
 
-            if (cmd.hasOption("debug") || Boolean.TRUE) {
+            if (cmd.hasOption("h")) {
+                new HelpFormatter().printHelp("java -jar VisualFitsBrowser-<version>-jar-with-dependencies.jar",
+                        options);
+                System.exit(0);
+            }
+
+            if (cmd.hasOption("debug")) {
 
                 LoggerContext context = (LoggerContext) LogManager.getContext(false);
                 Configuration config = context.getConfiguration();
                 LoggerConfig rootConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
                 rootConfig.setLevel(Level.DEBUG);
+                // Loggers created before this point (static fields) only see the new level after an update.
+                context.updateLoggers();
             }
 
         } catch (Exception e) {
-            myLogger.warn("Command line parsing error!");
+            myLogger.warn("Command line parsing error: " + e.getMessage());
 
         }
 
@@ -586,7 +595,7 @@ public class VisualFitsBrowserApp extends JFrame {
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
         try {
             context.setConfigLocation(VisualFitsBrowserApp.class.getClassLoader()
-                    .getResource("resources/VisualFitsBrowser.log4j").toURI());
+                    .getResource("resources/log4j2.xml").toURI());
         } catch (Exception e) {
             myLogger.warn("Error while configuring log4j 2", e);
         }

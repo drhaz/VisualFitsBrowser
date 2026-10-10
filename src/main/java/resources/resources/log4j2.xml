@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration status="warn" name="MyApp" packages="">
+<!-- Loaded explicitly by VisualFitsBrowserApp.main; the -debug option raises the root level to DEBUG. -->
+<Configuration status="warn" name="VisualFitsBrowser">
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
-      <SimpleLayout/>
+      <PatternLayout pattern="%d{HH:mm:ss} %-5level %c{1} - %msg%n"/>
     </Console>
   </Appenders>
 

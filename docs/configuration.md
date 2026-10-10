@@ -30,7 +30,7 @@ external program paths that you set only in this file.
 |---|---|---|
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.DS9EXEC` | first of `/usr/local/bin/ds9`, `/usr/bin/ds9`, `~/bin/ds9` that exists | ds9 binary launched when you double-click the **DS9** label |
 | `org.cowjumping.VisualFitsBrowser.latex.pdflatex` | `/usr/bin/pdflatex` | `pdflatex` used for [log sheets](user-guide/logsheets.md) |
-| `org.cowjumping.VisualFitsBrowser.latex.openpdf` | `/usr/bin/okular` | Program that opens the log-sheet PDF. On macOS use `/usr/bin/open`. |
+| `org.cowjumping.VisualFitsBrowser.latex.openpdf` | `/usr/bin/okular` | Program that opens the log-sheet PDF. On macOS use `/usr/bin/open`. Options may follow the program, e.g. `/usr/bin/open -a Preview`. |
 | `VisualFitsBrowser.latex.tmp` | `/tmp` | Directory for log-sheet LaTeX and PDF files |
 | `cowumping.funpack.exec` | `/usr/bin/funpack` | `funpack` used on shift + double-click (the key really is spelled `cowumping`) |
 | `tempdir` | system temp directory | Where uncompressed files from `funpack` are written |

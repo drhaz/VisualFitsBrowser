@@ -8,6 +8,21 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Fixed
+- PDF log sheets failed with an error since 1.9.0 (observation times were
+  formatted with the wrong date API).
+- Log sheets no longer break on comments containing `\ { } ^ ~ < >`.
+- External programs (pdflatex, funpack, PDF viewer, ds9) can no longer hang the
+  program by filling their output buffer, and file paths with spaces work.
+- Changing directory no longer waits for, or can hang on, the old directory watcher.
+- The `-debug` option works, the log configuration file is actually used, and the
+  default log level is `INFO` instead of always `DEBUG`.
+
+### Changed
+- The PDF viewer is started without waiting for it to close, so
+  **Generate PDF logfile** becomes available again right away.
+- `-h` prints the command-line options.
+
 ### Security
 - log4j 2.17.1 → 2.25.5 (GHSA-vc5p-v9hr-52mj, GHSA-6hg6-v5c8-fphq,
   GHSA-3pxv-7cmr-fjr4, GHSA-qv9r-c865-cp47).

@@ -266,11 +266,7 @@ public class SAMPUtilities {
 
         if (pathToBinary != null)
 
-            try {
-                Runtime.getRuntime().exec(pathToBinary + " -samp connect");
-            } catch (IOException e) {
-                log.error("While launching ds9: ", e);
-            }
+            ProcessRunner.launch(ProcessRunner.command(pathToBinary, "-samp", "connect"), null, log);
 
         else
 
@@ -307,7 +303,7 @@ public class SAMPUtilities {
                 for (String client : clients) {
 
                     String clientName = getHubConnector().getConnection().getMetadata(client).getName();
-                    log.info ("Client name: " + clientName);
+                    log.debug ("Client name: " + clientName);
                     if (clientName != null) {
 
                         if (clientName.contains(idContain))
