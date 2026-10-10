@@ -398,50 +398,49 @@ public class VisualFitsBrowserApp extends JFrame {
         mProgressBar.setMaximumSize(new Dimension(100, mProgressBar.getPreferredSize().height));
         theMenu.add(mProgressBar);
 
+        // Poll ds9 availability and free disk space in the background: the SAMP query and the file system
+        // calls can block. The results are applied to the Swing components on the event thread.
         Thread t = new Thread(new Runnable() {
 
             public void run() {
 
-                //final Runtime rt = Runtime.getRuntime();
-                double free = 0;
-                double total = 1;
-                // boolean heart = true;
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
 
-                    boolean ds9Status = SAMPUtilities.isClientAvailable(SAMPUtilities.DS9IDString);
-                    ds9Label.setEnabled(ds9Status);
+                    final boolean ds9Status = SAMPUtilities.isClientAvailable(SAMPUtilities.DS9IDString);
+
+                    FileBrowserPanel panel = getmBrowserPanel();
+                    File dir = panel != null ? panel.mRootDirectory : null;
+                    final long free = dir != null ? dir.getFreeSpace() : 0;
+                    final long total = dir != null ? dir.getTotalSpace() : 0;
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            ds9Label.setEnabled(ds9Status);
+
+                            // getTotalSpace() is 0 if the directory does not exist or cannot be queried.
+                            if (total > 0) {
+                                int progress = (int) ((double) (total - free) / total * 1000);
+                                mProgressBar.setValue(progress);
+                                if (progress < 800)
+                                    mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
+                                else
+                                    mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
+                                mProgressBar.setString(String.format("%6.2f TB free", free / 1000. / 1000 / 1000 / 1000));
+                            }
+                        }
+                    });
 
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
-                        myLogger.warn("Error in memory monitoring thread.", e);
-
-                    }
-
-                    if (getmBrowserPanel() != null && getmBrowserPanel().mRootDirectory != null
-                            && getmBrowserPanel().mRootDirectory.exists()) {
-
-                        free = getmBrowserPanel().mRootDirectory.getFreeSpace();
-
-                        total = getmBrowserPanel().mRootDirectory.getTotalSpace();
-                        if (total != 0) {
-                            int progress = (int) ((total - free) / total * 1000);
-
-                            mProgressBar.setValue(progress);
-                            if (progress < 800)
-                                mProgressBar.setForeground(GUIConsts.GoodStatusBackgroundColor);
-                            else
-                                mProgressBar.setForeground(GUIConsts.WarnStatusBackgroundColor);
-                            mProgressBar.setString(String.format("%6.2f TB free", free / 1000. / 1000 / 1000 / 1000));
-
-                        }
-
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
 
         });
-        t.setName("Memory Display Thread");
+        t.setName("Status Display Thread");
+        t.setDaemon(true);
         t.start();
 
         return theMenu;
