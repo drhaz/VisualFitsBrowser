@@ -269,43 +269,46 @@ public class Filelist2Latex {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				myLogger.info("Invoking Generate PDF");
+
+				if (myFileBrowserPanel == null || myFileBrowserPanel.mRootDirectory == null) {
+					myLogger.warn("No filebrowser panel set for logfile conversion");
+					return;
+				}
+
+				// Take a snapshot on the event thread; the list may change while the PDF is being built.
+				final Vector<FitsFileEntry> fileList = new Vector<FitsFileEntry>(myFileBrowserPanel.mImageList);
+				final File rootDirectory = myFileBrowserPanel.mRootDirectory;
+				final String tempDir = Preferences.thePreferences.getProperty("VisualFitsBrowser.latex.tmp", "/tmp");
+
 				item.setEnabled(false);
 
-				new SwingWorker() {
+				new SwingWorker<Void, Void>() {
 
-					protected Boolean doInBackground() throws Exception {
+					@Override
+					protected Void doInBackground() throws Exception {
+						String title = rootDirectory.getAbsolutePath();
+						String LatexFname = rootDirectory.getName() + ".tex";
 
-						if (myFileBrowserPanel != null && myFileBrowserPanel.mRootDirectory != null) {
-
-							// Get file list and prepare title, get name for latex file
-							Vector<FitsFileEntry> fileList = myFileBrowserPanel.mImageList;
-							String title = myFileBrowserPanel.mRootDirectory.getAbsolutePath();
-							String tempDir = Preferences.thePreferences.getProperty("VisualFitsBrowser.latex.tmp", "/tmp");
-							String LatexFname = myFileBrowserPanel.mRootDirectory.getName() + ".tex";
-
-							try {
-								writeFileList2Latex(title, fileList, tempDir + "/" + LatexFname);
-								processLatex(tempDir, tempDir + "/" + LatexFname);
-								processLatex(tempDir, tempDir + "/" + LatexFname);
-								processLatex(tempDir, tempDir + "/" + LatexFname);
-								openLatexPDF(tempDir + "/" + LatexFname.replace(".tex", ".pdf"));
-
-							} catch (Exception e1) {
-								JOptionPane.showMessageDialog(myFileBrowserPanel.getParent(),
-										"Error whlile creating pdf lof sheet:\n\n" + e1.getMessage());
-							}
-
-						} else {
-							myLogger.warn("No filebrowser panel set for logfile conversion");
-						}
-						return (true);
+						writeFileList2Latex(title, fileList, tempDir + "/" + LatexFname);
+						processLatex(tempDir, tempDir + "/" + LatexFname);
+						processLatex(tempDir, tempDir + "/" + LatexFname);
+						processLatex(tempDir, tempDir + "/" + LatexFname);
+						openLatexPDF(tempDir + "/" + LatexFname.replace(".tex", ".pdf"));
+						return null;
 					}
 
-
+					@Override
 					protected void done() {
 						item.setEnabled(true);
+						try {
+							get();
+						} catch (Exception e1) {
+							Throwable cause = e1.getCause() != null ? e1.getCause() : e1;
+							myLogger.error("Error while creating pdf log sheet", cause);
+							JOptionPane.showMessageDialog(myFileBrowserPanel.getParent(),
+									"Error while creating pdf log sheet:\n\n" + cause.getMessage());
+						}
 					}
-
 
 				}.execute();
 			}

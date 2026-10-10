@@ -15,6 +15,9 @@ Entries before 1.10.4 were reconstructed from the git history.
 - External programs (pdflatex, funpack, PDF viewer, ds9) can no longer hang the
   program by filling their output buffer, and file paths with spaces work.
 - Changing directory no longer waits for, or can hang on, the old directory watcher.
+- The file table is now only updated on the Swing event thread. Fixes duplicated
+  rows after quickly reloading or switching directories, and files from a
+  previously shown directory appearing in the table.
 - The `-debug` option works, the log configuration file is actually used, and the
   default log level is `INFO` instead of always `DEBUG`.
 

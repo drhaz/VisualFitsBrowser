@@ -255,14 +255,23 @@ public class FitsFileEntry {
 		return RootPath + "/" + FName;
 	}
 
-	public static Vector<FitsFileEntry> getImagesInDirectory(File RootDirectory, ProgressMonitor progressM) {
+	/**
+	 * Read the headers of all FITS files in a directory. Typically called from a background thread; progress is
+	 * reported to the (optional) ProgressMonitor on the Swing event thread.
+	 */
+	public static Vector<FitsFileEntry> getImagesInDirectory(File RootDirectory, final ProgressMonitor progressM) {
 		Vector<FitsFileEntry> directoryImages = new Vector<FitsFileEntry>();
 
 		File files[] = RootDirectory.listFiles(thefileFilter);
 
 		if (files != null) {
+			final int nFiles = files.length;
 			if (progressM != null)
-				progressM.setMaximum(files.length);
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						progressM.setMaximum(nFiles);
+					}
+				});
 			myLogger.info("| Found  " + files.length + " entries");
 			int progress = 0;
 
@@ -290,8 +299,14 @@ public class FitsFileEntry {
 
 					progress++;
 
-					if (progressM != null)
-						progressM.setProgress(progress);
+					if (progressM != null) {
+						final int done = progress;
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								progressM.setProgress(done);
+							}
+						});
+					}
 
 				}
 			}
