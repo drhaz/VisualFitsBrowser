@@ -8,6 +8,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+## [1.10.5] - 2026-10-09
+
 ### Fixed
 - Log sheets: if the configured PDF viewer (default `/usr/bin/okular`) does not
   exist, the PDF is opened with `open` on macOS, or with `xdg-open`, `gio open` or
@@ -27,6 +29,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 - The file table is now only updated on the Swing event thread. Fixes duplicated
   rows after quickly reloading or switching directories, and files from a
   previously shown directory appearing in the table.
+- The ds9 indicator and the free-disk-space bar are updated on the Swing event
+  thread; the disk-space bar is shown right at start-up.
 - The `-debug` option works, the log configuration file is actually used, and the
   default log level is `INFO` instead of always `DEBUG`.
 
