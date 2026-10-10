@@ -68,7 +68,8 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
      */
     private static int waitMilliSecondsBeforeDS9load = 1000;
 
-    public File mRootDirectory = null;
+    /** The displayed directory. Written on the Swing event thread, read by status and export threads. */
+    public volatile File mRootDirectory = null;
 
     private DirectoryListener myDirectoryListener = null;
 
