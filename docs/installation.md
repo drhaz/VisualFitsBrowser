@@ -22,7 +22,8 @@ it contains all required libraries.
 java -jar VisualFitsBrowser-<version>-jar-with-dependencies.jar
 ```
 
-Replace `<version>` with the version you downloaded. On start-up the program prints
+Replace `<version>` with the version you downloaded. Add `-debug` for detailed
+log output on the console, or `-h` to list the options. On start-up the program prints
 its version and starts a SAMP hub. The window title also shows the version.
 
 On first start the program opens the file system root `/`. Use

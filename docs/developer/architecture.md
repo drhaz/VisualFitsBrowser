@@ -47,6 +47,11 @@ See [Configuration](../configuration.md) for all keys.
 
 ## Logging
 
-log4j2 writes to the console. Start the program from a terminal to see what it
-is doing. At present the root log level is always forced to `DEBUG` in
-`VisualFitsBrowserApp.parseArgs`.
+log4j2 writes to the console, configured by `src/main/java/resources/log4j2.xml`
+(log level `INFO`). Start the program from a terminal to see what it is doing; the
+`-debug` option switches the root logger to `DEBUG`.
+
+External programs (pdflatex, funpack, the PDF viewer, ds9) are started through
+`guiUtils.ProcessRunner`, which merges their stderr into stdout so they cannot
+block on a full output pipe, and passes file names as separate arguments so paths
+with spaces work. Use it for any new external tool.

@@ -5,10 +5,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cowjumping.guiUtils.Preferences;
+import org.cowjumping.guiUtils.ProcessRunner;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 
 
@@ -39,39 +38,6 @@ public class funpackwrapper {
 
 
 
-    private void callout(String g) {
-        try {
-            Runtime rt = Runtime.getRuntime();
-            Process proc = null;
-
-            log.debug("Executing funpack: " + g);
-
-            proc = rt.exec(g, null);
-            if (proc == null)
-                return;
-
-            BufferedReader err = new BufferedReader(new InputStreamReader(
-                    proc.getErrorStream()));
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    proc.getInputStream()));
-
-            String sline=null;
-            String eline=null;
-            while ((sline = br.readLine()) != null
-                    || (eline = err.readLine()) != null) {
-                if (sline != null) log.debug(sline);
-                if (eline != null) log.error(sline);
-            }
-
-            proc.waitFor();
-            log.debug ("Done funpacking, exit code " + proc.exitValue());
-
-        } catch (Exception e) {
-
-            log.error(e);
-        }
-    }
-
     /**
      *
      * Blocking function to funpack a fits file.
@@ -99,8 +65,10 @@ public class funpackwrapper {
         if (! name.endsWith(".fits"))
             name = name + ".fits";
         File outfile = new File (new File (tempDirectory), name);
-        String commandline = execLocation + " -O " + outfile.getAbsolutePath() + " " + input;
-        callout(commandline);
+        int exit = ProcessRunner.run(ProcessRunner.command(execLocation, "-O", outfile.getAbsolutePath(), input),
+                null, log);
+        if (exit != 0)
+            log.warn("funpack exited with code " + exit + " for " + input);
         if (outfile.exists()) {
             outfile.deleteOnExit();
             return outfile;

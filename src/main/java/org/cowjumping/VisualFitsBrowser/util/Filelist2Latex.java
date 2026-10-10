@@ -6,24 +6,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cowjumping.VisualFitsBrowser.FileBrowserPanel;
 import org.cowjumping.guiUtils.Preferences;
+import org.cowjumping.guiUtils.ProcessRunner;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
 public class Filelist2Latex {
 
 	private final static Logger myLogger = LogManager.getLogger(Filelist2Latex.class);
-	private final static SimpleDateFormat mDateFormat = new SimpleDateFormat(
-			"HH:mm:ss");
+	private final static DateTimeFormatter mDateFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
 	private static FileBrowserPanel myFileBrowserPanel;
 
 	public static void writeFileList2Latex(String Title,
@@ -90,7 +89,7 @@ public class Filelist2Latex {
 					+ EscapeForLatex(fe.Filter)
 					+ "} & "//
 					+ "\\multirow{2}{*}{"
-					+ EscapeForLatex(mDateFormat.format(fe.DateObs))
+					+ EscapeForLatex(formatTime(fe.DateObs))
 					+ "} & " //
 					+ String.format("% 6.1f", fe.Focus)
 					+ " & " //
@@ -122,7 +121,7 @@ public class Filelist2Latex {
 					+ " & " + EscapeForLatex(fe.Dec_String) + " & "//
 					+ EscapeForLatex(fe.ExpTime + "") + " & " //
 					+ EscapeForLatex(fe.Filter) + " & "//
-					+ EscapeForLatex(mDateFormat.format(fe.DateObs)) + " & " //
+					+ EscapeForLatex(formatTime(fe.DateObs)) + " & " //
 					+ EscapeForLatex(fe.UserComment);
 
 			sb.append(s);
@@ -168,19 +167,50 @@ public class Filelist2Latex {
 		return retVal;
 	}
 
-	private static String EscapeForLatex(String s) {
-		String ret = "";
+	/** Time of day of an observation for the log sheet, or an empty string if unknown. */
+	static String formatTime(LocalDateTime t) {
+		return t == null ? "" : mDateFormat.format(t);
+	}
+
+	/**
+	 * Escape text so that it is printed literally by LaTeX, e.g. user comments and file names.
+	 */
+	static String EscapeForLatex(String s) {
 		if (s == null)
-			return ret;
+			return "";
 
-		String a = s.replaceAll("#", "\\\\#");
-		ret = a.replaceAll("&", "\\\\&");
-		ret = ret.replaceAll("\\$", "\\\\\\$");
-		ret = ret.replaceAll("_", "\\\\_");
-		ret = ret.replaceAll("%", "\\\\%");
-
-		return ret;
-
+		StringBuilder sb = new StringBuilder(s.length() + 16);
+		for (char c : s.toCharArray()) {
+			switch (c) {
+				case '\\':
+					sb.append("\\textbackslash{}");
+					break;
+				case '{':
+				case '}':
+				case '#':
+				case '$':
+				case '%':
+				case '&':
+				case '_':
+					sb.append('\\').append(c);
+					break;
+				case '^':
+					sb.append("\\textasciicircum{}");
+					break;
+				case '~':
+					sb.append("\\textasciitilde{}");
+					break;
+				case '<':
+					sb.append("\\textless{}");
+					break;
+				case '>':
+					sb.append("\\textgreater{}");
+					break;
+				default:
+					sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 
 	public static void main(String args[]) {
@@ -197,101 +227,32 @@ public class Filelist2Latex {
 
 	}
 
+	/**
+	 * Run pdflatex on a LaTeX file.
+	 *
+	 * @param Path  working directory; output files are written there.
+	 * @param fname LaTeX file, relative to Path or absolute.
+	 * @return pdflatex exit code, or -1 if it could not be run.
+	 */
 	public static int processLatex(String Path, String fname) {
-
-		Runtime rt = Runtime.getRuntime();
-		Process proc = null;
-		StringBuffer output = new StringBuffer();
 
 		String pdfLatex = Preferences.thePreferences.getProperty(
 				"org.cowjumping.VisualFitsBrowser.latex.pdflatex",
 				"/usr/bin/pdflatex");
 
-		StringBuffer Command = new StringBuffer(pdfLatex + "  -interaction=nonstopmode ");
-		Command.append(" " + fname);
-
-		try {
-			myLogger.info("Executing pdflatex: " + Command.toString() + " in Path: " + Path);
-			proc = rt.exec(Command.toString(), null, new File(Path));
-			if (proc == null) {
-				myLogger.error("Proceess for pdflatex returned null. Aborting");
-				return -1;
-			}
-
-			BufferedReader err = new BufferedReader(new InputStreamReader(
-					proc.getErrorStream()));
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					proc.getInputStream()));
-
-			String sline = null;
-			String eline = null;
-
-			while ((sline = br.readLine()) != null
-					|| (eline = err.readLine()) != null) {
-				if (output != null && sline != null)
-					output.append(sline);
-				if (eline != null)
-					if (myLogger.isDebugEnabled())
-						myLogger.debug(eline);
-			}
-
-			proc.waitFor();
-
-		} catch (Exception e) {
-
-			myLogger.error("Error while processing latex", e);
-		}
-		myLogger.info("PDFLatex output\n " + output.toString());
-        return proc.exitValue();
-
+		return ProcessRunner.run(ProcessRunner.command(pdfLatex, "-interaction=nonstopmode", fname),
+				new File(Path), myLogger);
 	}
 
+	/**
+	 * Open a PDF file in the configured viewer. Does not wait for the viewer to close.
+	 */
 	public static void openLatexPDF(String fname) {
-
-		Runtime rt = Runtime.getRuntime();
-		Process proc = null;
-
 
 		String OpenPDF = Preferences.thePreferences.getProperty(
 				"org.cowjumping.VisualFitsBrowser.latex.openpdf", "/usr/bin/okular");
 
-		StringBuilder Command = new StringBuilder(OpenPDF + " " + fname);
-		StringBuilder output = new StringBuilder();
-
-		try {
-			myLogger.info("Calling PDf viewer: " + Command.toString());
-			proc = rt.exec(Command.toString());
-			if (proc == null) {
-				myLogger.error("Proceess for pdflatex returned null. Aborting");
-				return;
-			}
-
-			BufferedReader err = new BufferedReader(new InputStreamReader(
-					proc.getErrorStream()));
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					proc.getInputStream()));
-
-			String sline = null;
-			String eline = null;
-
-
-			while ((sline = br.readLine()) != null
-					|| (eline = err.readLine()) != null) {
-				if (sline != null)
-					output.append(sline);
-				if (eline != null)
-					if (myLogger.isDebugEnabled())
-						myLogger.debug(eline);
-			}
-
-			proc.waitFor();
-
-		} catch (Exception e) {
-
-			myLogger.error("Error while opening log pdf file", e);
-		}
-		myLogger.debug("PDF viewer said: " + output.toString());
-
+		ProcessRunner.launch(ProcessRunner.command(OpenPDF, fname), null, myLogger);
 	}
 
 	/**

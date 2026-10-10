@@ -47,9 +47,15 @@ public class DirectoryListener implements Runnable {
     private DirectoryChangeReceiver rec;
 
     /**
-     * Internal flag if listener should die.
+     * Internal flag if listener should die. Volatile because it is set from another thread (usually the Swing
+     * event thread) while the listener thread polls it.
      */
-    private boolean abort = false;
+    private volatile boolean abort = false;
+
+    /**
+     * The thread executing {@link #run()}, so that {@link #waitToabort()} can cut its sleep short.
+     */
+    private volatile Thread listenerThread = null;
 
     /**
      * Flag whether to beep when a new file has arrived.
@@ -96,6 +102,7 @@ public class DirectoryListener implements Runnable {
     }
 
     public void run() {
+        listenerThread = Thread.currentThread();
         myLogger.info("Starting new Directory Listener Thread for: "
                 + myDirectory.getAbsolutePath());
 
@@ -155,8 +162,8 @@ public class DirectoryListener implements Runnable {
                 // get a bit CPU heavy.
                 Thread.sleep(ignorelastModified ? 2000 : 700);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                myLogger.error("Interrupted while sleeping.", e);
+                // Expected when waitToabort() wakes us up; the loop condition decides whether to exit.
+                myLogger.debug("Directory listener woken up from sleep.");
             }
 
         }
@@ -166,8 +173,15 @@ public class DirectoryListener implements Runnable {
         abortWait.release();
     }
 
+    /**
+     * Stop the listener and block until its thread has finished, so that it cannot report files from the old
+     * directory after this method returns. Returns quickly because the listener's sleep is interrupted.
+     */
     public void waitToabort() {
         this.abort = true;
+        Thread t = listenerThread;
+        if (t != null)
+            t.interrupt();
         myLogger.debug("Waiting for Directorylistener to quit.");
         try {
             this.abortWait.acquire();
