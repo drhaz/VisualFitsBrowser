@@ -9,6 +9,11 @@ Entries before 1.10.4 were reconstructed from the git history.
 ## [Unreleased]
 
 ### Fixed
+- Log sheets: if the configured PDF viewer (default `/usr/bin/okular`) does not
+  exist, the PDF is opened with `open` on macOS, or with `xdg-open`, `gio open` or
+  a common PDF viewer on Linux. If no viewer is found, an error dialog shows where
+  the PDF was written. A failed pdflatex run is now reported instead of opening a
+  stale PDF from an earlier run.
 - Log sheets: if the configured `pdflatex` does not exist, `pdflatex` is now
   searched on `PATH` and in the usual TeX installation directories (MacTeX,
   Homebrew, MacPorts, TeX Live). If none is found, an error dialog explains how

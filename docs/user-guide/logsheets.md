@@ -10,7 +10,7 @@ Choose **File → Generate PDF logfile**. The program will:
 1. write a LaTeX file named `<directory name>.tex` into the temporary directory
    (`/tmp` by default);
 2. run `pdflatex` on it three times (needed for the "page X of Y" footer);
-3. open the resulting PDF in your PDF viewer.
+3. open the resulting PDF in your PDF viewer (see [Opening the PDF](#opening-the-pdf)).
 
 The menu item is disabled while this runs. A plain-text version of the table
 (columns separated by `&`) is also written to `/tmp/VisualFitsBrowser_Logfile.txt`.
@@ -64,6 +64,22 @@ The search is needed on macOS in particular: programs started from the Finder or
 the Dock do not see the `PATH` of your shell. A warning in the log shows which
 program was used; the setting itself is not changed. If no `pdflatex` is found,
 an error dialog asks you to install TeX or set the full path.
+
+### Opening the PDF
+
+If the configured PDF viewer does not exist (the default `/usr/bin/okular` is often
+not installed), the PDF is opened the usual way for your system:
+
+- **macOS**: with `open`, i.e. in your default PDF application (normally Preview).
+- **Linux and other Unix systems**: with the first available of `xdg-open` and
+  `gio open` (your desktop's default PDF application), then `evince`, `okular`,
+  `atril`, `xreader`, `zathura`, `qpdfview`, `mupdf`, `xpdf`.
+- Otherwise, through Java's desktop integration.
+
+A viewer configured with a full path is also found if it is installed in a
+different directory. A warning in the log shows which program was used; the setting
+is not changed. If no viewer can be started, an error dialog shows where the PDF
+was written.
 
 ## Customising the layout
 

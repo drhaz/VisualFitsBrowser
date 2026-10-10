@@ -9,6 +9,8 @@ import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.ProcessRunner;
 
 import javax.swing.*;
+import java.awt.Desktop;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -293,15 +295,89 @@ public class Filelist2Latex {
 		return found;
 	}
 
+	static final String PROP_OPENPDF = "org.cowjumping.VisualFitsBrowser.latex.openpdf";
+
 	/**
-	 * Open a PDF file in the configured viewer. Does not wait for the viewer to close.
+	 * Programs tried, in order, when the configured PDF viewer does not exist. On macOS, {@code open} uses the
+	 * user's default PDF application. On Linux and other Unix systems, {@code xdg-open} and {@code gio open} do
+	 * the same for the desktop environment; the remaining entries are common stand-alone viewers.
 	 */
-	public static void openLatexPDF(String fname) {
+	static List<String> pdfViewerCandidates(String osName) {
+		if (osName != null && osName.toLowerCase().startsWith("mac"))
+			return Arrays.asList("open");
+		return Arrays.asList("xdg-open", "gio open", "evince", "okular", "atril", "xreader", "zathura",
+				"qpdfview", "mupdf", "xpdf");
+	}
 
-		String OpenPDF = Preferences.thePreferences.getProperty(
-				"org.cowjumping.VisualFitsBrowser.latex.openpdf", "/usr/bin/okular");
+	/** Directories searched after PATH for PDF viewers. */
+	static final List<File> VIEWER_SEARCH_DIRS = Arrays.asList(
+			new File("/usr/bin"), new File("/usr/local/bin"), new File("/bin"), new File("/opt/homebrew/bin"));
 
-		ProcessRunner.launch(ProcessRunner.command(OpenPDF, fname), null, myLogger);
+	/**
+	 * The PDF viewer to use: the configured one if it exists (also when installed in another directory than
+	 * configured), otherwise the first available of {@link #pdfViewerCandidates(String)}.
+	 *
+	 * @param configured configured viewer, possibly with options; may be null.
+	 * @param osName     value of the os.name system property.
+	 * @param pathDirs   directories of the PATH environment variable.
+	 * @param extraDirs  directories searched after PATH, normally {@link #VIEWER_SEARCH_DIRS}.
+	 * @return viewer program (path, possibly followed by options), or null if none was found.
+	 */
+	static String findPdfViewer(String configured, String osName, List<File> pathDirs, List<File> extraDirs) {
+		if (configured != null && !configured.trim().isEmpty()) {
+			String found = ProcessRunner.findExecutable(configured, programName(configured), pathDirs,
+					extraDirs);
+			if (found != null)
+				return found;
+		}
+		for (String candidate : pdfViewerCandidates(osName)) {
+			String found = ProcessRunner.findExecutable(candidate, programName(candidate), pathDirs,
+					extraDirs);
+			if (found != null)
+				return found;
+		}
+		return null;
+	}
+
+	/** File name of the program in a command such as "/usr/bin/gio open". */
+	private static String programName(String command) {
+		return new File(command.trim().split("\\s+")[0]).getName();
+	}
+
+	/**
+	 * Open a PDF file in a viewer. Does not wait for the viewer to close.
+	 * <p>
+	 * Uses the configured viewer if it exists, otherwise the system's way of opening PDF files (see
+	 * {@link #pdfViewerCandidates(String)}), and finally Java's {@link Desktop#open(File)}.
+	 *
+	 * @return true if a viewer was started.
+	 */
+	public static boolean openLatexPDF(String fname) {
+
+		String configured = Preferences.thePreferences.getProperty(PROP_OPENPDF, "/usr/bin/okular");
+		String viewer = findPdfViewer(configured, System.getProperty("os.name"),
+				ProcessRunner.pathDirectories(System.getenv("PATH")), VIEWER_SEARCH_DIRS);
+
+		if (viewer != null) {
+			if (!viewer.equals(configured))
+				myLogger.warn("Configured PDF viewer '" + configured + "' not found, using " + viewer);
+			if (ProcessRunner.launch(ProcessRunner.command(viewer, fname), null, myLogger))
+				return true;
+		}
+
+		try {
+			if (!GraphicsEnvironment.isHeadless() && Desktop.isDesktopSupported()
+					&& Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+				myLogger.info("Opening " + fname + " with the desktop's default application");
+				Desktop.getDesktop().open(new File(fname));
+				return true;
+			}
+		} catch (Exception e) {
+			myLogger.warn("Could not open " + fname + " with the desktop's default application: " + e.getMessage());
+		}
+
+		myLogger.error("No PDF viewer found to open " + fname);
+		return false;
 	}
 
 	/**
@@ -341,11 +417,23 @@ public class Filelist2Latex {
 						if (findPdfLatex() == null)
 							throw new IOException(PDFLATEX_NOT_FOUND);
 
+						String baseName = LatexFname.substring(0, LatexFname.length() - ".tex".length());
+						String pdf = tempDir + "/" + baseName + ".pdf";
+						// Remove the result of an earlier run, so that a failed pdflatex run is noticed.
+						new File(pdf).delete();
+
 						writeFileList2Latex(title, fileList, tempDir + "/" + LatexFname);
 						processLatex(tempDir, tempDir + "/" + LatexFname);
 						processLatex(tempDir, tempDir + "/" + LatexFname);
 						processLatex(tempDir, tempDir + "/" + LatexFname);
-						openLatexPDF(tempDir + "/" + LatexFname.replace(".tex", ".pdf"));
+
+						if (!new File(pdf).exists())
+							throw new IOException("pdflatex did not create " + pdf + ".\nSee "
+									+ tempDir + "/" + baseName + ".log for details.");
+						if (!openLatexPDF(pdf))
+							throw new IOException("The log sheet was created as " + pdf
+									+ ",\nbut no PDF viewer was found. Set " + PROP_OPENPDF
+									+ "\nin ~/.VisualFitsBrowserApp to your PDF viewer.");
 						return null;
 					}
 
