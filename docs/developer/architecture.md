@@ -30,6 +30,15 @@ loads `~/.VisualFitsBrowserApp`.
 each file's comment, then starts a new `DirectoryListener` thread. The listener
 calls back `FileBrowserPanel.addSingleNewItem` for each new file.
 
+**Threading rule for the file table.** `FileBrowserPanel.mImageList` and the table
+model are changed only on the Swing event thread. Slow work (reading FITS headers)
+runs in the background and hands its result to the event thread: `readDirectory`
+applies the worker's result in `done()` and discards it if a newer directory read
+has started; `addSingleNewItem` reads the header in the listener thread and adds
+the row with `SwingUtilities.invokeLater`. Code on other threads that needs the
+list must take a snapshot or hold the `Vector`'s lock while iterating.
+`FileBrowserPanelTest` checks this.
+
 **Displaying in ds9.** All ds9 commands go through `SAMPUtilities`, which sends
 `ds9.set` notifications (`file fits …`, `frame …`, `lock …`) to every connected
 client. Calls that need an answer (`ds9.get`, e.g. imexam) are
