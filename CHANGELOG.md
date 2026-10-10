@@ -8,6 +8,14 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Security
+- log4j 2.17.1 → 2.25.5 (GHSA-vc5p-v9hr-52mj, GHSA-6hg6-v5c8-fphq,
+  GHSA-3pxv-7cmr-fjr4, GHSA-qv9r-c865-cp47).
+- commons-io 2.11.0 → 2.20.0 (GHSA-78wr-2p64-hpwj).
+
+### Removed
+- Unused commons-lang3 dependency (GHSA-j288-q9x7-2f5v).
+
 ## [1.10.4] - 2026-10-09
 
 ### Added
