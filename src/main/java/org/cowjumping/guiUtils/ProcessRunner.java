@@ -54,7 +54,12 @@ public class ProcessRunner {
         return findExecutable(configured, name, pathDirectories(System.getenv("PATH")), fallbackDirs);
     }
 
-    static String findExecutable(String configured, String name, List<File> pathDirs, List<File> fallbackDirs) {
+    /**
+     * As {@link #findExecutable(String, String, List)}, but with the {@code PATH} directories given explicitly
+     * (for tests, or callers that want to control the search).
+     */
+    public static String findExecutable(String configured, String name, List<File> pathDirs,
+                                        List<File> fallbackDirs) {
         if (configured != null && !configured.trim().isEmpty()) {
             String trimmed = configured.trim();
             String[] parts = trimmed.split("\\s+", 2);
@@ -77,7 +82,7 @@ public class ProcessRunner {
         return found != null ? found.getAbsolutePath() : null;
     }
 
-    static List<File> pathDirectories(String path) {
+    public static List<File> pathDirectories(String path) {
         List<File> dirs = new ArrayList<File>();
         if (path != null)
             for (String entry : path.split(File.pathSeparator))
