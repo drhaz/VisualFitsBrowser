@@ -49,6 +49,22 @@ The programs used are set in the [configuration file](../configuration.md):
 | `org.cowjumping.VisualFitsBrowser.latex.openpdf` | `/usr/bin/okular` | `/usr/bin/open` (macOS), `/usr/bin/xdg-open`, `/usr/bin/evince` |
 | `VisualFitsBrowser.latex.tmp` | `/tmp` | any writable directory |
 
+### Finding pdflatex
+
+If the configured `pdflatex` does not exist, VisualFitsBrowser looks for
+`pdflatex` itself and uses the first one found in:
+
+1. the directories on your `PATH`;
+2. `/Library/TeX/texbin` (MacTeX), `/opt/homebrew/bin`, `/usr/local/bin`,
+   `/opt/local/bin` (MacPorts), `/usr/bin`;
+3. `/usr/local/texlive/<year>/bin/<platform>` (TeX Live installed from
+   upstream), newest year first.
+
+The search is needed on macOS in particular: programs started from the Finder or
+the Dock do not see the `PATH` of your shell. A warning in the log shows which
+program was used; the setting itself is not changed. If no `pdflatex` is found,
+an error dialog asks you to install TeX or set the full path.
+
 ## Customising the layout
 
 The LaTeX preamble and closing lines come from the templates

@@ -9,6 +9,10 @@ Entries before 1.10.4 were reconstructed from the git history.
 ## [Unreleased]
 
 ### Fixed
+- Log sheets: if the configured `pdflatex` does not exist, `pdflatex` is now
+  searched on `PATH` and in the usual TeX installation directories (MacTeX,
+  Homebrew, MacPorts, TeX Live). If none is found, an error dialog explains how
+  to fix it instead of failing silently.
 - PDF log sheets failed with an error since 1.9.0 (observation times were
   formatted with the wrong date API).
 - Log sheets no longer break on comments containing `\ { } ^ ~ < >`.

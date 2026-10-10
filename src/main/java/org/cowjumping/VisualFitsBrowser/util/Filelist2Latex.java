@@ -15,6 +15,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
@@ -236,12 +239,58 @@ public class Filelist2Latex {
 	 */
 	public static int processLatex(String Path, String fname) {
 
-		String pdfLatex = Preferences.thePreferences.getProperty(
-				"org.cowjumping.VisualFitsBrowser.latex.pdflatex",
-				"/usr/bin/pdflatex");
+		String pdfLatex = findPdfLatex();
+		if (pdfLatex == null) {
+			myLogger.error(PDFLATEX_NOT_FOUND);
+			return -1;
+		}
 
 		return ProcessRunner.run(ProcessRunner.command(pdfLatex, "-interaction=nonstopmode", fname),
 				new File(Path), myLogger);
+	}
+
+	static final String PROP_PDFLATEX = "org.cowjumping.VisualFitsBrowser.latex.pdflatex";
+
+	static final String PDFLATEX_NOT_FOUND = "pdflatex was not found. Install a TeX distribution (TeX Live, "
+			+ "MacTeX), or set " + PROP_PDFLATEX + " in ~/.VisualFitsBrowserApp to the full path of pdflatex.";
+
+	/**
+	 * Directories searched for pdflatex after PATH. Programs started from the macOS Finder or Dock do not see
+	 * the shell's PATH, so the usual TeX installation directories are listed explicitly.
+	 */
+	static List<File> pdfLatexSearchDirs() {
+		List<File> dirs = new ArrayList<File>();
+		dirs.add(new File("/Library/TeX/texbin"));   // MacTeX
+		dirs.add(new File("/opt/homebrew/bin"));     // Homebrew on Apple silicon
+		dirs.add(new File("/usr/local/bin"));        // Homebrew on Intel, manual installs
+		dirs.add(new File("/opt/local/bin"));        // MacPorts
+		dirs.add(new File("/usr/bin"));              // Linux distribution packages
+
+		// TeX Live installed from upstream: /usr/local/texlive/<year>/bin/<platform>, newest year first.
+		File[] years = new File("/usr/local/texlive").listFiles();
+		if (years != null) {
+			Arrays.sort(years, Collections.reverseOrder());
+			for (File year : years) {
+				File[] platforms = new File(year, "bin").listFiles();
+				if (platforms != null)
+					dirs.addAll(Arrays.asList(platforms));
+			}
+		}
+		return dirs;
+	}
+
+	/**
+	 * The pdflatex program to use: the configured one if it exists, otherwise pdflatex found on PATH or in
+	 * {@link #pdfLatexSearchDirs()}. The configuration is not changed.
+	 *
+	 * @return program (path, possibly followed by options), or null if no pdflatex was found.
+	 */
+	static String findPdfLatex() {
+		String configured = Preferences.thePreferences.getProperty(PROP_PDFLATEX, "/usr/bin/pdflatex");
+		String found = ProcessRunner.findExecutable(configured, "pdflatex", pdfLatexSearchDirs());
+		if (found != null && !found.equals(configured))
+			myLogger.warn("Configured pdflatex '" + configured + "' not found, using " + found);
+		return found;
 	}
 
 	/**
@@ -288,6 +337,9 @@ public class Filelist2Latex {
 					protected Void doInBackground() throws Exception {
 						String title = rootDirectory.getAbsolutePath();
 						String LatexFname = rootDirectory.getName() + ".tex";
+
+						if (findPdfLatex() == null)
+							throw new IOException(PDFLATEX_NOT_FOUND);
 
 						writeFileList2Latex(title, fileList, tempDir + "/" + LatexFname);
 						processLatex(tempDir, tempDir + "/" + LatexFname);
