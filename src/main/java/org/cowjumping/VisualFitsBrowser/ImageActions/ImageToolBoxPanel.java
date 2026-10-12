@@ -81,7 +81,7 @@ public class ImageToolBoxPanel extends JPanel implements OTAFileListListener {
 	/**
 	 * private method to query the associated file browser panel for selected
 	 * files. safeguards against a null filebrowserpanel. moving code into own
-	 * procedure avoids the need to check for null in every singel image action.
+	 * procedure avoids the need to check for null in every single image action.
 	 * 
 	 * @return list of selected files. Could be empty, but will not be null.
 	 */

@@ -103,7 +103,7 @@ public class FITSHeaderInspection extends ImageEvaluator {
                     try {
                         myTextArea.setCaretPosition(this.lastPanePosition);
                     } catch (Exception e) {
-                        log.debug("probably bad carret position");
+                        log.debug("probably bad caret position");
                     }
                     break;
                 }

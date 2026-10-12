@@ -72,7 +72,7 @@ public class GuideStarDisplayComponent extends
 	/** marker for the current location of the guide star */
 	protected Point2D currentCenter = new Point2D.Float();
 	Point2D centerOnScreen = new Point2D.Float();
-	/** marker for the mean (or intial) position of the guide star */
+	/** marker for the mean (or initial) position of the guide star */
 	protected Point2D meanCenter = new Point2D.Float();
 
 	private float fwhm = 0;
@@ -140,7 +140,7 @@ public class GuideStarDisplayComponent extends
 	/**
 	 * Initialize the component to display images of a new size.
 	 * 
-	 * This is always called if either the screen size or the iamge size is
+	 * This is always called if either the screen size or the image size is
 	 * changed
 	 * 
 	 */

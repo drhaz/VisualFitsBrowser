@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 
 
 /**
- * Tools to use ds9 via SAMP. This is mostly concerning interaction with ds9, but can easilly be expanded to
+ * Tools to use ds9 via SAMP. This is mostly concerning interaction with ds9, but can easily be expanded to
  * collaborate with other SAMP clients.
  *
  * @author harbeck
@@ -111,7 +111,7 @@ public class SAMPUtilities {
     /**
      * ds9: activate a frame in ds9.
      * <p>
-     * Caution: If entering a large number, ds9 will open as many new frames internaly, i.e., this can potentially
+     * Caution: If entering a large number, ds9 will open as many new frames internally, i.e., this can potentially
      * cause ds9 to consumer a lot of resources.
      *
      * @param frameNumber ds9 frame number
@@ -324,7 +324,7 @@ public class SAMPUtilities {
 
 
     /**
-     * utility function: fin dout if a fits file is a MEF file that could be
+     * utility function: find out if a fits file is a MEF file that could be
      * displayed as mosaicimage iraf in ds9
      *
      * @param fname
@@ -347,7 +347,7 @@ public class SAMPUtilities {
                             // && HDU.getHeader().containsKey("DETSIZE")
                     )) {
 
-                        log.info("Image extension does not contrain DETSEC or DETSZIZE");
+                        log.info("Image extension does not contain DETSEC or DETSIZE");
                         mef = false;
                         break;
                     }
@@ -383,7 +383,7 @@ public class SAMPUtilities {
 
         if (!isClientAvailable(DS9IDString)) {
             JOptionPane.showMessageDialog(null,
-                    "DS9 is not connected. DS9 conencts to SAMP only on startup, so if SAMP restarted, you need to restart ds9 as well.",
+                    "DS9 is not connected. DS9 connects to SAMP only on startup, so if SAMP restarted, you need to restart ds9 as well.",
                     "SAMP Error", JOptionPane.ERROR_MESSAGE);
             return;
         }

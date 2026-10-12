@@ -82,7 +82,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
      */
     protected AffineTransform forwardTransform = null;
     /**
-     * linear transformation from widget coordinate space to user coordiante space
+     * linear transformation from widget coordinate space to user coordinate space
      */
     protected AffineTransform backwardTransform = null;
 
@@ -130,13 +130,13 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     protected Color CooSysGrid = new Color(50, 50, 50);
 
     /**
-     * Font to be used for the Coordiante system axis labels
+     * Font to be used for the Coordinate system axis labels
      */
     protected static Font CooSysLabelFont = new Font(Font.SANS_SERIF, Font.PLAIN,
             14);
 
     /**
-     * Font to be used for the cooridnate system numbers
+     * Font to be used for the coordinate system numbers
      */
     protected static Font CooSysNumberFont = new Font(Font.SANS_SERIF,
             Font.PLAIN, 10);
@@ -149,7 +149,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     protected boolean drawsCooSys = true;
 
     /**
-     * flag if the widget runs in threaded mode. This is used in the rendereing
+     * flag if the widget runs in threaded mode. This is used in the rendering
      * process
      */
     protected boolean threadedMode = false;
@@ -259,7 +259,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
         // update the coordinate transformations.
         this.updateTransformation();
 
-        // Get a new Coordiante system image
+        // Get a new Coordinate system image
         CooSysImage = createVolatileImage(drawX, drawY);
         if (CooSysImage == null)
             CooSysImage = new BufferedImage(drawX, drawY, BufferedImage.TYPE_INT_ARGB);
@@ -336,7 +336,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     }
 
     /**
-     * modified paint function to accomodate a threaded mode.
+     * modified paint function to accommodate a threaded mode.
      */
 
     public void paint(Graphics g) {
@@ -365,7 +365,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     /**
      * Draw the background of the component. This is defaulted to draw the
      * coordinate system. If a different background (e.g., a guide star image) is
-     * desired, this calss can be overwritten.
+     * desired, this class can be overwritten.
      *
      * @param g2
      */
@@ -376,11 +376,11 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     }
 
     /**
-     * Transform a location from user coordiantes to component's pixel space.
+     * Transform a location from user coordinates to component's pixel space.
      *
      * @param x input x location.
      * @param y input y location.
-     * @param p Transformed lcoation of the point. Can be null.
+     * @param p Transformed location of the point. Can be null.
      * @return Transformed location of the point.
      */
 
@@ -440,7 +440,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
     }
 
     /**
-     * Calculate the linear transformation from the user cooridnate system to the
+     * Calculate the linear transformation from the user coordinate system to the
      * widget pixel space. The transformations are stored in the class' variables
      * forwardTransform and backwardTansform.
      * <p>
@@ -482,7 +482,7 @@ public abstract class CooSysComponent extends javax.swing.JComponent implements
             } catch (Exception e) {
                 log
                         .warn("Cannot create inverse coordinate transformation during init.");
-                log.warn("These are the paramters of the forward transform:");
+                log.warn("These are the parameters of the forward transform:");
                 log.warn("Scale: " + scaleX + " / " + scaleY);
                 log.warn("Offsets: " + offsetX + " / " + offsetY);
 

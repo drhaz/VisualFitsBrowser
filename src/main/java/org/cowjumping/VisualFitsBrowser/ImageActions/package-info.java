@@ -1,7 +1,7 @@
 
 /**
  * 
- * Toolbox to do someting with FITS images.
+ * Toolbox to do something with FITS images.
  * @author harbeck
  *
  */

@@ -64,7 +64,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     /**
      * How long to wait before displaying a newly arrived file; aims to prevent ds0
-     * load errors when laoding while system is still writing the file
+     * load errors when loading while system is still writing the file
      */
     private static int waitMilliSecondsBeforeDS9load = 1000;
 
@@ -443,7 +443,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 comparisonValue = ((String) value).trim();
             }
 
-            // Table sees the binned prefix rendered file name, so take this into acount
+            // Table sees the binned prefix rendered file name, so take this into account
             // here.
             if (comparisonValue.startsWith(binnedPrefix))
                 comparisonValue = comparisonValue.replace(binnedPrefix, "");

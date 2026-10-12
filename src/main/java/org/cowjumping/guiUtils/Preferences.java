@@ -44,7 +44,7 @@ public class Preferences {
 	private Preferences(String fname) {
 
 		if (thePreferences != null) {
-			myLogger.warn("Preferences is already instanciated!");
+			myLogger.warn("Preferences is already instantiated!");
 			return;
 
 		}
@@ -180,7 +180,7 @@ public class Preferences {
 			FileOutputStream out = new FileOutputStream(fname);
 			myProperties
 					.store(out,
-							"This is a maschine generated configuration file. Do not delete. Edit only if you know what you are doing.");
+							"This is a machine-generated configuration file. Do not delete. Edit only if you know what you are doing.");
 			out.flush();
 			out.close();
 		} catch (Exception e) {

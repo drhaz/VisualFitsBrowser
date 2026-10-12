@@ -132,9 +132,9 @@ public class zScaleTransformOp implements BufferedImageOp {
 	 * @param y
 	 *            the right edge of the pixel block
 	 * @param width
-	 *            the width of the pixel arry
+	 *            the width of the pixel array
 	 * @param height
-	 *            the height of the pixel arry
+	 *            the height of the pixel array
 	 * @param pixels
 	 *            the array to hold the returned pixels. May be null.
 	 * @return the pixels
@@ -163,9 +163,9 @@ public class zScaleTransformOp implements BufferedImageOp {
 	 * @param y
 	 *            the right edge of the pixel block
 	 * @param width
-	 *            the width of the pixel arry
+	 *            the width of the pixel array
 	 * @param height
-	 *            the height of the pixel arry
+	 *            the height of the pixel array
 	 * @param pixels
 	 *            the array of pixels to set
 	 * @see #getRGB

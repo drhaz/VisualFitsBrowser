@@ -18,7 +18,7 @@ import java.util.LinkedList;
  * and store (and display) up to a given number of data points simultaneously.
  * 
  * There are two display modes: plain and processed. In the plain mode, all
- * graphs wil be displayed, whereas in the processed mode the mean and upper
+ * graphs will be displayed, whereas in the processed mode the mean and upper
  * /lower limits will be displayed.
  * 
  */
@@ -76,7 +76,7 @@ public class StripChartComponent extends org.cowjumping.guiUtils.CooSysComponent
 	protected boolean updated = false;
 
 	/**
-	 * Default constructor Initialises the class with a defaul of 100 data
+	 * Default constructor Initialises the class with a default of 100 data
 	 * points in the +/- 2 range
 	 */
 	public StripChartComponent(String ylabel, int dimX, int dimY) {

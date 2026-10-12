@@ -23,7 +23,7 @@ import java.util.Map.Entry;
  *
  * Metadata are is stored in a Java HashTable, but a series of
  * default setter/getter access methods are declared to enforce conventions in
- * the HasTable. These getter/setter classes also enforce type checking.
+ * the Hashtable. These getter/setter classes also enforce type checking.
  *
  * The package defined also classes for tcp/ip guide star package transfer plus
  * additional traffic control. see GuideStarReceiver/Sender classes.
@@ -123,7 +123,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         OTA_Y("OTA_Y", Short.class),
 
         /**
-         * Extension number if grabed from a MEF file
+         * Extension number if grabbed from a MEF file
          */
         FITSEXTENSIONNUM("EXTNUM", Integer.class),
 
@@ -155,7 +155,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
          */
         BINNING_X("BIN_X", Short.class),
         /**
-         * Binning in Y diection
+         * Binning in Y direction
          */
         BINNING_Y("BIN_Y", Short.class),
 
@@ -199,7 +199,7 @@ public class ImageContainer implements Serializable, Comparable<ImageContainer> 
         DEC("DEC", Float.class), // RA of object or image
         RA("RA", Float.class), // DEC of object or image
         ROTOFFSET("ROTOFF", float.class), // rotator angle offset.
-        EQUINOX("EQNX", Float.class), // Equinox of coordiantes
+        EQUINOX("EQNX", Float.class), // Equinox of coordinates
 
         // Guide Catalog & OT setup stuff
         VIABLE("VIABLE", Boolean.class), // Guide star is good enough to use in

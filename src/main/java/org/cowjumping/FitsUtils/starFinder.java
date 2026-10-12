@@ -18,7 +18,7 @@ public class starFinder implements Callable<starFinder> {
 	/** The sky background level of the image */
 	double skyLevel = 0;
 
-	/** the assumed background noise in the iamge */
+	/** the assumed background noise in the image */
 	double skyNoise = 0;
 
 	/** the fraction of saturated pixels in the image */
@@ -83,7 +83,7 @@ public class starFinder implements Callable<starFinder> {
 		if (skyNoise < 10) {
 			skyNoise = 10;
 			if (myLogger.isDebugEnabled())
-				myLogger.debug("Low sky noise measurement adjusted to minium of readnoise (10).");
+				myLogger.debug("Low sky noise measurement adjusted to minimum of readnoise (10).");
 		}
 
 		// go, find the stars.
@@ -254,7 +254,7 @@ public class starFinder implements Callable<starFinder> {
 	}
 
 	/**
-	 * Numerical Recipies, page 342; Chapter 8 sorting
+	 * Numerical Recipes, page 342; Chapter 8 sorting
 	 * 
 	 * @param data
 	 * @param k

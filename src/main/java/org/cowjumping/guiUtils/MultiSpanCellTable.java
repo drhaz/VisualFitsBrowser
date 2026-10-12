@@ -255,7 +255,7 @@ class MultiSpanCellTableUI extends BasicTableUI {
 	    rendererPane.paintComponent (g, component, table, cellRect.x,
 		    cellRect.y, cellRect.width, cellRect.height, true);
 	}
-	// Have to restore the cellRect back to it's orginial size
+	// Have to restore the cellRect back to its original size
 	cellRect.setBounds (cellRect.x - spacingWidth / 2, cellRect.y
 		- spacingHeight / 2, cellRect.width + spacingWidth,
 		cellRect.height + spacingHeight);

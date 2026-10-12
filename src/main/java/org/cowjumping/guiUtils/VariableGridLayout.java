@@ -6,7 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
 
-// Grid Layout which allows components of differrent sizes
+// Grid Layout which allows components of different sizes
 public class VariableGridLayout extends GridLayout {
     public VariableGridLayout() {
 	this (1, 0, 0, 0);

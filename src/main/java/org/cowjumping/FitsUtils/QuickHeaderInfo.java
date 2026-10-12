@@ -333,7 +333,7 @@ public class QuickHeaderInfo {
                         value = Float.parseFloat(valueString);
                     } catch (Exception e) {
                         value = Float.NaN;
-                        myLogger.warn("Error while reading flaot key word: " + valueString);
+                        myLogger.warn("Error while reading float keyword: " + valueString);
                     }
 
                     continue;
@@ -350,7 +350,7 @@ public class QuickHeaderInfo {
         String valuestr = getStringValue(fitsHeader, "EXTEND");
         if (valuestr != null) {
             try {
-                myLogger.debug("bolean " + key + " " + valuestr);
+                myLogger.debug("boolean " + key + " " + valuestr);
                 value = valuestr.equalsIgnoreCase("T");
 
             } catch (Exception e) {
@@ -394,7 +394,7 @@ public class QuickHeaderInfo {
                 retval = (Integer.parseInt(xbin) > 1 ) & (Integer.parseInt(ybin) > 1);
 
             } catch (Exception e) {
-                myLogger.debug("While trying to read CCD sum keyworkd " + val, e);
+                myLogger.debug("While trying to read CCD sum keyword " + val, e);
                 retval = false;
             }
 

@@ -132,7 +132,7 @@ public class odiCentroidSupport {
             myLogger.error("gaussianFitFWHM: Unsupported plot mode: " + plotMode);
             return;
         }
-        // Chek boundary conditions
+        // Check boundary conditions
         Rectangle imageFrame = new Rectangle(0, 0, dimX, dimY);
         Rectangle safePixelArea = window.intersection(imageFrame);
 
@@ -206,7 +206,7 @@ public class odiCentroidSupport {
      * <p>
      * x' = x^2
      * <p>
-     * The data has to fullfill a few critical conditions: - data have to be sky
+     * The data has to fulfill a few critical conditions: - data have to be sky
      * subtracted - all data has to be larger than 0.
      */
 
@@ -295,7 +295,7 @@ public class odiCentroidSupport {
     /**
      * Do a linear least square fit to a set of data.
      * <p>
-     * f(x) = a + bx The algorithms is taken from Numerical Recipies [update
+     * f(x) = a + bx The algorithm is taken from Numerical Recipes [update
      * reference]
      *
      * @return float[0] = a; float[1] = b

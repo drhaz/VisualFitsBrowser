@@ -24,7 +24,7 @@ public class StripChartDataPoint {
      */
     protected double[] data = null;
 
-    /** Flag if the data is processed (min/max/avg) or raw (severeal lines) */
+    /** Flag if the data is processed (min/max/avg) or raw (several lines) */
     boolean processed = true;
 
     boolean toBeProcessed = false;
@@ -195,7 +195,7 @@ public class StripChartDataPoint {
 }
 
 /**
- * Poor man's fifo buffer implementaion with the ability to get the average of
+ * Poor man's fifo buffer implementation with the ability to get the average of
  * the values.
  * 
  * @author harbeck

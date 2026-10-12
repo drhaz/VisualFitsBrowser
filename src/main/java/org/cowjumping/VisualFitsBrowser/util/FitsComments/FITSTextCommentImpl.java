@@ -51,7 +51,7 @@ public class FITSTextCommentImpl implements FitsCommentInterface {
 		try {
 			myProps.store(new FileOutputStream(ps), "FITS FILE COMMENTS BELOW");
 		} catch (Exception e) {
-			log.error("Error while writing fits comemnts: ", e);
+			log.error("Error while writing fits comments: ", e);
 			return (false);
 		}
 		return(true);

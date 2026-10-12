@@ -26,7 +26,7 @@ import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 @SuppressWarnings("serial")
 public abstract class ImageEvaluator extends JPanel {
 
-	/** A central treadpool that al iamge operation scan utilize to do
+	/** A central thread pool that all image operations can utilize to do
 	 * heavy-lifting.
      */
 	final static protected ExecutorService myThreadPool = Executors.newFixedThreadPool(8);

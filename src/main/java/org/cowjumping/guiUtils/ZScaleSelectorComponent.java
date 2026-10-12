@@ -19,7 +19,7 @@ import java.util.Vector;
 /**
  * IMplements a GUI component that allows to set the z-range of an image display
  * to be selected (i.e., the contrast range). It can also send the command to
- * automatically apply an offset in the iamge display.
+ * automatically apply an offset in the image display.
  * 
  * @author harbeck
  * 

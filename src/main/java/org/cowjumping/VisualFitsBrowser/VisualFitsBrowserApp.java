@@ -328,7 +328,7 @@ public class VisualFitsBrowserApp extends JFrame {
                         Filelist2Latex.processLatex("/tmp/", fName);
                         Filelist2Latex.openLatexPDF("/tmp/" + fName.replace("tex", "pdf"));
                     } else {
-                        myLogger.info("Cannot genreate Latex logsheet since threre is no viable filelist");
+                        myLogger.info("Cannot generate Latex logsheet since there is no viable filelist");
                     }
                 }
             });
