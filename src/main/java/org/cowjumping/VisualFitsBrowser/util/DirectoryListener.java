@@ -14,9 +14,9 @@ import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.SoundSignal;
 
 /**
- * Class that handles watching a directory for any new ODI images.
+ * Class that handles watching a directory for any new FITS images.
  * <p>
- * The class polls a directory and investigates all directories in there ( == ODI
+ * The class polls a directory and investigates all directories in there ( == multi-file
  * images) that are newer than the latest image addition. Since it can take a
  * while between creating an image directory and an actual image to be written
  * (e.g., exposure time plus readout time), new detected fields are added to a

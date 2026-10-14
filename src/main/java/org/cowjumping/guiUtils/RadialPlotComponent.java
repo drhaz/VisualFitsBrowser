@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.FitsUtils.RadialProfile;
 import org.cowjumping.FitsUtils.gaussImage;
-import org.cowjumping.FitsUtils.odiCentroidSupport;
+import org.cowjumping.FitsUtils.CentroidSupport;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,7 +90,7 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
 
         myProfile.update(gs, plotMode);
 
-        odiCentroidSupport.scaleAndBiasImage(myProfile.value, (float) (peak - sky),
+        CentroidSupport.scaleAndBiasImage(myProfile.value, (float) (peak - sky),
                 (float) sky);
         this.sky /= peak;
         this.peak /= peak;
@@ -243,8 +243,8 @@ public class RadialPlotComponent extends org.cowjumping.guiUtils.CooSysComponent
 
     public static void updateImage (ImageContainer gs) {
         getRadialPlotFrame();
-        odiCentroidSupport.findSkyandPeak(gs,2,2);
-        odiCentroidSupport.MomentAnalysis(gs,1,gs.getImageDimX()-1,1, gs.getImageDimY()-1);
+        CentroidSupport.findSkyandPeak(gs,2,2);
+        CentroidSupport.MomentAnalysis(gs,1,gs.getImageDimX()-1,1, gs.getImageDimY()-1);
         rp.updateData(gs);
         gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX(), gs.getCenterY(),0);
         gd.setZScale(gs.getBackground()- gs.getBackNoise(), gs.getPeak());

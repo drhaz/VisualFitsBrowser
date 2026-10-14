@@ -3,7 +3,7 @@ package org.cowjumping.guiUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cowjumping.FitsUtils.ImageContainer;
-import org.cowjumping.FitsUtils.odiCentroidSupport;
+import org.cowjumping.FitsUtils.CentroidSupport;
 
 import javax.swing.*;
 import java.awt.*;
@@ -486,7 +486,7 @@ public class GuideStarDisplayComponent extends
 			
 			ImageContainer tempgs = new ImageContainer();
 			tempgs.setImage(outData, RawImage.getWidth(), RawImage.getHeight());
-			odiCentroidSupport.findSkyandPeak(tempgs, 3, 1);
+			CentroidSupport.findSkyandPeak(tempgs, 3, 1);
 
 			this.zExtraOffset = tempgs.getBackground() - 50;
 

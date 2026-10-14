@@ -225,10 +225,10 @@ public class Filelist2Latex {
 		fileList.add(new FitsFileEntry("", "filename", "Obj $ % & _ # ", null,
 				3.2f, "G\'", LocalDateTime.now(), false));
 
-		writeFileList2Latex("This is a title ", fileList, "/tmp/pODILogfile.tex");
+		writeFileList2Latex("This is a title ", fileList, "/tmp/VisualFitsBrowserLogfile.tex");
 
-		int ret = processLatex("/tmp/", "pODILogfile.tex");
-		openLatexPDF("/tmp/pODILogfile.pdf");
+		int ret = processLatex("/tmp/", "VisualFitsBrowserLogfile.tex");
+		openLatexPDF("/tmp/VisualFitsBrowserLogfile.pdf");
 
 	}
 

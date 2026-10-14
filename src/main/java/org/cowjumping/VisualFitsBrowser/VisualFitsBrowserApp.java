@@ -318,9 +318,7 @@ public class VisualFitsBrowserApp extends JFrame {
                     if (getmBrowserPanel() != null && getmBrowserPanel().getNumberOfEntries() > 0) {
                         // mBrowserPanel.print();
 
-                        String fName = "Log_" + getmBrowserPanel().mRootDirectoryString
-                                .substring(getmBrowserPanel().mRootDirectoryString.indexOf("podi") + 5);
-                        fName = fName.replaceAll("/", "_");
+                        String fName = "Log_" + new File(getmBrowserPanel().mRootDirectoryString).getName();
                         fName = fName.replaceAll("\\.", "") + ".tex";
                         Filelist2Latex.writeFileList2Latex(getmBrowserPanel().mRootDirectoryString,
                                 getmBrowserPanel().getImageList(), "/tmp/" + fName);
@@ -476,7 +474,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
     private static void initSampHub() {
 
-        SAMPUtilities.initHubConnector("ODI File Browser", "ODI File Browser & Image Analysis tool.", true);
+        SAMPUtilities.initHubConnector("VisualFitsBrowser", "VisualFitsBrowser: FITS file browser & image analysis tool.", true);
         SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.otalistener.displayedImage") {
             public Map processCall(HubConnection c, String senderId, Message msg) {
                 myLogger.debug("SAMP message handler");

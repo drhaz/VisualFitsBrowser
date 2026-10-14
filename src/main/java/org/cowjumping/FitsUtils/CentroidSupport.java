@@ -7,9 +7,9 @@ import org.cowjumping.guiUtils.RadialPlotComponent.OneDPlotModes;
 import java.awt.*;
 import java.util.Arrays;
 
-public class odiCentroidSupport {
+public class CentroidSupport {
 
-    static Logger myLogger = LogManager.getLogger(odiCentroidSupport.class);
+    static Logger myLogger = LogManager.getLogger(CentroidSupport.class);
 
     /**
      * Supporting function to translate x/y positions into array indices of a
@@ -146,7 +146,7 @@ public class odiCentroidSupport {
                         + myProfile.getNElements() + " data points");
 
             // subtract the sky level from the radial plot
-            odiCentroidSupport.scaleAndBiasImage(myProfile.value, 1, gs.getBackground());
+            CentroidSupport.scaleAndBiasImage(myProfile.value, 1, gs.getBackground());
 
             // and do the fitting
             fitOneDGauss(myProfile, gs);
@@ -892,38 +892,13 @@ public class odiCentroidSupport {
         p.value = new float[] { 3f, 4f, 5f, 6.2f, 7.01f, 8f };
         p.error = new float[] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
 
-        double res[] = odiCentroidSupport.linearFit(p);
+        double res[] = CentroidSupport.linearFit(p);
 
         System.err.println("Linear Fit Test:");
         System.err.println("f(x) = a + b*x -> a=" + res[0] + "  b=" + res[1] + " X2=" + res[2] + "  N=" + res[3]);
 
-        res = odiCentroidSupport.linearFitRej(p, 3, 0.2);
-
-        // System.err.println("Linear Fit Test:");
-        // System.err.println("f(x) = a + b*x -> a=" + res[0] + " b=" + res[1] + " X2="
-        // + res[2] + " N=" + res[3]);
-        //
-        // gaussImage gi = new gaussImage(24);
-        // gi.create(12, 12, 120, 4, 4, 5, 0);
-        // odiGaussFitCentroider.centroid(gi);
-        // System.out.println(gi);
-        //
-        // OTAReader.correctOV = false;
-        //
-        // Vector<GuideStarContainer> otaCells = OTAReader.readDetectorMEFFile(
-        // "/Volumes/odifile/archive/podi/TEST-12B-2101/2012.08.20/b20120820T210352.3",
-        // 0, 0, 1, 1);
-        // GuideStarContainer gs = otaCells.firstElement();
-        //
-        // double lastd = 0;
-        // for (int ii = 0; ii < 1; ii++) {
-        //
-        // double m = odiCentroidSupport.findMean(gs, 150, 250, 150, 250, 0);
-        // double s = odiCentroidSupport.findStdDev(gs, m, 150, 250, 150, 250, 0);
-        // System.out.println(" Noise in image: " + m + " " + s);
-        //
-        // }
-        // System.exit(1);
+        res = CentroidSupport.linearFitRej(p, 3, 0.2);
+        System.err.println("f(x) = a + b*x -> a=" + res[0] + "  b=" + res[1] + " X2=" + res[2] + "  N=" + res[3]);
 
     }
 

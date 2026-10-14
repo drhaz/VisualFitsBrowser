@@ -107,22 +107,6 @@ public class GUIConsts {
 
 	}
 
-	/**
-	 * Return a label with the ODI Logo as a picture.
-	 *
-	 */
-	public static JLabel getODIImageLabel() {
-		try {
-			ImageIcon odiIcon = (new ImageIcon(GUIConsts.class.getResource("/resources/ODILOGObig-alpha.png")));
-            return new JLabel(odiIcon);
-		} catch (Exception e) {
-			log.error("Could not fine odiIcon");
-
-		}
-
-		return new JLabel(new ImageIcon());
-	}
-
 	public static void setOSXExithandler(JFrame f) {
 		// try {
 		//

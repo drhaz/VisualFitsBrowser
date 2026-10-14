@@ -11,11 +11,11 @@ under `src/main/java/org/cowjumping/`.
 | `VisualFitsBrowser.util` | `FitsFileEntry` (one row of the table, created from a FITS header), `DirectoryListener` (polls for new files), `Filelist2Latex` (PDF log sheets). |
 | `VisualFitsBrowser.util.FitsComments` | `FitsCommentInterface` and its implementations: SQLite (`FITSTextCommentSQLITEImp`, in use) and a per-directory text file (`FITSTextCommentImpl`, legacy). |
 | `VisualFitsBrowser.ImageActions` | The Toolbox: `ImageToolBoxPanel` and the tools derived from `ImageEvaluator` (`FITSHeaderInspection`, `ImexamDisplay`). |
-| `FitsUtils` | FITS helpers: fast header reading (`QuickHeaderInfo`), image buffers (`ImageContainer`), centroiding and photometry (`odiCentroidSupport`, `RadialProfile`), `funpack` wrapper. |
+| `FitsUtils` | FITS helpers: fast header reading (`QuickHeaderInfo`), image buffers (`ImageContainer`), centroiding and photometry (`CentroidSupport`, `RadialProfile`), `funpack` wrapper. |
 | `guiUtils` | Reusable Swing components (plots, z-scale selector, tables), `Preferences` (settings file) and `SAMPUtilities` (all communication with ds9). |
 
-Several class names (`ODI…`, `OTA…`) date from the program's origin as a tool for
-the WIYN One Degree Imager.
+Some names (`OTA…` classes, the `odi.*` SAMP message types) date from the
+program's origin as a tool for the WIYN One Degree Imager.
 
 ## Main flows
 

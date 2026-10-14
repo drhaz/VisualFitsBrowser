@@ -8,6 +8,16 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Changed
+- Removed leftover references to the WIYN One Degree Imager (ODI): the SAMP client
+  now registers as "VisualFitsBrowser", `odiCentroidSupport` is renamed to
+  `CentroidSupport`, and unused ODI-specific code was deleted.
+
+### Fixed
+- Log sheet file names are now built from the name of the current directory.
+  Previously they assumed a path containing `podi` and otherwise cut off the first
+  characters of the path.
+
 ## [1.10.5] - 2026-10-09
 
 ### Fixed

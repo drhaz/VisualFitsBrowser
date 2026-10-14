@@ -2,7 +2,7 @@ package org.cowjumping.VisualFitsBrowser.ImageActions;
 
 import org.cowjumping.FitsUtils.ImageContainer;
 import org.cowjumping.FitsUtils.gaussImage;
-import org.cowjumping.FitsUtils.odiCentroidSupport;
+import org.cowjumping.FitsUtils.CentroidSupport;
 import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.guiUtils.GuideStarDisplayComponent;
 import org.cowjumping.guiUtils.RadialPlotComponent;
@@ -65,12 +65,12 @@ public class ImexamDisplay extends ImageEvaluator {
 
             ImageContainer gs = imageContainers.elementAt(0);
 
-            odiCentroidSupport.findSkyandPeak(gs, 2, 3);
+            CentroidSupport.findSkyandPeak(gs, 2, 3);
 
             double peakX = gs.getCenterX();
             double peakY = gs.getCenterY();
 
-            odiCentroidSupport.MomentAnalysis(gs, 2, gs.getImageDimX() - 2, 2, gs.getImageDimY() - 2);
+            CentroidSupport.MomentAnalysis(gs, 2, gs.getImageDimX() - 2, 2, gs.getImageDimY() - 2);
 
             double deltaX = Math.min(5, 2 * gs.getFWHM_X());
             double deltaY = Math.min(5, 2 * gs.getFWHM_Y());
@@ -84,9 +84,9 @@ public class ImexamDisplay extends ImageEvaluator {
                 maxy = (int) (gs.getCenterY() + 2);
             }
 
-            odiCentroidSupport.MomentAnalysis(gs, minx, maxx, miny, maxy);
-            odiCentroidSupport.gaussianFitFWHM(gs, getOneDPlotMode());
-            odiCentroidSupport.aperturePhotometry(gs);
+            CentroidSupport.MomentAnalysis(gs, minx, maxx, miny, maxy);
+            CentroidSupport.gaussianFitFWHM(gs, getOneDPlotMode());
+            CentroidSupport.aperturePhotometry(gs);
 
             rp.updateData(gs, this.getOneDPlotMode());
             gd.updateImage(gs.rawImageBuffer, gs.getImageDimX(), gs.getImageDimY(), gs.getCenterX() + 0.5f,

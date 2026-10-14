@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Vector;
 
 /**
- * Data holding class for an ODI Image.
+ * Data holding class for a FITS image.
  *
  * @author harbeck
  */
@@ -41,25 +41,6 @@ public class FitsFileEntry {
 			theCommentInterface.close();
 
 	}
-	/**
-	 * A predefined filer for ODI fits directories
-	 */
-
-	public static FileFilter theODIFileFilter1 = new FileFilter() {
-		public boolean accept(File file) {
-
-			boolean good_file = false;
-			good_file = file.isDirectory() && //
-					// || //
-					(file.getName().matches("[dftbo]20.*[T-].*") || //
-							file.getName().matches("focus20.*T.*"));
-			if (!good_file) {
-				myLogger.debug("Reject file " + file.getAbsolutePath());
-			}
-			return good_file;
-		}
-	};
-
 	/**
 	 * A filter generic fits filter
 	 */
@@ -210,7 +191,7 @@ public class FitsFileEntry {
 	/**
 	 * Write back the meta information for an image.
 	 * <p>
-	 * For this ODI implementation, the comment is added to the ./metainf.xml
+	 * For this implementation, the comment is added to the ./metainf.xml
 	 * file.
 	 * <p>
 	 * To provide another feedback mechanism, override this procedure.

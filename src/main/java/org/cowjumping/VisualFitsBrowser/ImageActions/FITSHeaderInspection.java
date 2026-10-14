@@ -17,7 +17,7 @@ import org.cowjumping.guiUtils.GUIConsts;
 import org.cowjumping.FitsUtils.QuickHeaderInfo;
 
 /**
- * Display the FITS header of an image, or the acquisition log of an ODi image,
+ * Display the FITS header of an image, or the acquisition log of an image,
  * depending on the mode set.
  *
  * @author harbeck

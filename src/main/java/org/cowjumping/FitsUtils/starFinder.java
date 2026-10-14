@@ -138,8 +138,7 @@ public class starFinder implements Callable<starFinder> {
 					// We need a small sub-image to do photometry
 					ImageContainer.extractThumImage(image, gs, 48, xx, yy);
 
-//					odiMomentCentroider.doCentroiding(gs);
-//					odiCentroidSupport.gaussianFitFWHM(gs);
+//					CentroidSupport.gaussianFitFWHM(gs);
 
 					// TODO: Make acceptance criteria a configurable parameter
 					if (//
@@ -430,21 +429,4 @@ public class starFinder implements Callable<starFinder> {
 
 	}
 
-	public static void main(String[] args) throws Exception {
-
-
-//		catalogFromOTA c = new catalogFromOTA(
-//				"/Volumes/odifile/archive/podi/test/2012.08.13/o20120813T231626.0",
-//				0, 0, true);
-//		long start = System.currentTimeMillis();
-//
-//		c.call();
-//		c.numberCatalogStars();
-//		GuideStarSender.dumpGuideStarCatalog("gslist.dat", c.cellStarCatalog);
-
-//		long end = System.currentTimeMillis();
-//		System.out.println("Execution time: " + ((end - start) / 1000.)
-//				+ "seconds.");
-
-	}
 }

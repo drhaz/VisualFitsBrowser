@@ -100,7 +100,7 @@ public class SAMPUtilities {
 
         if (sampHubConnector == null) {
 
-            initHubConnector("no name", "uninitialized ODI Utilitis SAMP hub.", false);
+            initHubConnector("no name", "uninitialized cowjumping SAMP hub.", false);
 
         }
 

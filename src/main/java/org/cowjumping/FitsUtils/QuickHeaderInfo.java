@@ -200,14 +200,14 @@ public class QuickHeaderInfo {
         String tobequeriedFits = null;
 
         if (dir == null || !dir.exists()) {
-            myLogger.warn("getODIHeader was given NULL or non-existent file. Quitting");
+            myLogger.warn("getFitsHeader was given NULL or non-existent file. Quitting");
             return null;
         }
 
         if (dir.isDirectory()) {
             // This covers the special case where an image is stored in a directory.
             // Grab the first fits imgae and go with it.
-            // Find the first available fits file from an ODI directory to
+            // Find the first available fits file in the directory to
             // extract fits header
 
             String match = ".*\\.[Ff][Ii][Tt][Ss]";
@@ -240,7 +240,7 @@ public class QuickHeaderInfo {
                 myLogger.debug("Could not find any suitable fits files in the sub directory!");
             }
 
-            // End of ODI directory search
+            // End of directory search
         } else {
 
             // We were given a file, not a directory; check if it is a fits of

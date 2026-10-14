@@ -114,7 +114,6 @@ public class gaussImage extends ImageContainer {
         g.safe("gauss.png");
 
 
-        //   odiGaussFitCentroider.centroid(g);
         System.out.println("Image metrics: \n" + "xce: " + g.getCenterX() + "\n"
                 + "yce: " + g.getCenterY());
 
