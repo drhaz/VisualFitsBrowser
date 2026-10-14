@@ -8,6 +8,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+## [1.10.6] - 2026-10-14
+
 ### Changed
 - Removed leftover references to the WIYN One Degree Imager (ODI): the SAMP client
   now registers as "VisualFitsBrowser", `odiCentroidSupport` is renamed to
