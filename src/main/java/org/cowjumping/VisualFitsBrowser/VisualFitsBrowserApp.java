@@ -11,9 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Response;
-import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.ResponseHandler;
 import org.cowjumping.FitsUtils.ImageContainer;
@@ -32,7 +30,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -62,8 +59,6 @@ public class VisualFitsBrowserApp extends JFrame {
     private static ImageToolBoxPanel mToolBoxPanel = null;
     private static JFrame ToolBoxFrame = null;
     public static String lastimexamKey = null;
-
-    static long IRAF_MSGID = 0;
 
     /**
      * A singleton file browser application
@@ -475,16 +470,6 @@ public class VisualFitsBrowserApp extends JFrame {
     private static void initSampHub() {
 
         SAMPUtilities.initHubConnector("VisualFitsBrowser", "VisualFitsBrowser: FITS file browser & image analysis tool.", true);
-        SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.otalistener.displayedImage") {
-            public Map processCall(HubConnection c, String senderId, Message msg) {
-                myLogger.debug("SAMP message handler");
-                if (getmBrowserPanel() != null) {
-                    getmBrowserPanel().setDisplayedImage((String) msg.getParam("fname"));
-                }
-
-                return null;
-            }
-        });
 
         // imexam
         SAMPUtilities.getHubConnector().addResponseHandler(new ResponseHandler() {
@@ -611,24 +596,6 @@ public class VisualFitsBrowserApp extends JFrame {
         VisualFitsBrowserApp b = new VisualFitsBrowserApp();
 
         System.out.println("Registering functions with SAMP ...");
-        SAMPUtilities.getHubConnector().addMessageHandler(new AbstractMessageHandler("odi.iraf.imageLoadReply") {
-            public Map processCall(HubConnection c, String senderId, Message msg) {
-
-                if (msg.getParam("msgid") == null) {
-                    myLogger.info("Invalid image return message for awaiting: " + IRAF_MSGID + "\n Got event: " + msg);
-                    return null;
-                }
-                long msgID = Integer.parseInt((String) msg.getParam("msgID"));
-                if (msgID != IRAF_MSGID) {
-                    myLogger.debug("image load response does not match a request of mine: " + msgID + " != "
-                            + IRAF_MSGID + " . Ignoring");
-                }
-
-                myLogger.debug("SAMP message handler: Reply to loaded Image received.");
-
-                return null;
-            }
-        });
 
         SAMPUtilities.getHubConnector().declareSubscriptions(SAMPUtilities.getHubConnector().computeSubscriptions());
 

@@ -14,8 +14,7 @@ under `src/main/java/org/cowjumping/`.
 | `FitsUtils` | FITS helpers: fast header reading (`QuickHeaderInfo`), image buffers (`ImageContainer`), centroiding and photometry (`CentroidSupport`, `RadialProfile`), `funpack` wrapper. |
 | `guiUtils` | Reusable Swing components (plots, z-scale selector, tables), `Preferences` (settings file) and `SAMPUtilities` (all communication with ds9). |
 
-Some names (`OTA…` classes, the `odi.*` SAMP message types) date from the
-program's origin as a tool for the WIYN One Degree Imager.
+Some `OTA…` class names date from the program's origin as a tool for the WIYN One Degree Imager.
 
 ## Main flows
 

@@ -13,6 +13,10 @@ Entries before 1.10.4 were reconstructed from the git history.
   now registers as "VisualFitsBrowser", `odiCentroidSupport` is renamed to
   `CentroidSupport`, and unused ODI-specific code was deleted.
 
+### Removed
+- The handlers for the ODI SAMP messages `odi.otalistener.displayedImage` and
+  `odi.iraf.imageLoadReply`. VisualFitsBrowser no longer subscribes to them.
+
 ### Fixed
 - Log sheet file names are now built from the name of the current directory.
   Previously they assumed a path containing `podi` and otherwise cut off the first
