@@ -347,9 +347,10 @@ public class VisualFitsBrowserApp extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     JOptionPane.showMessageDialog(VisualFitsBrowserApp.this,
                             "VisualFitsBrowser " + getVersion() + "\n" +
-                                    "(c) 2017-2025 Daniel Harbeck, cowjumping.org\n\n" +
+                                    "(c) 2017-2025 Daniel Harbeck, cowjumping.net\n\n" +
                                     "Documentation: " + DOCUMENTATION_URL,
-                            "About VisualFitsBrowser", JOptionPane.INFORMATION_MESSAGE);
+                            "About VisualFitsBrowser", JOptionPane.INFORMATION_MESSAGE,
+                            GUIConsts.getIcon("/resources/icons/cow_jumper_logo.png", 128));
                 }
             });
             menu.add(menuItem);

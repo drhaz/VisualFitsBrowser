@@ -12,6 +12,7 @@ Entries before 1.10.4 were reconstructed from the git history.
 - Removed leftover references to the WIYN One Degree Imager (ODI): the SAMP client
   now registers as "VisualFitsBrowser", `odiCentroidSupport` is renamed to
   `CentroidSupport`, and unused ODI-specific code was deleted.
+- The About dialog shows the cowjumping logo and links to cowjumping.net.
 
 ### Removed
 - The handlers for the ODI SAMP messages `odi.otalistener.displayedImage` and
