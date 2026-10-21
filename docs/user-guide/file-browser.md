@@ -30,11 +30,19 @@ Above the table:
 
 - the **reload** icon re-reads the directory from scratch (same as
   **File → Reload Directory**, `Alt+R`);
-- the current directory path;
+- the current directory path. Click it to open a different directory (same as
+  **File → Change Directory ...**);
 - **`<` / `>`** buttons, shown only when the directory path contains a date in
   `YYYYMMDD` form (for example `/data/raw/20240315`). They jump to the same path
   with the date one day earlier or later, if that directory exists. This is handy
   for observatory "day directories".
+- a **raw / processed** button between `<` and `>`, shown only when a folder in the
+  path is named `raw` or `processed`. Its icon shows which one you are looking at:
+  a cow for raw and minced meat for processed, or wheat and bread with
+  **Help → Vegan icons**. Click it
+  to switch to the same path with `raw` and `processed` exchanged, for example from
+  `/data/20240315/raw` to `/data/20240315/processed`. The button is greyed out if
+  that directory does not exist.
 
 ### Disk space indicator
 

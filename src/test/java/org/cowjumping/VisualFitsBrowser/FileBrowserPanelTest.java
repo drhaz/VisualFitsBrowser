@@ -36,7 +36,7 @@ public class FileBrowserPanelTest extends TestCase {
                 FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY", dir.getAbsolutePath());
 
         // Constructed off the event thread, as VisualFitsBrowserApp does at start-up.
-        panel = new FileBrowserPanel(null);
+        panel = new FileBrowserPanel(null, null);
         panel.getTableModel().addTableModelListener(new TableModelListener() {
             public void tableChanged(TableModelEvent e) {
                 if (!SwingUtilities.isEventDispatchThread())
@@ -115,6 +115,27 @@ public class FileBrowserPanelTest extends TestCase {
         settle();
         assertEquals(3, rowCount());
         assertTrue("table events fired off the event thread: " + offEdtEvents, offEdtEvents.isEmpty());
+    }
+
+    public void testStartDirectoryOverridesLastDirectory() throws Exception {
+        File startDir = new File(dir, "start");
+        assertTrue(startDir.mkdir());
+        FileBrowserPanel other = new FileBrowserPanel(null, startDir);
+        try {
+            assertEquals(startDir.getAbsoluteFile(), other.mRootDirectory);
+        } finally {
+            other.stopWatching();
+            startDir.delete();
+        }
+    }
+
+    public void testMissingStartDirectoryFallsBackToLastDirectory() throws Exception {
+        FileBrowserPanel other = new FileBrowserPanel(null, new File(dir, "does-not-exist"));
+        try {
+            assertEquals(dir.getAbsoluteFile(), other.mRootDirectory);
+        } finally {
+            other.stopWatching();
+        }
     }
 
     // --- helpers ---------------------------------------------------------------------------------------------

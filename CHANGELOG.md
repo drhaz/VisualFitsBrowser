@@ -8,6 +8,14 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Added
+- A button between `<` and `>` switches between the `raw` and `processed` version of
+  the current directory. Its icon shows which one is displayed: a cow and minced
+  meat, or wheat and bread with **Help → Vegan icons**.
+- Clicking the directory path opens the directory chooser.
+- A directory given on the command line is opened at start-up instead of the last
+  one.
+
 ## [1.10.6] - 2026-10-14
 
 ### Changed

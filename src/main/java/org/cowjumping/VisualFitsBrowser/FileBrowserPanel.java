@@ -91,8 +91,17 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     private JButton reloadButton = null;
     private JButton tomorrowLabel = null;
     private JButton yesterDayLabel = null;
+    private JButton rawProcessedButton = null;
+    private ImageIcon rawIcon;
+    private ImageIcon processedIcon;
+
+    private static final String RAW = "raw";
+    private static final String PROCESSED = "processed";
 
     private final String PROP_LASTDIRECTORY = FileBrowserPanel.class.getCanonicalName() + ".LASTDIRECTORY";
+
+    /** Icon set of the raw / processed button: "cow" (cow and minced meat) or "wheat" (wheat and bread). */
+    private final String PROP_RAWPROCESSEDICONS = FileBrowserPanel.class.getCanonicalName() + ".RAWPROCESSEDICONS";
 
     private OTAFileListListener mFileListListener = null;
 
@@ -109,21 +118,32 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
     }
 
     public FileBrowserPanel() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Initialize file browser panel.
      *
      * @param mFileListListener a listener to file select events. can be null.
+     * @param startDirectory    directory to open. If null or not a directory, the last opened directory is used.
      */
-    FileBrowserPanel(OTAFileListListener mFileListListener) {
+    FileBrowserPanel(OTAFileListListener mFileListListener, File startDirectory) {
 
         super();
         this.mFileListListener = mFileListListener;
         mRootDirectoryString = Preferences.thePreferences.getProperty(PROP_LASTDIRECTORY, mRootDirectoryString);
 
+        if (startDirectory != null) {
+            if (startDirectory.isDirectory())
+                mRootDirectoryString = startDirectory.getAbsolutePath();
+            else
+                log.warn("Start directory " + startDirectory + " does not exist. Opening last directory "
+                        + mRootDirectoryString + " instead.");
+        }
+
         mRootDirectory = new File(this.mRootDirectoryString);
+
+        loadRawProcessedIcons(isVeganIcons());
 
         this.setLayout(new BorderLayout());
 
@@ -134,7 +154,13 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             rootDirLabel.setHorizontalAlignment(SwingConstants.CENTER);
             rootDirLabel.setOpaque(true);
             rootDirLabel.setBackground(GUIConsts.InformationBackgroundColor);
-            rootDirLabel.setToolTipText("This is the current directory");
+            rootDirLabel.setToolTipText("This is the current directory. Click to open a different directory.");
+            rootDirLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            rootDirLabel.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    selectNewDirectory();
+                }
+            });
 
             ImageIcon reload = GUIConsts.getIcon("/resources/icons/reload.png", 18);
 
@@ -179,6 +205,15 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             tomorrowLabel.addActionListener(l);
             yesterDayLabel.addActionListener(l);
 
+            rawProcessedButton = new JButton(rawIcon);
+            this.maskButton(rawProcessedButton);
+            rawProcessedButton.setVisible(false);
+            rawProcessedButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    switchRawProcessed();
+                }
+            });
+
             Box topBox = Box.createHorizontalBox();
             topBox.setOpaque(true);
             topBox.setBackground(GUIConsts.InformationBackgroundColor);
@@ -186,6 +221,7 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             topBox.add(rootDirLabel);
             topBox.add(Box.createHorizontalGlue());
             topBox.add(yesterDayLabel);
+            topBox.add(rawProcessedButton);
             topBox.add(tomorrowLabel);
             add(topBox, BorderLayout.NORTH);
 
@@ -385,6 +421,83 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             }
 
         }
+    }
+
+    /** @return true if the raw / processed button uses wheat and bread instead of a cow and minced meat. */
+    boolean isVeganIcons() {
+        return Preferences.thePreferences.getProperty(PROP_RAWPROCESSEDICONS, "cow").equalsIgnoreCase("wheat");
+    }
+
+    /** Switch the raw / processed button between wheat and bread, and a cow and minced meat. */
+    void setVeganIcons(boolean vegan) {
+        Preferences.thePreferences.setProperty(PROP_RAWPROCESSEDICONS, vegan ? "wheat" : "cow");
+        loadRawProcessedIcons(vegan);
+        if (rawProcessedButton != null && mRootDirectory != null)
+            rawProcessedButton.setIcon(isRawDirectory(mRootDirectory) ? rawIcon : processedIcon);
+    }
+
+    private void loadRawProcessedIcons(boolean vegan) {
+        if (vegan) {
+            rawIcon = GUIConsts.getIcon("/resources/icons/raw_wheat.png", 18);
+            processedIcon = GUIConsts.getIcon("/resources/icons/processed_bread.png", 18);
+        } else {
+            rawIcon = GUIConsts.getIcon("/resources/icons/raw_cow.png", 18);
+            processedIcon = GUIConsts.getIcon("/resources/icons/processed_mince.png", 18);
+        }
+    }
+
+    /** Load the equivalent directory with the "raw" path component exchanged for "processed", or vice versa. */
+    public void switchRawProcessed() {
+        File f = getRawProcessedCounterpart(this.mRootDirectoryString);
+        if (f == null)
+            return;
+        if (f.exists() && f.isDirectory())
+            readDirectory(f);
+        else
+            log.warn("raw/processed directory " + f + " does not exist.");
+    }
+
+    /**
+     * Find the directory that corresponds to the given path, with its last "raw" path component replaced by
+     * "processed", or its last "processed" component replaced by "raw".
+     *
+     * @return the counterpart directory, or null if the path contains neither component.
+     */
+    private File getRawProcessedCounterpart(String name) {
+        if (name == null)
+            return null;
+
+        File dir = new File(name).getAbsoluteFile();
+        Vector<String> below = new Vector<String>();
+        for (File f = dir; f != null; f = f.getParentFile()) {
+            String target = getRawProcessedTarget(f.getName());
+            if (target != null) {
+                File ret = new File(f.getParentFile(), target);
+                for (int ii = below.size() - 1; ii >= 0; ii--)
+                    ret = new File(ret, below.get(ii));
+                return ret;
+            }
+            below.add(f.getName());
+        }
+        return null;
+    }
+
+    /** @return true if the last "raw" or "processed" component of the directory's path is "raw". */
+    private static boolean isRawDirectory(File dir) {
+        for (File f = dir.getAbsoluteFile(); f != null; f = f.getParentFile()) {
+            if (getRawProcessedTarget(f.getName()) != null)
+                return RAW.equals(f.getName());
+        }
+        return false;
+    }
+
+    /** @return "processed" for "raw", "raw" for "processed", and null for any other path component. */
+    private static String getRawProcessedTarget(String component) {
+        if (RAW.equals(component))
+            return PROCESSED;
+        if (PROCESSED.equals(component))
+            return RAW;
+        return null;
     }
 
     // private void hideColumn(JTable table, int c) {
@@ -745,6 +858,16 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                 boolean hasDate = getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null;
                 tomorrowLabel.setVisible(hasDate);
                 yesterDayLabel.setVisible(hasDate);
+
+                File counterpart = getRawProcessedCounterpart(RootDirectory.getAbsolutePath());
+                rawProcessedButton.setVisible(counterpart != null);
+                if (counterpart != null) {
+                    boolean isRaw = isRawDirectory(RootDirectory);
+                    rawProcessedButton.setIcon(isRaw ? rawIcon : processedIcon);
+                    rawProcessedButton.setToolTipText("Showing " + (isRaw ? RAW : PROCESSED)
+                            + " data. Click to load " + counterpart.getAbsolutePath());
+                    rawProcessedButton.setEnabled(counterpart.isDirectory());
+                }
 
                 // Now that the directory is fully read in, instantiate a new DirectoryListener.
                 myDirectoryListener = new DirectoryListener(RootDirectory, FileBrowserPanel.this);

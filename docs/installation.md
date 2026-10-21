@@ -30,6 +30,14 @@ On first start the program opens the file system root `/`. Use
 **File → Change Directory ...** to pick your data directory; the choice is
 remembered for the next start.
 
+To open a specific directory instead, give it as an argument:
+
+```sh
+java -jar VisualFitsBrowser-<version>-jar-with-dependencies.jar /data/raw/20240315
+```
+
+If that directory does not exist, the program opens the last directory instead.
+
 ### Connecting ds9
 
 VisualFitsBrowser runs its own SAMP hub. Start ds9 after VisualFitsBrowser (or

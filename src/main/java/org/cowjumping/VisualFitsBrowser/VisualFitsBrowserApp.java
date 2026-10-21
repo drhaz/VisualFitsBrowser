@@ -67,6 +67,9 @@ public class VisualFitsBrowserApp extends JFrame {
 
     private static boolean showUtilities = true;
 
+    /** Directory given on the command line; null to open the last directory. */
+    private static File startDirectory = null;
+
     private VisualFitsBrowserApp() {
 
         super("VisualFitsBrowser " + getVersion());
@@ -83,7 +86,7 @@ public class VisualFitsBrowserApp extends JFrame {
 
         VisualFitsBrowserApp.mToolBoxPanel = new ImageToolBoxPanel(null);
         
-        FileBrowserPanel fbp = new FileBrowserPanel(VisualFitsBrowserApp.mToolBoxPanel);
+        FileBrowserPanel fbp = new FileBrowserPanel(VisualFitsBrowserApp.mToolBoxPanel, startDirectory);
         VisualFitsBrowserApp.setmBrowserPanel(fbp);
 
         this.add(getmBrowserPanel(), BorderLayout.CENTER);
@@ -342,6 +345,22 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
         {
+            menuItem = new JCheckBoxMenuItem("Vegan icons");
+            menuItem.setToolTipText("Show wheat and bread instead of a cow and minced meat for raw and processed data");
+            menuItem.setSelected(getmBrowserPanel() != null && getmBrowserPanel().isVeganIcons());
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean vegan = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().setVeganIcons(vegan);
+                }
+
+            });
+            menu.add(menuItem);
+        }
+
+        {
             menuItem = new JMenuItem("About VisualFitsBrowser");
             menuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -551,8 +570,9 @@ public class VisualFitsBrowserApp extends JFrame {
             CommandLine cmd = parser.parse(options, args);
 
             if (cmd.hasOption("h")) {
-                new HelpFormatter().printHelp("java -jar VisualFitsBrowser-<version>-jar-with-dependencies.jar",
-                        options);
+                new HelpFormatter().printHelp("java -jar VisualFitsBrowser-<version>-jar-with-dependencies.jar"
+                        + " [options] [directory]", "Opens the given directory, or else the directory opened last.",
+                        options, null);
                 System.exit(0);
             }
 
@@ -564,6 +584,10 @@ public class VisualFitsBrowserApp extends JFrame {
                 rootConfig.setLevel(Level.DEBUG);
                 // Loggers created before this point (static fields) only see the new level after an update.
                 context.updateLoggers();
+            }
+
+            if (cmd.getArgs().length > 0) {
+                startDirectory = new File(cmd.getArgs()[0]);
             }
 
         } catch (Exception e) {

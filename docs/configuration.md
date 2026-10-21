@@ -39,7 +39,8 @@ external program paths that you set only in this file.
 
 | Key | Default | Menu | Description |
 |---|---|---|---|
-| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.LASTDIRECTORY` | `/` | File → Change Directory | Directory opened at start-up |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.LASTDIRECTORY` | `/` | File → Change Directory | Directory opened at start-up, unless a directory is given on the command line |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.RAWPROCESSEDICONS` | `cow` | Help → Vegan icons | Icons of the [raw / processed button](user-guide/file-browser.md#directory-header): `cow` (a cow for raw, minced meat for processed) or `wheat` (wheat for raw, bread for processed) |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.AUTODISPLAY` | `false` | File → Auto display new image in ds9 | Send new images to ds9 automatically |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.SHOWUTILITIES` | `false` | File → Show ToolBox | Toolbox window visible |
 | `directorylistener.ignorediremodified` | `False` | — | `true` rescans the directory every 2 s even if its modification time did not change. Use this on network file systems where new files do not show up. |
