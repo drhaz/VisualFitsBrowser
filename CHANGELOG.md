@@ -8,6 +8,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-10-21
+
 ### Added
 - A button between `<` and `>` switches between the `raw` and `processed` version of
   the current directory. Its icon shows which one is displayed: a cow and minced
