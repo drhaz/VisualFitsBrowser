@@ -8,6 +8,13 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Changed
+- Opening a directory is faster, especially on network file systems such as S3
+  mounts: the FITS headers of several files are read at the same time (setting
+  `READTHREADS`, default 16), each header is read in one request instead of several
+  small ones, and redundant checks whether a file exists were removed. These checks
+  also ran for every file once per second while a directory was being watched.
+
 ## [1.11.0] - 2026-10-21
 
 ### Added

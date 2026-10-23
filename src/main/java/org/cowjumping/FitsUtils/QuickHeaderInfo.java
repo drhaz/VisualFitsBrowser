@@ -16,6 +16,12 @@ public class QuickHeaderInfo {
     final static int FITSBLOCKSIZE = 2880;
 
     /**
+     * Bytes requested from the file at once. Large enough to hold a typical primary and first extension header in
+     * one read, which matters on network file systems such as S3 mounts where every read is a remote request.
+     */
+    final static int HEADER_READ_SIZE = 64 * 1024;
+
+    /**
      * Quickly reads in the primary header of a fits file and returns it as a
      * Vector of Strings. No Analysis of the header is done.
      *
@@ -27,16 +33,13 @@ public class QuickHeaderInfo {
         Vector<String> retVal = new Vector<String>();
         boolean extend = false;
         char b[] = new char[80];
-        if (!f.exists()) {
-            myLogger.error("Attempt to read from non-existing file: " + f.getAbsolutePath());
-            return retVal;
-        }
 
         myLogger.debug("Start read header");
         int linesRead = 0;
         // Read primary header & first extension
         try {
-            BufferedReader r = new BufferedReader(new FileReader(f), FITSBLOCKSIZE * 1);
+            BufferedReader r = new BufferedReader(new InputStreamReader(
+                    new BufferedInputStream(new FileInputStream(f), HEADER_READ_SIZE), "US-ASCII"));
 
             // primary header
             while (r.read(b, 0, 80) == 80) {
@@ -78,6 +81,8 @@ public class QuickHeaderInfo {
             }
             r.close();
 
+        } catch (FileNotFoundException e) {
+            myLogger.error("Attempt to read from non-existing file: " + f.getAbsolutePath());
         } catch (Exception e) {
             myLogger.error("Error while reading in primary hedaer for file " + f.getAbsolutePath(), e);
 

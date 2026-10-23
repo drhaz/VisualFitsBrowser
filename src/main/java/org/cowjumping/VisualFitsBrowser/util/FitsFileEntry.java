@@ -6,12 +6,20 @@ import org.cowjumping.FitsUtils.OBSTYPE;
 import org.cowjumping.FitsUtils.QuickHeaderInfo;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FITSTextCommentSQLITEImp;
 import org.cowjumping.VisualFitsBrowser.util.FitsComments.FitsCommentInterface;
+import org.cowjumping.guiUtils.Preferences;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Data holding class for a FITS image.
@@ -36,6 +44,13 @@ public class FitsFileEntry {
 	private static FitsCommentInterface theCommentInterface = new FITSTextCommentSQLITEImp(commentdbfilename);
 
 
+	/**
+	 * Number of files whose headers are read at the same time. On network file systems such as S3 mounts each read
+	 * waits for a remote request, so reading in parallel hides most of that latency.
+	 */
+	private final static String PROP_READTHREADS = FitsFileEntry.class.getCanonicalName() + ".READTHREADS";
+	private final static int DEFAULT_READTHREADS = 16;
+
 	public static void onExit () {
 		if (theCommentInterface != null)
 			theCommentInterface.close();
@@ -49,9 +64,9 @@ public class FitsFileEntry {
 		public boolean accept(File file) {
 
 			boolean good_file = false;
-			good_file = file.exists() && //
-					// || //
-					(file.getName().matches(".*\\.fits?$") || file.getName().matches(".*\\.fits\\.fz$"));
+			// No file.exists() check: the files come from a directory listing, and on network file systems every
+			// check is a remote request.
+			good_file = file.getName().matches(".*\\.fits?$") || file.getName().matches(".*\\.fits\\.fz$");
 
 			if (!good_file) {
 				//myLogger.debug("Reject file " + file.getAbsolutePath());
@@ -114,7 +129,20 @@ public class FitsFileEntry {
 		return createFromFile(f, "CONFMODE");
 	}
 
+	/** @return the entry for the file, or null if the file does not exist. */
 	public static FitsFileEntry createFromFile(File f, String extraKey) {
+		if (!f.exists())
+			return null;
+		FitsFileEntry entry = readFromFile(f, extraKey);
+		FitsFileEntry.theCommentInterface.readComment(entry);
+		return entry;
+	}
+
+	/**
+	 * Create an entry from the file's FITS header, without the user comment. Does not check that the file exists.
+	 * Safe to call from several threads at once.
+	 */
+	private static FitsFileEntry readFromFile(File f, String extraKey) {
 
 		FitsFileEntry entry = null;
 		OBSTYPE ot = OBSTYPE.INDEF;
@@ -124,57 +152,52 @@ public class FitsFileEntry {
 		LocalDateTime DateObs = null;
 		String Filter = "n/a";
 
-		if (f.exists()) {
+		Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
+		if (fitsHeader != null && fitsHeader.size() > 0) {
 
-			Vector<String> fitsHeader = QuickHeaderInfo.readFITSHeader(f);
-			if (fitsHeader != null && fitsHeader.size() > 0) {
+			expTime = QuickHeaderInfo.getExpTime(fitsHeader);
+			ObjName = QuickHeaderInfo.getObject(fitsHeader);
+			Filter = QuickHeaderInfo.getFilter(fitsHeader);
+			DateObs = QuickHeaderInfo.getDateObs(fitsHeader, true);
 
-				expTime = QuickHeaderInfo.getExpTime(fitsHeader);
-				ObjName = QuickHeaderInfo.getObject(fitsHeader);
-				Filter = QuickHeaderInfo.getFilter(fitsHeader);
-				DateObs = QuickHeaderInfo.getDateObs(fitsHeader, true);
+		} else {
+			// Only checked after a failed read, to avoid an extra request per file on network file systems.
+			if (!f.exists())
+				return null;
+			myLogger.error("Fitsheader for file " + f.getName() + " is empty.");
+			ObjName = "[invalid readout]";
+		}
 
-			} else {
-				myLogger.error("Fitsheader for file " + f.getName() + " is empty.");
-				ObjName = "[invalid readout]";
-			}
+		entry = new FitsFileEntry(f.getParent(), //
+				f.getName(), ObjName, ot, //
+				expTime, //
+				Filter, //
+				DateObs != null ? DateObs : LocalDateTime.now(), //
+				false);
 
-			entry = new FitsFileEntry(f.getParent(), //
-					f.getName(), ObjName, ot, //
-					expTime, //
-					Filter, //
-					DateObs != null ? DateObs : LocalDateTime.now(), //
-					false);
+		entry.DirectoryFile = f;
+		// Now fetching additional header information:
 
-			entry.DirectoryFile = f;
-			// Now fetching additional header information:
-
-			if (fitsHeader != null) {
-				myLogger.debug("Adding image: " + entry);
-				entry.RA_String = QuickHeaderInfo.getStringValue(fitsHeader, "RA");
-				entry.Dec_String = QuickHeaderInfo.getStringValue(fitsHeader, "DEC");
-				entry.RA_String = entry.RA_String != null ? entry.RA_String.trim() : "INDEF";
-				entry.Dec_String = entry.Dec_String != null ? entry.Dec_String.trim() : "INDEF";
-				entry.Airmass = QuickHeaderInfo.getFloatValue(fitsHeader, "AIRMASS");
-				entry.Focus = QuickHeaderInfo.getFloatValue(fitsHeader, "TELFOCUS");
-				entry.isBinned = QuickHeaderInfo.isBinned(fitsHeader);
-				entry.mef = QuickHeaderInfo.getBooleanValue (fitsHeader, "EXTEND");
-				myLogger.debug("Added image: " + entry);
-			}
-
-
-			if (extraKey != null && fitsHeader != null) {
-				String temp = QuickHeaderInfo.getStringValue(fitsHeader, extraKey);
-				if (temp != null)
-					entry.ExtraKeyword = temp;
-				else
-					entry.ExtraKeyword = "n/a";
-			}
-
-			// fetch user comment
-			FitsFileEntry.theCommentInterface.readComment(entry);
+		if (fitsHeader != null) {
+			myLogger.debug("Adding image: " + entry);
+			entry.RA_String = QuickHeaderInfo.getStringValue(fitsHeader, "RA");
+			entry.Dec_String = QuickHeaderInfo.getStringValue(fitsHeader, "DEC");
+			entry.RA_String = entry.RA_String != null ? entry.RA_String.trim() : "INDEF";
+			entry.Dec_String = entry.Dec_String != null ? entry.Dec_String.trim() : "INDEF";
+			entry.Airmass = QuickHeaderInfo.getFloatValue(fitsHeader, "AIRMASS");
+			entry.Focus = QuickHeaderInfo.getFloatValue(fitsHeader, "TELFOCUS");
+			entry.isBinned = QuickHeaderInfo.isBinned(fitsHeader);
+			entry.mef = QuickHeaderInfo.getBooleanValue (fitsHeader, "EXTEND");
+			myLogger.debug("Added image: " + entry);
+		}
 
 
+		if (extraKey != null && fitsHeader != null) {
+			String temp = QuickHeaderInfo.getStringValue(fitsHeader, extraKey);
+			if (temp != null)
+				entry.ExtraKeyword = temp;
+			else
+				entry.ExtraKeyword = "n/a";
 		}
 
 		return entry;
@@ -239,63 +262,85 @@ public class FitsFileEntry {
 	/**
 	 * Read the headers of all FITS files in a directory. Typically called from a background thread; progress is
 	 * reported to the (optional) ProgressMonitor on the Swing event thread.
+	 * <p>
+	 * The headers are read by several threads at once (see {@link #PROP_READTHREADS}); the user comments are then
+	 * read one after the other, since the comment database is not meant for concurrent use.
 	 */
 	public static Vector<FitsFileEntry> getImagesInDirectory(File RootDirectory, final ProgressMonitor progressM) {
 		Vector<FitsFileEntry> directoryImages = new Vector<FitsFileEntry>();
 
 		File files[] = RootDirectory.listFiles(thefileFilter);
 
-		if (files != null) {
-			final int nFiles = files.length;
-			if (progressM != null)
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						progressM.setMaximum(nFiles);
-					}
-				});
-			myLogger.info("| Found  " + files.length + " entries");
-			int progress = 0;
+		if (files == null) {
+			myLogger.error("No images found, returning empty lists.");
+			return directoryImages;
+		}
 
-			{
+		final int nFiles = files.length;
+		if (progressM != null)
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					progressM.setMaximum(nFiles);
+				}
+			});
+		myLogger.info("| Found  " + files.length + " entries");
+		if (nFiles == 0)
+			return directoryImages;
 
-				for (File file : files) {
+		int nThreads = DEFAULT_READTHREADS;
+		if (Preferences.thePreferences != null) {
+			String value = Preferences.thePreferences.getProperty(PROP_READTHREADS, "" + DEFAULT_READTHREADS);
+			try {
+				nThreads = Integer.parseInt(value.trim());
+			} catch (NumberFormatException e) {
+				myLogger.warn("Invalid " + PROP_READTHREADS + " " + value + ", using " + DEFAULT_READTHREADS);
+			}
+		}
+		nThreads = Math.max(1, Math.min(nThreads, nFiles));
 
-					if (myLogger.isDebugEnabled()) {
+		ExecutorService pool = Executors.newFixedThreadPool(nThreads, new ThreadFactory() {
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r, "FITS header reader");
+				t.setDaemon(true);
+				return t;
+			}
+		});
 
-						myLogger.debug("Checking out file: " + file.getAbsolutePath());
-					}
+		final AtomicInteger progress = new AtomicInteger();
+		List<Future<FitsFileEntry>> results = new ArrayList<Future<FitsFileEntry>>(nFiles);
+		for (final File file : files) {
+			results.add(pool.submit(() -> {
+				myLogger.debug("Checking out file: " + file.getAbsolutePath());
+				FitsFileEntry e = readFromFile(file, "CONFMODE");
 
-					FitsFileEntry e = FitsFileEntry.createFromFile(file);
+				final int done = progress.incrementAndGet();
+				if (progressM != null)
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							progressM.setProgress(done);
+						}
+					});
+				return e;
+			}));
+		}
 
+		try {
+			for (int ii = 0; ii < nFiles; ii++) {
+				try {
+					FitsFileEntry e = results.get(ii).get();
 					if (e != null) {
-						myLogger.debug("Adding file: " + file.getAbsolutePath());
+						FitsFileEntry.theCommentInterface.readComment(e);
 						directoryImages.add(e);
-
-					} else {
-
-						if (myLogger.isDebugEnabled())
-							myLogger.debug("File " + file.getAbsolutePath() + " has been rejected.");
-
 					}
-
-					progress++;
-
-					if (progressM != null) {
-						final int done = progress;
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								progressM.setProgress(done);
-							}
-						});
-					}
-
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					break;
+				} catch (Exception e) {
+					myLogger.error("While reading header of " + files[ii].getAbsolutePath(), e);
 				}
 			}
-
-		} else {
-
-			myLogger.error("No images found, returning empty lists.");
-
+		} finally {
+			pool.shutdownNow();
 		}
 
 		return directoryImages;

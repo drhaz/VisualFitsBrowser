@@ -43,6 +43,7 @@ external program paths that you set only in this file.
 | `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.RAWPROCESSEDICONS` | `cow` | Help → Vegan icons | Icons of the [raw / processed button](user-guide/file-browser.md#directory-header): `cow` (a cow for raw, minced meat for processed) or `wheat` (wheat for raw, bread for processed) |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.AUTODISPLAY` | `false` | File → Auto display new image in ds9 | Send new images to ds9 automatically |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.SHOWUTILITIES` | `false` | File → Show ToolBox | Toolbox window visible |
+| `org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.READTHREADS` | `16` | — | Number of files whose headers are read at the same time when a directory is opened. Reading in parallel makes opening directories on network file systems such as S3 mounts much faster; set it to `1` to read one file after the other. |
 | `directorylistener.ignorediremodified` | `False` | — | `true` rescans the directory every 2 s even if its modification time did not change. Use this on network file systems where new files do not show up. |
 
 ### Window positions
