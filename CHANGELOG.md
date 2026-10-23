@@ -8,6 +8,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-10-23
+
 ### Changed
 - Opening a directory is faster, especially on network file systems such as S3
   mounts: the FITS headers of several files are read at the same time (setting
