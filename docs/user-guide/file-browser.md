@@ -16,13 +16,38 @@ Every file ending in `.fit`, `.fits` or `.fits.fz` is listed with these columns:
 | Filter | `FILTER` |
 | X | `AIRMASS` |
 | DATE_OBS | `DATE-OBS` |
-| *(no title)* | `CONFMODE` keyword, or `n/a` if the header has none |
+| *keyword* | A FITS keyword of your choice (default `CONFMODE`), or `n/a` if the header has none. The column title is the keyword. |
 | Comment | Your [comment](comments.md) for this image — editable |
 
 Click a column header to sort. The default order puts the newest image
 (`DATE-OBS`) on top. Hover over a cell to see its full content as a tooltip.
 
+Drag the border between two column headers to change the column widths. The
+widths are remembered for the next start; **Display → Reset column widths** goes
+back to the defaults. Making the window wider or narrower widens or narrows all
+columns; the window width is remembered too.
+
 The image currently shown in ds9 is highlighted in **bold magenta**.
+
+### Display options
+
+The **Display** menu changes how the table looks:
+
+- **Hide .fits suffix** shows file names without `.fit`, `.fits` or `.fits.fz`.
+  The tooltip still shows the full name.
+- **Shorten long text in the middle** (on by default): an OBJECT name, extra
+  column value or comment too long for its column has its middle
+  replaced by an ellipsis (`…`), for example `NGC 22…luster` for
+  `NGC 2264 Christmas Tree Cluster`, so that both its start and end stay visible.
+  Switch it off to cut values at the end instead. The tooltip still shows the full
+  value.
+- **Extra column keyword ...** chooses the FITS keyword shown in the extra
+  column. Type a keyword, or pick one from the drop-down list, which shows the
+  keywords in the header of the image at the top of the table. The directory is
+  then read again to fill in the new values.
+- **Reset column widths** goes back to the default column widths.
+- **Vegan icons** changes the icons of the
+  [raw / processed button](#directory-header).
 
 ### Directory header
 
@@ -39,7 +64,7 @@ Above the table:
 - a **raw / processed** button between `<` and `>`, shown only when a folder in the
   path is named `raw` or `processed`. Its icon shows which one you are looking at:
   a cow for raw and minced meat for processed, or wheat and bread with
-  **Help → Vegan icons**. Click it
+  **Display → Vegan icons**. Click it
   to switch to the same path with `raw` and `processed` exchanged, for example from
   `/data/20240315/raw` to `/data/20240315/processed`. The button is greyed out if
   that directory does not exist.

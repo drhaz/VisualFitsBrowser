@@ -278,7 +278,8 @@ public class QuickHeaderInfo {
         String retVal = getStringValue(fitsHeader, "FILTER");
         if (retVal == null)
             retVal = "";
-        return retVal;
+        // FITS string values are padded with blanks inside the quotes, e.g. 'rp      '.
+        return retVal.trim();
 
     }
 
@@ -287,6 +288,26 @@ public class QuickHeaderInfo {
         if (retVal == null)
             retVal = 0;
         return retVal;
+    }
+
+    /**
+     * @return the keywords of all cards in the header that have a value, in header order and without duplicates.
+     *         COMMENT, HISTORY and blank cards are left out.
+     */
+    public static List<String> getKeywords(Vector<String> fitsHeader) {
+        LinkedHashSet<String> keys = new LinkedHashSet<String>();
+        if (fitsHeader != null) {
+            for (String fitsCard : fitsHeader) {
+                String key = null;
+                if (fitsCard.length() > 8 && fitsCard.charAt(8) == '=')
+                    key = fitsCard.substring(0, 8).trim();
+                else if (fitsCard.startsWith("HIERARCH") && fitsCard.indexOf('=') > 0)
+                    key = fitsCard.substring(0, fitsCard.indexOf('=')).trim();
+                if (key != null && !key.isEmpty())
+                    keys.add(key);
+            }
+        }
+        return new ArrayList<String>(keys);
     }
 
     public static String getStringKey(String fitsCard) {

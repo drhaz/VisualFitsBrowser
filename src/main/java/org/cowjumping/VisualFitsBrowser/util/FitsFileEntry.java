@@ -51,6 +51,23 @@ public class FitsFileEntry {
 	private final static String PROP_READTHREADS = FitsFileEntry.class.getCanonicalName() + ".READTHREADS";
 	private final static int DEFAULT_READTHREADS = 16;
 
+	/** FITS keyword shown in the extra column of the file table. */
+	private final static String PROP_EXTRAKEYWORD = FitsFileEntry.class.getCanonicalName() + ".EXTRAKEYWORD";
+	private final static String DEFAULT_EXTRAKEYWORD = "CONFMODE";
+
+	/** @return the FITS keyword whose value is read into {@link #ExtraKeyword}. */
+	public static String getExtraKeyword() {
+		if (Preferences.thePreferences == null)
+			return DEFAULT_EXTRAKEYWORD;
+		String key = Preferences.thePreferences.getProperty(PROP_EXTRAKEYWORD, DEFAULT_EXTRAKEYWORD).trim();
+		return key.isEmpty() ? DEFAULT_EXTRAKEYWORD : key;
+	}
+
+	/** Set the FITS keyword read into {@link #ExtraKeyword}. Takes effect for headers read afterwards. */
+	public static void setExtraKeyword(String key) {
+		Preferences.thePreferences.setProperty(PROP_EXTRAKEYWORD, key.trim());
+	}
+
 	public static void onExit () {
 		if (theCommentInterface != null)
 			theCommentInterface.close();
@@ -126,7 +143,7 @@ public class FitsFileEntry {
 	public boolean isValidReadout = true;
 
 	public static FitsFileEntry createFromFile(File f) {
-		return createFromFile(f, "CONFMODE");
+		return createFromFile(f, getExtraKeyword());
 	}
 
 	/** @return the entry for the file, or null if the file does not exist. */
@@ -306,12 +323,13 @@ public class FitsFileEntry {
 			}
 		});
 
+		final String extraKey = getExtraKeyword();
 		final AtomicInteger progress = new AtomicInteger();
 		List<Future<FitsFileEntry>> results = new ArrayList<Future<FitsFileEntry>>(nFiles);
 		for (final File file : files) {
 			results.add(pool.submit(() -> {
 				myLogger.debug("Checking out file: " + file.getAbsolutePath());
-				FitsFileEntry e = readFromFile(file, "CONFMODE");
+				FitsFileEntry e = readFromFile(file, extraKey);
 
 				final int done = progress.incrementAndGet();
 				if (progressM != null)

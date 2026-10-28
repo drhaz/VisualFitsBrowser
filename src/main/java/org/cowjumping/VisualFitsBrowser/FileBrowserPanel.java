@@ -19,8 +19,10 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -33,13 +35,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cowjumping.FitsUtils.QuickHeaderInfo;
 import org.cowjumping.VisualFitsBrowser.ImageActions.OTAFileListListener;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryChangeReceiver;
 import org.cowjumping.VisualFitsBrowser.util.DirectoryListener;
@@ -102,6 +103,24 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
     /** Icon set of the raw / processed button: "cow" (cow and minced meat) or "wheat" (wheat and bread). */
     private final String PROP_RAWPROCESSEDICONS = FileBrowserPanel.class.getCanonicalName() + ".RAWPROCESSEDICONS";
+
+    /** Show file names without their .fits / .fits.fz suffix. */
+    private final String PROP_HIDEFITSSUFFIX = FileBrowserPanel.class.getCanonicalName() + ".HIDEFITSSUFFIX";
+
+    /** Shorten OBJECT, extra column and comment values that do not fit their column in the middle, not at the end. */
+    private final String PROP_MIDDLEELLIPSIS = FileBrowserPanel.class.getCanonicalName() + ".MIDDLEELLIPSIS";
+
+    /** Widths of the table columns, comma separated in table model order. */
+    private final String PROP_COLUMNWIDTHS = FileBrowserPanel.class.getCanonicalName() + ".COLUMNWIDTHS";
+
+    /**
+     * Default column widths in table model order: file name, OBJECT, exposure time, filter, airmass, DATE-OBS, extra
+     * keyword, comment.
+     */
+    private static final int[] DEFAULT_COLUMNWIDTHS = { 400, 400, 70, 100, 45, 100, 75, 300 };
+
+    private static final Pattern FITS_SUFFIX = Pattern.compile("(?i)\\.fits?(\\.fz)?$");
+    private static final String ELLIPSIS = "\u2026";
 
     private OTAFileListListener mFileListListener = null;
 
@@ -281,6 +300,12 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
                     .setCellRenderer(new NumberFormatterCellRenderer("%2.1f"));
 
             mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setCellRenderer(new ImageIDRenderer());
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL)
+                    .setCellRenderer(new MiddleEllipsisRenderer());
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.EXTRA_COL)
+                    .setCellRenderer(new MiddleEllipsisRenderer());
+            mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL)
+                    .setCellRenderer(new MiddleEllipsisRenderer());
 
             mTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             mTable.setFont(GUIConsts.TTFont16);
@@ -290,20 +315,18 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             JScrollPane scrollPane = new JScrollPane(mTable);
             scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.FNAME_COL).setPreferredWidth(400);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.OBJECT_COL).setPreferredWidth(400);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.TEXP_COL).setPreferredWidth(70);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.FILTER_COL).setPreferredWidth(100);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.AIRMASS_COL).setPreferredWidth(45);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.DATEOBS_COL).setPreferredWidth(100);
-            mTable.getColumnModel().getColumn(FitsViewerTableModel.USERCOMMENT_COL).setPreferredWidth(300);
+            setColumnWidths(loadColumnWidths());
+            // Remember the widths once the user has finished dragging a column border.
+            mTable.getTableHeader().addMouseListener(new MouseAdapter() {
+                public void mouseReleased(MouseEvent e) {
+                    saveColumnWidths();
+                }
+            });
 
-            for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
-                TableColumn tc = mTable.getColumnModel().getColumn(ii);
-                tc.setMaxWidth(tc.getPreferredWidth());
-            }
-
-            scrollPane.setPreferredSize(new Dimension(mTable.getMaximumSize().width, 550));
+            int tableWidth = 0;
+            for (int ii = 0; ii < mTable.getColumnCount(); ii++)
+                tableWidth += mTable.getColumnModel().getColumn(ii).getPreferredWidth();
+            scrollPane.setPreferredSize(new Dimension(tableWidth, 550));
             add(scrollPane, BorderLayout.CENTER);
 
         }
@@ -434,6 +457,118 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         loadRawProcessedIcons(vegan);
         if (rawProcessedButton != null && mRootDirectory != null)
             rawProcessedButton.setIcon(isRawDirectory(mRootDirectory) ? rawIcon : processedIcon);
+    }
+
+    /** @return true if file names are shown without their .fits / .fits.fz suffix. */
+    boolean isHideFitsSuffix() {
+        return Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_HIDEFITSSUFFIX, "false"));
+    }
+
+    void setHideFitsSuffix(boolean hide) {
+        Preferences.thePreferences.setProperty(PROP_HIDEFITSSUFFIX, hide + "");
+        mTable.repaint();
+    }
+
+    /**
+     * @return true if OBJECT, extra column and comment values too long for their column are shortened in the
+     *         middle rather than at the end.
+     */
+    boolean isMiddleEllipsis() {
+        return Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_MIDDLEELLIPSIS, "true"));
+    }
+
+    void setMiddleEllipsis(boolean middle) {
+        Preferences.thePreferences.setProperty(PROP_MIDDLEELLIPSIS, middle + "");
+        mTable.repaint();
+    }
+
+    /** @return the saved column widths in table model order, or the defaults if none (or invalid ones) are saved. */
+    private int[] loadColumnWidths() {
+        String saved = Preferences.thePreferences.getProperty(PROP_COLUMNWIDTHS, "");
+        String[] parts = saved.split(",");
+        if (parts.length != DEFAULT_COLUMNWIDTHS.length)
+            return DEFAULT_COLUMNWIDTHS.clone();
+
+        int[] widths = new int[parts.length];
+        try {
+            for (int ii = 0; ii < parts.length; ii++)
+                widths[ii] = Math.max(1, Integer.parseInt(parts[ii].trim()));
+        } catch (NumberFormatException e) {
+            log.warn("Invalid " + PROP_COLUMNWIDTHS + " " + saved + ", using default column widths");
+            return DEFAULT_COLUMNWIDTHS.clone();
+        }
+        return widths;
+    }
+
+    /** Set the preferred column widths, given in table model order. */
+    private void setColumnWidths(int[] widths) {
+        for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
+            TableColumn tc = mTable.getColumnModel().getColumn(ii);
+            if (tc.getModelIndex() < widths.length)
+                tc.setPreferredWidth(widths[tc.getModelIndex()]);
+        }
+    }
+
+    /**
+     * Store the column widths in table model order. The preferred widths are stored: dragging a column border sets
+     * them to the displayed widths, and resizing the window keeps them, so together with the window width they
+     * reproduce the layout at the next start.
+     */
+    void saveColumnWidths() {
+        int[] widths = loadColumnWidths();
+        for (int ii = 0; ii < mTable.getColumnCount(); ii++) {
+            TableColumn tc = mTable.getColumnModel().getColumn(ii);
+            if (tc.getModelIndex() < widths.length)
+                widths[tc.getModelIndex()] = tc.getPreferredWidth();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int ii = 0; ii < widths.length; ii++)
+            sb.append(ii > 0 ? "," : "").append(widths[ii]);
+        Preferences.thePreferences.setProperty(PROP_COLUMNWIDTHS, sb.toString());
+    }
+
+    /** Go back to the default column widths and forget the saved ones. */
+    void resetColumnWidths() {
+        Preferences.thePreferences.setProperty(PROP_COLUMNWIDTHS, "");
+        setColumnWidths(DEFAULT_COLUMNWIDTHS);
+        mTable.doLayout();
+        mTable.getTableHeader().repaint();
+        mTable.repaint();
+    }
+
+    /** @return the file name without a trailing .fit, .fits, .fit.fz or .fits.fz. */
+    static String stripFitsSuffix(String name) {
+        return FITS_SUFFIX.matcher(name).replaceFirst("");
+    }
+
+    /**
+     * Shorten a text to fit into the given width by replacing characters in its middle with an ellipsis, keeping
+     * its start and end visible.
+     *
+     * @return the text unchanged if it fits, otherwise the longest middle-shortened version that fits.
+     */
+    static String middleEllipsis(String text, FontMetrics fm, int width) {
+        if (fm.stringWidth(text) <= width)
+            return text;
+
+        // Binary search for the largest number of characters to keep.
+        int lo = 0;
+        int hi = text.length() - 1;
+        while (lo < hi) {
+            int keep = (lo + hi + 1) / 2;
+            if (fm.stringWidth(shortenMiddle(text, keep)) <= width)
+                lo = keep;
+            else
+                hi = keep - 1;
+        }
+        return shortenMiddle(text, lo);
+    }
+
+    private static String shortenMiddle(String text, int keep) {
+        int head = (keep + 1) / 2;
+        int tail = keep - head;
+        return text.substring(0, head) + ELLIPSIS + text.substring(text.length() - tail);
     }
 
     private void loadRawProcessedIcons(boolean vegan) {
@@ -569,51 +704,34 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             renderer.setForeground(c);
             renderer.setFont(f);
 
+            // The model keeps the full name (used for tooltips and to find the displayed image); shorten it for
+            // display only.
+            if (value != null && isHideFitsSuffix())
+                renderer.setText(stripFitsSuffix((String) value));
+
             return renderer;
         }
 
     }
 
-    public void packColumns(JTable table, int margin) {
-        for (int c = 0; c < table.getColumnCount(); c++) {
-            packColumn(table, c, margin);
-        }
-    }
+    /** Renders a text column, optionally shortening values that are too long in the middle. */
+    private class MiddleEllipsisRenderer extends DefaultTableCellRenderer {
 
-    // Sets the preferred width of the visible column specified by vColIndex.
-    // The column
-    // will be just wide enough to show the column head and the widest cell in
-    // the column.
-    // margin pixels are added to the left and right
-    // (resulting in an additional width of 2*margin pixels).
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            JLabel renderer = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                    column);
 
-    private void packColumn(JTable table, int vColIndex, int margin) {
-        // TableModel model = table.getModel ();
-        DefaultTableColumnModel colModel = (DefaultTableColumnModel) table.getColumnModel();
-        TableColumn col = colModel.getColumn(vColIndex);
-        int width = 0;
+            // The model keeps the full value, which is shown as tooltip.
+            if (value != null && isMiddleEllipsis()) {
+                Insets insets = renderer.getInsets();
+                int width = table.getColumnModel().getColumn(column).getWidth() - insets.left - insets.right;
+                renderer.setText(middleEllipsis((String) value, renderer.getFontMetrics(renderer.getFont()), width));
+            }
 
-        // Get width of column header
-        TableCellRenderer renderer = col.getHeaderRenderer();
-        if (renderer == null) {
-            renderer = table.getTableHeader().getDefaultRenderer();
-        }
-        Component comp = renderer.getTableCellRendererComponent(table, col.getHeaderValue(), false, false, 0, 0);
-        width = comp.getPreferredSize().width;
-
-        // Get maximum width of column data
-        for (int r = 0; r < table.getRowCount(); r++) {
-            renderer = table.getCellRenderer(r, vColIndex);
-            comp = renderer.getTableCellRendererComponent(table, table.getValueAt(r, vColIndex), false, false, r,
-                    vColIndex);
-            width = Math.max(width, comp.getPreferredSize().width);
+            return renderer;
         }
 
-        // Add margin
-        width += 2 * margin;
-
-        // Set the width
-        col.setPreferredWidth(width);
     }
 
     public Vector<FitsFileEntry> getSelected() {
@@ -671,6 +789,40 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
         if (mRootDirectory != null && mRootDirectory.exists())
             readDirectory(mRootDirectory);
 
+    }
+
+    /**
+     * Ask the user for the FITS keyword shown in the extra column. The keyword can be typed in or picked from the
+     * keywords of the image at the top of the table. Changing it re-reads the directory.
+     */
+    void chooseExtraKeyword() {
+        JComboBox<String> keywordBox = new JComboBox<String>();
+        keywordBox.setEditable(true);
+        keywordBox.setMaximumRowCount(20);
+
+        if (mTable.getRowCount() > 0) {
+            FitsFileEntry first = mImageList.elementAt(mTable.convertRowIndexToModel(0));
+            for (String key : QuickHeaderInfo.getKeywords(QuickHeaderInfo.readFITSHeader(first.DirectoryFile)))
+                keywordBox.addItem(key);
+        }
+        keywordBox.setSelectedItem(FitsFileEntry.getExtraKeyword());
+
+        int answer = JOptionPane.showConfirmDialog(this,
+                new Object[] { "FITS keyword shown in the extra column:", keywordBox }, "Extra column keyword",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        Object selected = keywordBox.getSelectedItem();
+        if (answer != JOptionPane.OK_OPTION || selected == null)
+            return;
+
+        String key = selected.toString().trim().toUpperCase();
+        if (key.isEmpty() || key.equals(FitsFileEntry.getExtraKeyword()))
+            return;
+
+        FitsFileEntry.setExtraKeyword(key);
+        TableColumn extraColumn = mTable.getColumnModel().getColumn(FitsViewerTableModel.EXTRA_COL);
+        extraColumn.setHeaderValue(key);
+        mTable.getTableHeader().repaint();
+        reload();
     }
 
     public void onDirectoryChanged(File f) {
@@ -849,11 +1001,6 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
                 log.debug("done with reading the directory, notifying table");
                 mTableDataModel.fireTableDataChanged();
-
-                packColumn(mTable, 0, 1);
-                packColumn(mTable, 1, 1);
-                packColumn(mTable, 2, 2);
-                packColumn(mTable, 3, 1);
 
                 boolean hasDate = getDateComponentofDirectory(RootDirectory.getAbsolutePath()) != null;
                 tomorrowLabel.setVisible(hasDate);
@@ -1054,6 +1201,9 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
 
             if (col == USERCOMMENT_COL)
                 return "Comment";
+
+            if (col == EXTRA_COL)
+                return FitsFileEntry.getExtraKeyword();
             return null;
 
         }
@@ -1079,6 +1229,11 @@ public class FileBrowserPanel extends JPanel implements DirectoryChangeReceiver 
             return super.getColumnClass(columnIndex);
         }
 
+    }
+
+    /** The table, for tests. */
+    JTable getTable() {
+        return mTable;
     }
 
     /** The table model, for tests. */

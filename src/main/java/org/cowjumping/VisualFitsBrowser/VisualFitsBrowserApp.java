@@ -19,7 +19,6 @@ import org.cowjumping.VisualFitsBrowser.ImageActions.ImageToolBoxPanel;
 import org.cowjumping.VisualFitsBrowser.util.Filelist2Latex;
 import org.cowjumping.VisualFitsBrowser.util.FitsFileEntry;
 import org.cowjumping.guiUtils.GUIConsts;
-import org.cowjumping.guiUtils.OSXAdapter;
 import org.cowjumping.guiUtils.Preferences;
 import org.cowjumping.guiUtils.SAMPUtilities;
 
@@ -43,6 +42,8 @@ public class VisualFitsBrowserApp extends JFrame {
             + ".WindowLocation";
     private final static String PROP_WINDOWLOCATION_TOOLBOX = VisualFitsBrowserApp.class.getCanonicalName()
             + ".ToolsBoxWindowLocation";
+    /** Width of the main window; its height follows from the table. */
+    private final static String PROP_WINDOWWIDTH = PROP_WINDOWLOCATION_ROOT + ".width";
     private final static String PROP_SHOWUTILITIES = VisualFitsBrowserApp.class.getCanonicalName() + ".SHOWUTILITIES";
 
     private final static String PROP_AUTODISPLAY = VisualFitsBrowserApp.class.getCanonicalName() + ".AUTODISPLAY";
@@ -66,6 +67,9 @@ public class VisualFitsBrowserApp extends JFrame {
     public static VisualFitsBrowserApp theFileBrowserApp = null;
 
     private static boolean showUtilities = true;
+
+    /** Set once {@link #onExit()} has run, so that settings are saved and resources closed only once. */
+    private boolean exited = false;
 
     /** Directory given on the command line; null to open the last directory. */
     private static File startDirectory = null;
@@ -126,39 +130,36 @@ public class VisualFitsBrowserApp extends JFrame {
         }
 
         pack();
+        restoreWindowWidth();
         setVisible(true);
 
         this.setShowUtiltiies(
                 Boolean.parseBoolean(Preferences.thePreferences.getProperty(PROP_SHOWUTILITIES, "false")));
 
         /*
-         * Ensure graceful handling when Command-Q is pressed in Mac Os X
+         * Save settings however the program ends, including Command-Q on macOS, which exits the JVM without
+         * closing the window.
          */
-        SwingUtilities.invokeLater(new Runnable() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
-                try {
-                    Thread.sleep(1000);
-                    // setResizable(false);
-                    OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onExit", (Class[]) null));
-                } catch (Exception e) {
-                    myLogger.info("Could not bind to MacOS X Quit Handler. Get a Mac!");
-
-                }
+                onExit();
             }
-        });
+        }, "VisualFitsBrowser shutdown"));
 
-        final int preferredWidth = this.getWidth();
+    }
 
-        addComponentListener(new ComponentAdapter() {
-
-            @Override
-            public void componentResized(ComponentEvent e) {
-                setSize(new Dimension(preferredWidth, getHeight()));
-                super.componentResized(e);
-            }
-
-        });
-
+    /** Set the main window to the width saved at the last exit, if any. */
+    private void restoreWindowWidth() {
+        String saved = Preferences.thePreferences.getProperty(PROP_WINDOWWIDTH, "");
+        if (saved.trim().isEmpty())
+            return;
+        try {
+            int width = Integer.parseInt(saved.trim());
+            if (width > 0)
+                setSize(width, getHeight());
+        } catch (NumberFormatException e) {
+            myLogger.warn("Invalid " + PROP_WINDOWWIDTH + " " + saved + ", using default window width");
+        }
     }
 
     /**
@@ -303,6 +304,86 @@ public class VisualFitsBrowserApp extends JFrame {
             });
         }
 
+        menu = new JMenu("Display");
+        menu.getAccessibleContext().setAccessibleDescription("Display Menu");
+        theMenu.add(menu);
+
+        {
+            menuItem = new JCheckBoxMenuItem("Hide .fits suffix");
+            menuItem.setToolTipText("Show file names without their .fits or .fits.fz suffix");
+            menuItem.setSelected(getmBrowserPanel() != null && getmBrowserPanel().isHideFitsSuffix());
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean hide = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().setHideFitsSuffix(hide);
+                }
+
+            });
+            menu.add(menuItem);
+        }
+
+        {
+            menuItem = new JCheckBoxMenuItem("Shorten long text in the middle");
+            menuItem.setToolTipText("Replace the middle of an OBJECT, extra column or comment value too long for its "
+                    + "column with an ellipsis (\u2026) instead of cutting it at the end, so its start and end stay "
+                    + "visible");
+            menuItem.setSelected(getmBrowserPanel() != null && getmBrowserPanel().isMiddleEllipsis());
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean middle = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().setMiddleEllipsis(middle);
+                }
+
+            });
+            menu.add(menuItem);
+        }
+
+        {
+            menuItem = new JMenuItem("Extra column keyword ...");
+            menuItem.setToolTipText("Choose the FITS keyword shown in the extra column");
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().chooseExtraKeyword();
+                }
+            });
+            menu.add(menuItem);
+        }
+
+        {
+            menuItem = new JMenuItem("Reset column widths");
+            menuItem.setToolTipText("Go back to the default widths of the table columns");
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().resetColumnWidths();
+                }
+            });
+            menu.add(menuItem);
+        }
+
+        menu.add(new JSeparator());
+
+        {
+            menuItem = new JCheckBoxMenuItem("Vegan icons");
+            menuItem.setToolTipText("Show wheat and bread instead of a cow and minced meat for raw and processed data");
+            menuItem.setSelected(getmBrowserPanel() != null && getmBrowserPanel().isVeganIcons());
+            menuItem.addItemListener(new ItemListener() {
+
+                public void itemStateChanged(ItemEvent e) {
+                    boolean vegan = ((JCheckBoxMenuItem) e.getSource()).getState();
+                    if (getmBrowserPanel() != null)
+                        getmBrowserPanel().setVeganIcons(vegan);
+                }
+
+            });
+            menu.add(menuItem);
+        }
+
         menu = new JMenu("LogSheets");
         menu.getAccessibleContext().setAccessibleDescription("Logsheets Menu");
 
@@ -340,22 +421,6 @@ public class VisualFitsBrowserApp extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     openDocumentation();
                 }
-            });
-            menu.add(menuItem);
-        }
-
-        {
-            menuItem = new JCheckBoxMenuItem("Vegan icons");
-            menuItem.setToolTipText("Show wheat and bread instead of a cow and minced meat for raw and processed data");
-            menuItem.setSelected(getmBrowserPanel() != null && getmBrowserPanel().isVeganIcons());
-            menuItem.addItemListener(new ItemListener() {
-
-                public void itemStateChanged(ItemEvent e) {
-                    boolean vegan = ((JCheckBoxMenuItem) e.getSource()).getState();
-                    if (getmBrowserPanel() != null)
-                        getmBrowserPanel().setVeganIcons(vegan);
-                }
-
             });
             menu.add(menuItem);
         }
@@ -479,12 +544,24 @@ public class VisualFitsBrowserApp extends JFrame {
                 "Documentation", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void onExit() {
-        SAMPUtilities.onExit();
-        FitsFileEntry.onExit(); // this shuts down the user comment database
+    /**
+     * Save settings and shut down. Called by File → Exit and on closing the window, and again by the shutdown hook;
+     * only the first call does anything.
+     */
+    private synchronized void onExit() {
+        if (exited)
+            return;
+        exited = true;
+
+        // Settings first, so that they are saved even if shutting down SAMP takes long.
         Preferences.thePreferences.storeWindowLocation(this, PROP_WINDOWLOCATION_ROOT);
+        Preferences.thePreferences.setProperty(PROP_WINDOWWIDTH, getWidth() + "");
+        if (getmBrowserPanel() != null)
+            getmBrowserPanel().saveColumnWidths();
         Preferences.thePreferences.storeWindowLocation(VisualFitsBrowserApp.ToolBoxFrame, PROP_WINDOWLOCATION_TOOLBOX);
         Preferences.thePreferences.save();
+        SAMPUtilities.onExit();
+        FitsFileEntry.onExit(); // this shuts down the user comment database
     }
 
     private static void initSampHub() {

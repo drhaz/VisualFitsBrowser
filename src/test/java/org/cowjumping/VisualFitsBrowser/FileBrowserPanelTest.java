@@ -138,6 +138,91 @@ public class FileBrowserPanelTest extends TestCase {
         }
     }
 
+    public void testStripFitsSuffix() {
+        assertEquals(" ogg2m001-ep04-20260928-0042-e91", FileBrowserPanel.stripFitsSuffix(" ogg2m001-ep04-20260928-0042-e91.fits.fz"));
+        assertEquals("img1", FileBrowserPanel.stripFitsSuffix("img1.fits"));
+        assertEquals("img1", FileBrowserPanel.stripFitsSuffix("img1.fit"));
+        assertEquals("my.fits.backup", FileBrowserPanel.stripFitsSuffix("my.fits.backup"));
+    }
+
+    public void testMiddleEllipsis() {
+        java.awt.FontMetrics fm = new javax.swing.JLabel().getFontMetrics(new java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12));
+        String name = "NGC 2264 Christmas Tree Cluster";
+
+        assertEquals(name, FileBrowserPanel.middleEllipsis(name, fm, fm.stringWidth(name)));
+
+        // Room for 12 characters of the name plus the ellipsis, split evenly between start and end.
+        String expected = "NGC 22\u2026luster";
+        assertEquals(expected, FileBrowserPanel.middleEllipsis(name, fm, fm.stringWidth(expected)));
+    }
+
+    public void testFilterIsTrimmed() {
+        java.util.Vector<String> header = new java.util.Vector<String>(Arrays.asList(
+                "FILTER  = '  rp    '           / filter name"));
+        assertEquals("rp", org.cowjumping.FitsUtils.QuickHeaderInfo.getFilter(header));
+    }
+
+    public void testHeaderKeywords() {
+        java.util.Vector<String> header = new java.util.Vector<String>(Arrays.asList(
+                "SIMPLE  =                    T",
+                "OBJECT  = 'M31'",
+                "COMMENT this card has no value",
+                "HISTORY  neither has this one",
+                "        ",
+                "HIERARCH ESO DET DIT = 1.5",
+                "OBJECT  = 'M31 again'"));
+        assertEquals(Arrays.asList("SIMPLE", "OBJECT", "HIERARCH ESO DET DIT"),
+                org.cowjumping.FitsUtils.QuickHeaderInfo.getKeywords(header));
+    }
+
+    public void testExtraKeywordIsRead() throws Exception {
+        String previous = org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.getExtraKeyword();
+        try {
+            org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.setExtraKeyword("FILTER");
+            SwingUtilities.invokeAndWait(new Runnable() {
+                public void run() {
+                    panel.reload();
+                }
+            });
+            waitForRows(3);
+            Thread.sleep(500);
+            settle();
+            assertEquals("r", panel.mImageList.get(0).ExtraKeyword);
+            assertEquals("FILTER", panel.getTableModel().getColumnName(6));
+        } finally {
+            org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.setExtraKeyword(previous);
+        }
+    }
+
+    public void testColumnWidthsAreRestored() throws Exception {
+        String key = FileBrowserPanel.class.getCanonicalName() + ".COLUMNWIDTHS";
+        try {
+            Preferences.thePreferences.setProperty(key, "41,42,43,44,45,46,47,48");
+            FileBrowserPanel other = new FileBrowserPanel(null, null);
+            try {
+                for (int ii = 0; ii < 8; ii++)
+                    assertEquals(41 + ii, other.getTable().getColumnModel().getColumn(ii).getPreferredWidth());
+
+                other.resetColumnWidths();
+                assertEquals(400, other.getTable().getColumnModel().getColumn(0).getPreferredWidth());
+                assertEquals("", Preferences.thePreferences.getProperty(key, ""));
+            } finally {
+                other.stopWatching();
+            }
+
+            // A damaged setting falls back to the defaults.
+            Preferences.thePreferences.setProperty(key, "41,forty-two");
+            other = new FileBrowserPanel(null, null);
+            try {
+                assertEquals(300, other.getTable().getColumnModel().getColumn(7).getPreferredWidth());
+            } finally {
+                other.stopWatching();
+            }
+        } finally {
+            Preferences.thePreferences.setProperty(key, "");
+        }
+    }
+
     // --- helpers ---------------------------------------------------------------------------------------------
 
     /** Wait until all events queued so far on the event thread have been processed. */

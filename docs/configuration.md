@@ -40,16 +40,21 @@ external program paths that you set only in this file.
 | Key | Default | Menu | Description |
 |---|---|---|---|
 | `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.LASTDIRECTORY` | `/` | File → Change Directory | Directory opened at start-up, unless a directory is given on the command line |
-| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.RAWPROCESSEDICONS` | `cow` | Help → Vegan icons | Icons of the [raw / processed button](user-guide/file-browser.md#directory-header): `cow` (a cow for raw, minced meat for processed) or `wheat` (wheat for raw, bread for processed) |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.HIDEFITSSUFFIX` | `false` | Display → Hide .fits suffix | Show file names without their `.fit`, `.fits` or `.fits.fz` suffix |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.MIDDLEELLIPSIS` | `true` | Display → Shorten long text in the middle | Replace the middle of OBJECT, extra column and comment values too long for their column with an ellipsis (`…`) instead of cutting them at the end |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.COLUMNWIDTHS` | `400,400,70,100,45,100,75,300` | Drag column borders; Display → Reset column widths | Column widths in pixels: file name, OBJECT, exposure time, filter, airmass, DATE_OBS, extra keyword, comment. Empty means the defaults. |
+| `org.cowjumping.VisualFitsBrowser.FileBrowserPanel.RAWPROCESSEDICONS` | `cow` | Display → Vegan icons | Icons of the [raw / processed button](user-guide/file-browser.md#directory-header): `cow` (a cow for raw, minced meat for processed) or `wheat` (wheat for raw, bread for processed) |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.AUTODISPLAY` | `false` | File → Auto display new image in ds9 | Send new images to ds9 automatically |
 | `org.cowjumping.VisualFitsBrowser.VisualFitsBrowserApp.SHOWUTILITIES` | `false` | File → Show ToolBox | Toolbox window visible |
+| `org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.EXTRAKEYWORD` | `CONFMODE` | Display → Extra column keyword ... | FITS keyword shown in the extra column of the file table |
 | `org.cowjumping.VisualFitsBrowser.util.FitsFileEntry.READTHREADS` | `16` | — | Number of files whose headers are read at the same time when a directory is opened. Reading in parallel makes opening directories on network file systems such as S3 mounts much faster; set it to `1` to read one file after the other. |
 | `directorylistener.ignorediremodified` | `False` | — | `true` rescans the directory every 2 s even if its modification time did not change. Use this on network file systems where new files do not show up. |
 
 ### Window positions
 
-Each window stores `.x`, `.y` and `.visible` under these prefixes. Delete these
-lines to reset a window that ended up off-screen.
+Each window stores `.x`, `.y` and `.visible` under these prefixes; the main window
+also stores its `.width`. Delete these lines to reset a window that ended up
+off-screen.
 
 | Prefix | Window |
 |---|---|

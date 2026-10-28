@@ -8,6 +8,33 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+### Added
+- **Display** menu for options that change how the file table looks.
+- **Display → Hide .fits suffix** shows file names without `.fit`, `.fits` or
+  `.fits.fz`.
+- **Display → Shorten long text in the middle** (on by default) replaces the
+  middle of an OBJECT name, extra column value or comment too long for its column
+  with an ellipsis (`…`), so its start and end stay visible.
+- **Display → Extra column keyword ...** chooses the FITS keyword shown in the
+  extra column, which used to always show `CONFMODE`. Type a keyword or pick one
+  of the keywords of the top image from a drop-down list. The column title now
+  shows the keyword.
+- Column widths can be changed by dragging the column borders and are remembered
+  for the next start. **Display → Reset column widths** goes back to the defaults.
+  The first four columns are no longer resized to fit their content when a
+  directory is read.
+
+### Changed
+- The main window can now be resized horizontally. Its width is remembered for
+  the next start.
+- **Vegan icons** moved from the Help menu to the Display menu.
+
+### Fixed
+- Filter names no longer carry the blanks that pad FITS string values, e.g.
+  `'rp      '` is shown as `rp`.
+- Quitting with Command-Q on macOS now saves window positions and settings. They
+  used to be saved only by **File → Exit** or closing the window.
+
 ## [1.11.1] - 2026-10-23
 
 ### Changed
