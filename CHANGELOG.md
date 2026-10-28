@@ -8,6 +8,8 @@ Entries before 1.10.4 were reconstructed from the git history.
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-10-28
+
 ### Added
 - **Display** menu for options that change how the file table looks.
 - **Display → Hide .fits suffix** shows file names without `.fit`, `.fits` or
